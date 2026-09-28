@@ -15,14 +15,12 @@ It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a 
 | | |
 | --- | --- |
 | Type | Automated trading robot (MT5 Expert Advisor), written in MQL5 |
-| Automation | Fully automatic from signal to order: it finds the setup, opens the trade, sets the stop and target, and manages the exit without input from you |
-| Also usable manually | Leave execution off and it works as a pure SMC chart tool, marking zones and confirmations for you to trade by hand |
-| Decision making | Rule based and deterministic. The same history and settings always produce the same trades. No machine learning, no black box, no martingale, no grid, no hedging |
-| Execution | Market orders, one position at a time, fixed lot size, stop and target placed with the order |
-| Where it runs | On your own terminal or VPS, on any symbol your broker offers. Nothing is sent anywhere else |
-| Source | Open source under MIT. Every rule is readable in the files listed below and written out in `DESIGN.md` |
+| Automation | Fully automatic: finds the setup, opens the trade, sets stop and target, manages the exit |
+| Manual use | Leave execution off and it is a pure SMC chart tool |
+| Decisions | Rule based and deterministic. No machine learning, no black box, no martingale, no grid, no hedging |
+| Runs on | Your own terminal or VPS, any symbol your broker offers |
 
-Terms people use for this kind of software: algorithmic trading, algo trading, automated trading, auto trading, trading bot, trading robot, forex robot, expert advisor, EA, systematic trading, rule based trading, mechanical trading system.
+Also known as: algo trading, automated trading, trading bot, trading robot, forex robot, expert advisor, systematic trading.
 
 ![MQL5](https://img.shields.io/badge/MQL5-MetaTrader%205-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -30,15 +28,14 @@ Terms people use for this kind of software: algorithmic trading, algo trading, a
 
 ## Contents
 
-1. [Install](#install)
-2. [First run](#first-run)
-3. [The panel](#the-panel)
-4. [Trading rules](#trading-rules)
-5. [Settings packages](#settings-packages)
-6. [Screenshots](#screenshots)
-7. [Does it work?](#does-it-work)
-8. [Files](#files)
-9. [Self tests](#self-tests)
+2. [Install](#install)
+3. [First run](#first-run)
+4. [The panel](#the-panel)
+5. [Trading rules](#trading-rules)
+6. [Settings packages](#settings-packages)
+7. [Screenshots](#screenshots)
+8. [Testing and results](#testing-and-results)
+9. [Files](#files)
 10. [Troubleshooting](#troubleshooting)
 11. [Contributing](#contributing)
 12. [License](#license)
@@ -136,66 +133,29 @@ To add your own, drop the files in a `screenshots/` folder and reference them he
 | `screenshots/panel.png` | The control panel, Advanced mode |
 | `screenshots/trade.png` | An open trade with its stop and target |
 
-## Does it work?
+## Testing and results
 
-Measured over 19 markets and 20 months in R multiples, not currency. Full detail in [research/REPORT.md](research/REPORT.md).
+Set `InpRunSelfTest = true` and run it in the Strategy Tester: every module checks
+itself and prints a pass or fail summary to the journal.
 
-| | |
-| --- | --- |
-| Recommended setup, H1 to M5 | 57.2% win rate, +0.143 R per trade, profit factor 1.34 |
-| In sample against out of sample | +0.143 R against +0.144 R |
-| Walk forward | 5 of 5 windows positive out of sample |
-| Monte Carlo | 99.9% chance the edge is positive; expect a drawdown near 22 R |
-| Markets positive | 15 of 19 |
-| **Trend filter off** | **50.3%, no edge at all** |
-
-Read that last line twice. The trend filter is the strategy.
-
-Three limits worth knowing.
-
-1. **H4 to M15 is unproven** — 127 trades in 20 months and negative out of sample.
-2. **M15 to M1 cannot be validated far back** — brokers keep only a few months of M1 history.
-3. **Fixed lots means uneven risk** — the stop is the block height, so dollar risk changes trade to trade.
-
-Results come from one broker over one 20-month stretch.
+The validation study of the signals, across 19 markets, is in
+[research/REPORT.md](research/REPORT.md) with the data tables beside it.
 
 ## Files
 
 ```text
-SMC_OrderBlock_EA.mq5      entry point: inputs, events, wiring
-SMC_OB_Structure.mqh       swings, BOS, CHoCH
-SMC_OB_Displacement.mqh    impulse tests, picks the block candle
-SMC_OB_Engine.mqh          Order Block lifecycle
-SMC_OB_FVG.mqh             Fair Value Gaps
-SMC_CISD_Engine.mqh        sweep, series, confirmation, retracement
-SMC_Connect_Engine.mqh     HTF block to LTF CISD, M1 retest, trend filter
-SMC_OB_TradeHooks.mqh      the only file that sends orders
-SMC_OB_Panel.mqh           the on-chart panel
-SMC_Config.mqh             named profiles on disk
-SMC_*_Visual.mqh           drawing
-SMC_*_SelfTest.mqh         verification suites
-DESIGN.md                  every rule and threshold, precisely
-presets/ profiles/         settings packages
-research/                  validation report, data tables, analysis scripts
+SMC_OrderBlock_EA.mq5    entry point: inputs, events, wiring
+SMC_OB_*.mqh             structure, displacement, blocks, FVG, drawing, panel
+SMC_CISD_*.mqh           sweep, series, confirmation, retracement
+SMC_Connect_*.mqh        HTF block to LTF CISD, M1 retest, trend filter
+SMC_OB_TradeHooks.mqh    the only file that sends orders
+SMC_*_SelfTest.mqh       verification suites
+DESIGN.md                every rule and threshold, precisely
+presets/ profiles/       settings packages
+research/                validation study and analysis scripts
 ```
 
-Detection never calls the broker. Only `SMC_OB_TradeHooks.mqh` does.
-
 Three rules the code keeps: closed candles only, nothing repaints, and no trading from history-scan signals.
-
-## Self tests
-
-Set `InpRunSelfTest = true` and run the EA in the Strategy Tester.
-
-| Suite | Checks |
-| --- | --- |
-| Order Blocks | 129 |
-| Panel | 47 |
-| CISD | 76 plus 3 wiring |
-| Connection | 10 wiring, plus a full replay suite |
-| Config profiles | 6 |
-
-The connection suite replays every engine in batch and demands it match the live bar-by-bar run exactly. That is the test that catches repainting or look-ahead.
 
 ## Troubleshooting
 
