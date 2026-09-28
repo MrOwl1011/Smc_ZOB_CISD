@@ -22,6 +22,11 @@
 //|                                                                  |
 //|  Break even (optional): once the position is a set number of     |
 //|  points in profit, the stop moves to the entry price, once.      |
+//|                                                                  |
+//|  Ride the trend (optional): no fixed target at all. The position |
+//|  is held until price reaches the nearest live Order Block facing  |
+//|  the other way, which becomes a moving take profit. While this is |
+//|  on, the reward:risk multiple is not used.                        |
 //+------------------------------------------------------------------+
 #ifndef SMC_OB_TRADEHOOKS_MQH
 #define SMC_OB_TRADEHOOKS_MQH
@@ -36,6 +41,7 @@ private:
    bool              m_enabled;
    bool              m_oppExit;       // close on a retested opposite block
    double            m_rr;            // take profit as a multiple of risk
+   bool              m_ride;          // hold to the nearest opposite block instead of a fixed target
    bool              m_beEnabled;     // move the stop to entry once in profit
    int               m_bePoints;      // profit in points that arms it
    double            m_lots;
@@ -45,6 +51,7 @@ private:
    int               m_sent;          // orders accepted by the server
    int               m_closed;        // positions closed by the opposite block exit
    int               m_beMoved;       // stops moved to break even
+   int               m_rideExits;     // positions closed at an opposite block
    int               m_skipped;       // signals skipped (open position, invalid stop, rejected)
    string            m_last;          // last action, for the panel status line
 
@@ -97,20 +104,22 @@ private:
      }
 
 public:
-                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0),
+                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false),
                                              m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_magic(0), m_ready(false),
-                                             m_warned(false), m_sent(0), m_closed(0), m_beMoved(0),
+                                             m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0),
                                              m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
    void              Init(const bool enabled, const double lots, const long magic, const int slippage,
-                           const double rr, const bool beEnabled, const int bePoints)
+                           const double rr, const bool beEnabled, const int bePoints,
+                           const bool ride)
      {
       m_enabled = enabled;
       m_lots    = (lots > 0.0 ? lots : 0.01);
       m_rr        = (rr > 0.0 ? rr : 1.0);
       m_beEnabled = beEnabled;
       m_bePoints  = (bePoints > 0 ? bePoints : 100);
+      m_ride      = ride;
       m_magic   = magic;
       m_trade.SetExpertMagicNumber((ulong)magic);
       m_trade.SetDeviationInPoints((ulong)MathMax(0, slippage));
@@ -120,6 +129,7 @@ public:
       m_sent = 0;
       m_closed = 0;
       m_beMoved = 0;
+      m_rideExits = 0;
       m_skipped = 0;
       m_last = "";
      }
@@ -135,6 +145,14 @@ public:
       if(points > 0)
          m_bePoints = points;
      }
+   void              SetRideTrend(const bool on)
+     {
+      if(on != m_ride)
+         Print("[SMC-TRADE] ride the trend ", on ? "ON (no fixed target)" : "OFF");
+      m_ride = on;
+     }
+   bool              RideTrend(void) const { return m_ride; }
+   int               RideExits(void) const { return m_rideExits; }
    double            TargetRR(void) const { return m_rr; }
    bool              BreakEven(void) const { return m_beEnabled; }
    int               BreakEvenPoints(void) const { return m_bePoints; }
@@ -149,11 +167,12 @@ public:
    string            LastAction(void) const { return m_last; }
    string            StatusText(void) const
      {
-      return StringFormat("trading %s | lots %.2f | 1:%.2f | break even %s (%d pts) | opposite exit %s | "
-                          "sent %d | closed %d | be %d | skipped %d%s",
-                          m_enabled ? "ON" : "OFF", m_lots, m_rr,
+      return StringFormat("trading %s | lots %.2f | %s | break even %s (%d pts) | opposite exit %s | "
+                          "sent %d | closed %d | be %d | ride exits %d | skipped %d%s",
+                          m_enabled ? "ON" : "OFF", m_lots,
+                          m_ride ? "ride the trend" : StringFormat("1:%.2f", m_rr),
                           m_beEnabled ? "ON" : "OFF", m_bePoints, m_oppExit ? "ON" : "OFF",
-                          m_sent, m_closed, m_beMoved, m_skipped,
+                          m_sent, m_closed, m_beMoved, m_rideExits, m_skipped,
                           m_last == "" ? "" : " | " + m_last);
      }
 
@@ -196,17 +215,17 @@ public:
          entry = ask;
          sl    = obBottom;                       // other side of the block
          risk  = entry - sl;
-         tp    = entry + risk * m_rr;            // reward:risk multiple
+         tp    = m_ride ? 0.0 : entry + risk * m_rr;   // riding: the opposite block is the target
         }
       else
         {
          entry = bid;
          sl    = obTop;
          risk  = sl - entry;
-         tp    = entry - risk * m_rr;
+         tp    = m_ride ? 0.0 : entry - risk * m_rr;
         }
       sl = NormalizeDouble(sl, digits);
-      tp = NormalizeDouble(tp, digits);
+      tp = (tp > 0.0) ? NormalizeDouble(tp, digits) : 0.0;
 
       if(risk <= 0.0 || risk <= stops)
         {
@@ -222,8 +241,11 @@ public:
       if(ok)
         {
          m_sent++;
-         m_last = StringFormat("%s %.2f @ %.*f sl %.*f tp %.*f (OB #%I64d)",
-                               dir == SMC_DIR_BULL ? "BUY" : "SELL", lots, digits, entry, digits, sl, digits, tp, obId);
+         m_last = (tp > 0.0)
+               ? StringFormat("%s %.2f @ %.*f sl %.*f tp %.*f (OB #%I64d)",
+                              dir == SMC_DIR_BULL ? "BUY" : "SELL", lots, digits, entry, digits, sl, digits, tp, obId)
+               : StringFormat("%s %.2f @ %.*f sl %.*f riding the trend (OB #%I64d)",
+                              dir == SMC_DIR_BULL ? "BUY" : "SELL", lots, digits, entry, digits, sl, obId);
          Print("[SMC-TRADE] ", m_last);
         }
       else
@@ -280,6 +302,77 @@ public:
       m_last = StringFormat("stop moved to break even at %.*f (%.0f points in profit)",
                             digits, entry, profit / point);
       Print("[SMC-TRADE] ", m_last);
+      return true;
+     }
+
+   //--- Ride the trend: the nearest live Order Block facing the other way becomes
+   //--- the target. Its near edge is written as the position's take profit, and it
+   //--- is updated whenever a closer block appears. If price is already past that
+   //--- edge the position is closed at market.
+   bool              RideOpenPosition(const CSMCDetector &det)
+     {
+      if(!m_enabled || !m_ride || !m_ready)
+         return false;
+      ulong    ticket = 0;
+      int      posDir = 0;
+      datetime opened = 0;
+      if(!FindPosition(ticket, posDir, opened))
+         return false;
+      if(!PositionSelectByTicket(ticket))
+         return false;
+
+      int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+      double point  = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      double entry  = PositionGetDouble(POSITION_PRICE_OPEN);
+      double sl     = PositionGetDouble(POSITION_SL);
+      double tp     = PositionGetDouble(POSITION_TP);
+      double price  = PositionGetDouble(POSITION_PRICE_CURRENT);
+      int    want   = (posDir == SMC_DIR_BULL) ? SMC_DIR_BEAR : SMC_DIR_BULL;
+
+      //--- nearest live opposite block ahead of the trade
+      SOrderBlock obs[];
+      int n = det.GetLiveOBs(want, obs);
+      double target = 0.0;
+      long   tid = 0;
+      for(int i = 0; i < n; i++)
+        {
+         //--- a bearish block is resistance: its lower edge is the first touch from below
+         double edge = (posDir == SMC_DIR_BULL) ? obs[i].bottom : obs[i].top;
+         if(posDir == SMC_DIR_BULL && edge <= entry)
+            continue;                              // not ahead of the trade
+         if(posDir == SMC_DIR_BEAR && edge >= entry)
+            continue;
+         if(target == 0.0 ||
+            (posDir == SMC_DIR_BULL && edge < target) || (posDir == SMC_DIR_BEAR && edge > target))
+           {
+            target = edge;
+            tid = obs[i].id;
+           }
+        }
+      if(target == 0.0)
+         return false;                             // nothing opposite ahead yet: keep riding
+      target = NormalizeDouble(target, digits);
+
+      //--- already there: take it at market
+      if((posDir == SMC_DIR_BULL && price >= target) || (posDir == SMC_DIR_BEAR && price <= target))
+        {
+         if(!m_trade.PositionClose(ticket))
+            return false;
+         m_rideExits++;
+         m_last = StringFormat("closed %s at opposite Order Block #%I64d (%.*f)",
+                               posDir == SMC_DIR_BULL ? "BUY" : "SELL", tid, digits, target);
+         Print("[SMC-TRADE] ", m_last);
+         return true;
+        }
+      //--- otherwise park the target there, respecting the broker's minimum distance
+      double stops = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * point;
+      if(MathAbs(target - price) <= stops)
+         return false;
+      if(MathAbs(tp - target) < point / 2.0)
+         return false;                             // already set there
+      if(!m_trade.PositionModify(ticket, sl, target))
+         return false;
+      m_last = StringFormat("target set at opposite Order Block #%I64d (%.*f)", tid, digits, target);
       return true;
      }
 
