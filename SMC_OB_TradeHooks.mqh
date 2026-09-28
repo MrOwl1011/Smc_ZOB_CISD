@@ -9,7 +9,7 @@
 //|    entry : market, at the CISD confirmation                      |
 //|    stop  : the far side of the Order Block (below a bull block,  |
 //|            above a bear block)                                   |
-//|    target: 1:1 - the same distance on the other side             |
+//|    target: reward:risk multiple of the stop distance (def 1:1)   |
 //|    size  : fixed lots (panel / input), default 0.01              |
 //|                                                                  |
 //|  Only one position at a time, and only on live events - history   |
@@ -19,6 +19,9 @@
 //|  Order Block / ZOrder Block against it that price then retests    |
 //|  closes the position - the market built and respected structure   |
 //|  in the other direction.                                         |
+//|                                                                  |
+//|  Break even (optional): once the position is a set number of     |
+//|  points in profit, the stop moves to the entry price, once.      |
 //+------------------------------------------------------------------+
 #ifndef SMC_OB_TRADEHOOKS_MQH
 #define SMC_OB_TRADEHOOKS_MQH
@@ -32,12 +35,16 @@ private:
    CTrade            m_trade;
    bool              m_enabled;
    bool              m_oppExit;       // close on a retested opposite block
+   double            m_rr;            // take profit as a multiple of risk
+   bool              m_beEnabled;     // move the stop to entry once in profit
+   int               m_bePoints;      // profit in points that arms it
    double            m_lots;
    long              m_magic;
    bool              m_ready;
    bool              m_warned;        // "trading not allowed" logged once
    int               m_sent;          // orders accepted by the server
    int               m_closed;        // positions closed by the opposite block exit
+   int               m_beMoved;       // stops moved to break even
    int               m_skipped;       // signals skipped (open position, invalid stop, rejected)
    string            m_last;          // last action, for the panel status line
 
@@ -90,14 +97,20 @@ private:
      }
 
 public:
-                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_lots(0.01), m_magic(0), m_ready(false),
-                                             m_warned(false), m_sent(0), m_closed(0), m_skipped(0), m_last("") {}
+                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0),
+                                             m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_magic(0), m_ready(false),
+                                             m_warned(false), m_sent(0), m_closed(0), m_beMoved(0),
+                                             m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
-   void              Init(const bool enabled, const double lots, const long magic, const int slippage)
+   void              Init(const bool enabled, const double lots, const long magic, const int slippage,
+                           const double rr, const bool beEnabled, const int bePoints)
      {
       m_enabled = enabled;
       m_lots    = (lots > 0.0 ? lots : 0.01);
+      m_rr        = (rr > 0.0 ? rr : 1.0);
+      m_beEnabled = beEnabled;
+      m_bePoints  = (bePoints > 0 ? bePoints : 100);
       m_magic   = magic;
       m_trade.SetExpertMagicNumber((ulong)magic);
       m_trade.SetDeviationInPoints((ulong)MathMax(0, slippage));
@@ -106,12 +119,26 @@ public:
       m_ready = true;
       m_sent = 0;
       m_closed = 0;
+      m_beMoved = 0;
       m_skipped = 0;
       m_last = "";
      }
 
    void              SetEnabled(const bool on) { if(on != m_enabled) { m_enabled = on; Print("[SMC-TRADE] execution ", on ? "ON" : "OFF"); } }
    void              SetLots(const double lots) { if(lots > 0.0) m_lots = lots; }
+   void              SetTargetRR(const double rr) { if(rr > 0.0) m_rr = rr; }
+   void              SetBreakEven(const bool on, const int points)
+     {
+      if(on != m_beEnabled)
+         Print("[SMC-TRADE] break even ", on ? "ON" : "OFF");
+      m_beEnabled = on;
+      if(points > 0)
+         m_bePoints = points;
+     }
+   double            TargetRR(void) const { return m_rr; }
+   bool              BreakEven(void) const { return m_beEnabled; }
+   int               BreakEvenPoints(void) const { return m_bePoints; }
+   int               BreakEvenMoved(void) const { return m_beMoved; }
    void              SetOppositeExit(const bool on) { if(on != m_oppExit) { m_oppExit = on; Print("[SMC-TRADE] opposite block exit ", on ? "ON" : "OFF"); } }
    bool              OppositeExit(void) const { return m_oppExit; }
    int               Closed(void) const { return m_closed; }
@@ -122,8 +149,11 @@ public:
    string            LastAction(void) const { return m_last; }
    string            StatusText(void) const
      {
-      return StringFormat("trading %s | lots %.2f | opposite exit %s | sent %d | closed %d | skipped %d%s",
-                          m_enabled ? "ON" : "OFF", m_lots, m_oppExit ? "ON" : "OFF", m_sent, m_closed, m_skipped,
+      return StringFormat("trading %s | lots %.2f | 1:%.2f | break even %s (%d pts) | opposite exit %s | "
+                          "sent %d | closed %d | be %d | skipped %d%s",
+                          m_enabled ? "ON" : "OFF", m_lots, m_rr,
+                          m_beEnabled ? "ON" : "OFF", m_bePoints, m_oppExit ? "ON" : "OFF",
+                          m_sent, m_closed, m_beMoved, m_skipped,
                           m_last == "" ? "" : " | " + m_last);
      }
 
@@ -166,14 +196,14 @@ public:
          entry = ask;
          sl    = obBottom;                       // other side of the block
          risk  = entry - sl;
-         tp    = entry + risk;                   // 1:1
+         tp    = entry + risk * m_rr;            // reward:risk multiple
         }
       else
         {
          entry = bid;
          sl    = obTop;
          risk  = sl - entry;
-         tp    = entry - risk;
+         tp    = entry - risk * m_rr;
         }
       sl = NormalizeDouble(sl, digits);
       tp = NormalizeDouble(tp, digits);
@@ -203,6 +233,54 @@ public:
          Print("[SMC-TRADE] ", m_last);
         }
       return ok;
+     }
+
+   //--- Break-even: once the open position is m_bePoints in profit, the stop is
+   //--- moved to the entry price. Runs once per position; a stop already at or
+   //--- beyond entry is left alone.
+   bool              ManageOpenPosition(void)
+     {
+      if(!m_enabled || !m_beEnabled || !m_ready)
+         return false;
+      ulong    ticket = 0;
+      int      posDir = 0;
+      datetime opened = 0;
+      if(!FindPosition(ticket, posDir, opened))
+         return false;
+      if(!PositionSelectByTicket(ticket))
+         return false;
+
+      double point = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      if(point <= 0.0)
+         return false;
+      int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+      double entry  = NormalizeDouble(PositionGetDouble(POSITION_PRICE_OPEN), digits);
+      double sl     = PositionGetDouble(POSITION_SL);
+      double tp     = PositionGetDouble(POSITION_TP);
+      double price  = PositionGetDouble(POSITION_PRICE_CURRENT);
+      double profit = (posDir == SMC_DIR_BULL) ? (price - entry) : (entry - price);
+      if(profit < m_bePoints * point)
+         return false;                            // not far enough in profit yet
+      //--- already at or beyond entry: nothing to do
+      if(sl != 0.0 && ((posDir == SMC_DIR_BULL && sl >= entry) || (posDir == SMC_DIR_BEAR && sl <= entry)))
+         return false;
+      //--- respect the broker's minimum distance from the current price
+      double stops = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * point;
+      if(MathAbs(price - entry) <= stops)
+         return false;
+
+      if(!m_trade.PositionModify(ticket, entry, tp))
+        {
+         m_last = StringFormat("break even failed: retcode %d (%s)",
+                               m_trade.ResultRetcode(), m_trade.ResultRetcodeDescription());
+         Print("[SMC-TRADE] ", m_last);
+         return false;
+        }
+      m_beMoved++;
+      m_last = StringFormat("stop moved to break even at %.*f (%.0f points in profit)",
+                            digits, entry, profit / point);
+      Print("[SMC-TRADE] ", m_last);
+      return true;
      }
 
    //--- Opposite Block Exit: a block created against the open position, and now

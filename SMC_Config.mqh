@@ -117,6 +117,9 @@ bool SMC_ConfigSave(const string profile, const SSMCPanelState &p, const string 
    SMC_CfgWriteBool(h, "tradeEnabled", p.tradeEnabled);
    SMC_CfgWrite(h, "lots", DoubleToString(p.lots, 2));
    SMC_CfgWriteBool(h, "oppositeExit", p.oppExit);
+   SMC_CfgWrite(h, "targetRR", DoubleToString(p.targetRR, 1));
+   SMC_CfgWriteBool(h, "breakEven", p.breakEven);
+   SMC_CfgWriteInt(h, "bePoints", p.bePoints);
    SMC_CfgWriteInt(h, "swingLength", p.swingLength);
    SMC_CfgWrite(h, "dispATRMult", DoubleToString(p.dispATRMult, 2));
    SMC_CfgWriteInt(h, "maxOBToBOSBars", p.maxOBToBOSBars);
@@ -124,7 +127,6 @@ bool SMC_ConfigSave(const string profile, const SSMCPanelState &p, const string 
    SMC_CfgWriteInt(h, "fvgMode", p.fvgMode);
    SMC_CfgWriteInt(h, "mitigationMode", p.mitigationMode);
    SMC_CfgWriteInt(h, "invalidationMode", p.invalidationMode);
-   SMC_CfgWriteInt(h, "zoneMode", p.zoneMode);
    SMC_CfgWriteInt(h, "overlapMode", p.overlapMode);
 
    //--- read-only snapshot of the EA inputs (cannot be applied at runtime, reported on load)
@@ -216,6 +218,9 @@ bool SMC_ConfigLoad(const string profile, SSMCPanelState &p, const bool common,
       else if(key == "tradeEnabled")       p.tradeEnabled = bv;
       else if(key == "lots")               p.lots = dv;
       else if(key == "oppositeExit")       p.oppExit = bv;
+      else if(key == "targetRR")           p.targetRR = dv;
+      else if(key == "breakEven")          p.breakEven = bv;
+      else if(key == "bePoints")           p.bePoints = iv;
       else if(key == "swingLength")        p.swingLength = iv;
       else if(key == "dispATRMult")        p.dispATRMult = dv;
       else if(key == "maxOBToBOSBars")     p.maxOBToBOSBars = iv;
@@ -223,7 +228,6 @@ bool SMC_ConfigLoad(const string profile, SSMCPanelState &p, const bool common,
       else if(key == "fvgMode")            p.fvgMode = iv;
       else if(key == "mitigationMode")     p.mitigationMode = iv;
       else if(key == "invalidationMode")   p.invalidationMode = iv;
-      else if(key == "zoneMode")           p.zoneMode = iv;
       else if(key == "overlapMode")        p.overlapMode = iv;
       else
         {

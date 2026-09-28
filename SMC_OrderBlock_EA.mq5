@@ -54,7 +54,6 @@ input group "=== Order Blocks ==="
 input ENUM_CISD_TF               InpOBTimeframe        = CISD_TF_CURRENT;       // Order Block timeframe (panel default)
 input bool                       InpEnableBull         = true;                  // Detect bullish OBs
 input bool                       InpEnableBear         = true;                  // Detect bearish OBs
-input ENUM_SMC_ZONE_MODE         InpZoneMode           = SMC_ZONE_WICK;         // OB zone calculation
 input int                        InpExtendBars         = 20;                    // OB extension (bars right of last bar)
 input int                        InpMaxActivePerDir    = 10;                    // Max active OBs per direction
 input int                        InpMaxAgeBars         = 0;                     // Expire OB after N bars (0 = never)
@@ -120,6 +119,9 @@ input group "=== Trading ==="
 input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
 input double                     InpLots               = 0.01;                  // Lot size (panel default)
 input bool                       InpOppositeBlockExit  = true;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
+input double                     InpTargetRR           = 1.0;                   // Take profit, as a multiple of risk (1.0 = 1:1) (panel default)
+input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
+input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
 input long                       InpMagic              = 20260928;              // Magic number
 input int                        InpSlippage           = 20;                    // Max slippage (points)
 
@@ -245,6 +247,9 @@ void PanelDefaults(SSMCPanelState &p)
    p.tradeEnabled     = InpEnableTrading;
    p.lots             = InpLots;
    p.oppExit          = InpOppositeBlockExit;
+   p.targetRR         = InpTargetRR;
+   p.breakEven        = InpBreakEven;
+   p.bePoints         = InpBreakEvenPoints;
    p.swingLength      = InpSwingLength;
    p.dispATRMult      = InpDispATRMult;
    p.maxOBToBOSBars   = InpMaxOBToBOSBars;
@@ -252,7 +257,6 @@ void PanelDefaults(SSMCPanelState &p)
    p.fvgMode          = (int)InpFVGMode;
    p.mitigationMode   = (int)InpMitigationMode;
    p.invalidationMode = (int)InpInvalidationMode;
-   p.zoneMode         = (int)InpZoneMode;
    p.overlapMode      = (int)InpOverlapMode;
   }
 
@@ -277,7 +281,7 @@ void BuildSettings(SSMCSettings &s)
    s.maxOBToBOSBars     = p.maxOBToBOSBars;
    s.rejectLegViolation = InpRejectLegViolation;
    s.zoneSource         = SMC_SOURCE_CANDLE_SERIES;   // the only zone model in this EA
-   s.zoneMode           = (ENUM_SMC_ZONE_MODE)p.zoneMode;
+   s.zoneMode           = SMC_ZONE_OPEN_LAST_EXTREME;   // the only zone model in this EA
    s.overlapMode        = (ENUM_SMC_OVERLAP_MODE)p.overlapMode;
    s.overlapPct         = InpOverlapPct;
    s.maxActivePerDir    = p.maxActivePerDir;
@@ -485,7 +489,8 @@ int OnInit(void)
    BuildVisualSettings(v);
    g_visual.Init(v, 0);
    g_visual.Cleanup();
-   g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage);
+   g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage,
+                InpTargetRR, InpBreakEven, InpBreakEvenPoints);
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
@@ -533,6 +538,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick(void)
   {
+   g_trade.ManageOpenPosition();       // break-even stop, if armed
    if(InpEnableCISD && !ConnActive())
       ProcessCISD();                   // standalone CISD (connection OFF), independent of the OB pipeline
    if(!g_scanned && !TryInitialScan())
@@ -790,7 +796,9 @@ string TradeStatusText(void)
   {
    if(!g_trade.IsEnabled())
       return "";
-   return StringFormat("     TRADING %.2f lots (%d sent%s)", g_trade.Lots(), g_trade.Sent(),
+   return StringFormat("     TRADING %.2f lots 1:%.1f%s (%d sent%s)", g_trade.Lots(), g_trade.TargetRR(),
+                       g_trade.BreakEven() ? StringFormat(" BE %d", g_trade.BreakEvenPoints()) : "",
+                       g_trade.Sent(),
                        g_trade.Closed() > 0 ? StringFormat(", %d closed", g_trade.Closed()) : "");
   }
 
@@ -804,6 +812,8 @@ void ApplyTradeSettings(void)
    g_trade.SetEnabled(p.tradeEnabled);
    g_trade.SetLots(p.lots);
    g_trade.SetOppositeExit(p.oppExit);
+   g_trade.SetTargetRR(p.targetRR);
+   g_trade.SetBreakEven(p.breakEven, p.bePoints);
   }
 
 //+------------------------------------------------------------------+
@@ -1565,6 +1575,29 @@ void TestConnPanelWiring(void)
    ApplyTradeSettings();
    trOk = trOk && (g_trade.OppositeExit() == opp0);
 
+   //--- reward:risk and break-even reach the engine, independently of each other
+   double rr0 = g_trade.TargetRR();
+   bool be0 = g_trade.BreakEven();
+   int bept0 = g_trade.BreakEvenPoints();
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "rr_p");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && MathAbs(g_trade.TargetRR() - (rr0 + 0.1)) < 1e-9 &&
+                   g_trade.BreakEven() == be0);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "rr_m");
+   ApplyTradeSettings();
+   trOk = trOk && MathAbs(g_trade.TargetRR() - rr0) < 1e-9;
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "be");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && g_trade.BreakEven() != be0 &&
+                   MathAbs(g_trade.TargetRR() - rr0) < 1e-9);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "be");
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "bept_p");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && g_trade.BreakEvenPoints() == bept0 + 10);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "bept_m");
+   ApplyTradeSettings();
+   trOk = trOk && g_trade.BreakEvenPoints() == bept0 && g_trade.BreakEven() == be0;
+
    g_panel.OnClick(SMC_PANEL_PREFIX + "trade");        // back to the starting state
    g_panel.SetState(saved);
    ApplyTradeSettings();
@@ -1742,6 +1775,7 @@ void TestConfigProfiles(void)
    a.showBull = false; a.cisdSweep = false; a.obTF = 5; a.cisdTF = 2; a.connect = true; a.maxActivePerDir = 13;
    a.mitStopsCISD = true; a.trendFilter = false;
    a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
+   a.targetRR = 2.5; a.breakEven = true; a.bePoints = 250;
    if(SMC_ConfigSave(p1, a, BuildInputSnapshot(), InpConfigCommon, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  save: %s", res.message); }
@@ -1749,6 +1783,7 @@ void TestConfigProfiles(void)
    b = saved;                           // deliberately different starting point
    b.cisdMode = 0; b.retestMode = 0; b.swingLength = 3; b.mitStopsCISD = false; b.trendFilter = true;
    b.tradeEnabled = false; b.lots = 0.55; b.oppExit = true;
+   b.targetRR = 1.0; b.breakEven = false; b.bePoints = 100;
    if(SMC_ConfigLoad(p1, b, InpConfigCommon, keys, vals, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  load: %s", res.message); }
@@ -1757,7 +1792,9 @@ void TestConfigProfiles(void)
       b.showBull == a.showBull && b.cisdSweep == a.cisdSweep && b.obTF == a.obTF && b.cisdTF == a.cisdTF &&
       b.maxActivePerDir == a.maxActivePerDir && b.mitStopsCISD == a.mitStopsCISD &&
       b.trendFilter == a.trendFilter && b.tradeEnabled == a.tradeEnabled &&
-      MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit && ArraySize(keys) > 0)
+      MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit &&
+      MathAbs(b.targetRR - a.targetRR) < 1e-9 && b.breakEven == a.breakEven &&
+      b.bePoints == a.bePoints && ArraySize(keys) > 0)
       pass++;
    else { fail++; Print("[SMC-CFG][TEST] FAIL  round trip: values differ after load"); }
 

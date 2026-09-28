@@ -54,6 +54,9 @@ struct SSMCPanelState
    //--- trade execution (entry at the confirmed setup, stop on the far side of the OB, 1:1 target)
    bool              tradeEnabled;
    double            lots;
+   double            targetRR;        // take profit as a multiple of risk
+   bool              breakEven;       // move the stop to entry once in profit
+   int               bePoints;        // profit in points that arms it
    bool              oppExit;         // a retested opposite block closes the open trade
    //--- detection
    int               swingLength;
@@ -63,7 +66,6 @@ struct SSMCPanelState
    int               fvgMode;
    int               mitigationMode;
    int               invalidationMode;
-   int               zoneMode;
    int               overlapMode;
   };
 
@@ -166,7 +168,6 @@ public:
    static string     FVGText(const int v)  { return v == 0 ? "Off" : v == 1 ? "Confluence" : "Required"; }
    static string     MitText(const int v)  { return v == 0 ? "Off" : v == 1 ? "Touch" : v == 2 ? "50% of zone" : "Full zone"; }
    static string     InvText(const int v)  { return v == 0 ? "Off" : v == 1 ? "Close beyond" : "Wick beyond"; }
-   static string     ZoneText(const int v) { return v == 0 ? "Wick (H-L)" : v == 1 ? "Body" : v == 2 ? "Open-Extreme" : "Open-Last Ext"; }
    static string     OvlText(const int v)  { return v == 0 ? "Keep all" : v == 1 ? "Skip new" : "Replace old"; }
    static string     SrcText(const int v)  { return v == 1 ? "ZOrder only" : v == 2 ? "OB only" : "Both"; }
    static string     ModeText(const int v) { return v == 1 ? "Multi" : "Single"; }
@@ -194,6 +195,8 @@ void CSMCPanel::Init(const long chart, const string prefix, const int x, const i
 void CSMCPanel::Sanitize(SSMCPanelState &s) const
   {
    s.lots             = MathMax(0.01, MathMin(100.0, MathRound(s.lots * 100.0) / 100.0));
+   s.targetRR         = MathMax(0.1, MathMin(20.0, MathRound(s.targetRR * 10.0) / 10.0));
+   s.bePoints         = (int)MathMax(10, MathMin(100000, s.bePoints));
    s.swingLength      = (int)MathMax(1, MathMin(50, s.swingLength));
    s.dispATRMult      = MathMax(0.1, MathMin(10.0, MathRound(s.dispATRMult * 100.0) / 100.0));
    s.maxOBToBOSBars   = (int)MathMax(1, MathMin(100, s.maxOBToBOSBars));
@@ -201,7 +204,6 @@ void CSMCPanel::Sanitize(SSMCPanelState &s) const
    s.fvgMode          = (int)MathMax(0, MathMin(2, s.fvgMode));
    s.mitigationMode   = (int)MathMax(0, MathMin(3, s.mitigationMode));
    s.invalidationMode = (int)MathMax(0, MathMin(2, s.invalidationMode));
-   s.zoneMode         = (int)MathMax(0, MathMin(3, s.zoneMode));
    s.overlapMode      = (int)MathMax(0, MathMin(2, s.overlapMode));
    s.obTF             = (int)MathMax(0, MathMin(7, s.obTF));
    s.cisdTF           = (int)MathMax(0, MathMin(7, s.cisdTF));
@@ -501,7 +503,6 @@ int CSMCPanel::LayoutBody(void)
       Cycle("c_fvg", cy, "FVG", FVGText(m_st.fvgMode));                                 cy += SMC_PNL_ROW + 4;
       Cycle("c_mit", cy, "Mitigation", MitText(m_st.mitigationMode));                   cy += SMC_PNL_ROW + 4;
       Cycle("c_inv", cy, "Invalidation", InvText(m_st.invalidationMode));               cy += SMC_PNL_ROW + 4;
-      Cycle("c_zone", cy, "Zone", ZoneText(m_st.zoneMode));                             cy += SMC_PNL_ROW + 4;
       Cycle("c_ovl", cy, "Overlap", OvlText(m_st.overlapMode));                         cy += SMC_PNL_ROW + 8;
       Btn("reset", x + pad, cy, w - 2 * pad, SMC_PNL_ROW, "Reset to input values", SMC_PNL_OFF, SMC_PNL_TEXT);
       cy += SMC_PNL_ROW + 2;
@@ -513,6 +514,9 @@ int CSMCPanel::LayoutBody(void)
    cy += 16;
    Switch("trade", cy, "Trade execution", m_st.tradeEnabled);              cy += SMC_PNL_ROW + 4;
    Stepper("lots", cy, "Lot size", DoubleToString(m_st.lots, 2));          cy += SMC_PNL_ROW + 4;
+   Stepper("rr", cy, "Take profit  1 :", DoubleToString(m_st.targetRR, 1));  cy += SMC_PNL_ROW + 4;
+   Switch("be", cy, "Break even", m_st.breakEven);                          cy += SMC_PNL_ROW + 4;
+   Stepper("bept", cy, "Break even points", IntegerToString(m_st.bePoints)); cy += SMC_PNL_ROW + 4;
    Switch("oppx", cy, "Opposite block exit", m_st.oppExit);                cy += SMC_PNL_ROW + 4;
 
    //--- configuration profiles (always available, also in Easy mode)
@@ -610,7 +614,6 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "c_fvg")  { iv = m_st.fvgMode;          a = Next(iv, 3); m_st.fvgMode = iv;          return a; }
    if(id == "c_mit")  { iv = m_st.mitigationMode;   a = Next(iv, 4); m_st.mitigationMode = iv;   return a; }
    if(id == "c_inv")  { iv = m_st.invalidationMode; a = Next(iv, 3); m_st.invalidationMode = iv; return a; }
-   if(id == "c_zone") { iv = m_st.zoneMode;         a = Next(iv, 4); m_st.zoneMode = iv;         return a; }
    if(id == "c_ovl")  { iv = m_st.overlapMode;      a = Next(iv, 3); m_st.overlapMode = iv;      return a; }
    if(id == "c_obtf")  { iv = m_st.obTF;   Next(iv, 8); m_st.obTF = iv;   return SMC_PANEL_TIMEFRAME; }
    if(id == "c_cistf") { iv = m_st.cisdTF; Next(iv, 8); m_st.cisdTF = iv; return SMC_PANEL_CISD; }
@@ -621,6 +624,23 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "trendf")  { m_st.trendFilter  = !m_st.trendFilter;            return SMC_PANEL_CISD; }
    if(id == "trade")   { m_st.tradeEnabled = !m_st.tradeEnabled;           return SMC_PANEL_TRADE; }
    if(id == "oppx")    { m_st.oppExit      = !m_st.oppExit;                return SMC_PANEL_TRADE; }
+   if(id == "be")      { m_st.breakEven    = !m_st.breakEven;              return SMC_PANEL_TRADE; }
+   if(id == "rr_m" || id == "rr_p")
+     {
+      double rv = m_st.targetRR;
+      if(StepDbl(rv, id == "rr_p" ? 0.1 : -0.1, 0.1, 20.0) == SMC_PANEL_NONE)
+         return SMC_PANEL_NONE;
+      m_st.targetRR = rv;
+      return SMC_PANEL_TRADE;
+     }
+   if(id == "bept_m" || id == "bept_p")
+     {
+      int bv = m_st.bePoints;
+      if(StepInt(bv, id == "bept_p" ? 10 : -10, 10, 100000) == SMC_PANEL_NONE)
+         return SMC_PANEL_NONE;
+      m_st.bePoints = bv;
+      return SMC_PANEL_TRADE;
+     }
    if(id == "lots_m" || id == "lots_p")
      {
       double lv = m_st.lots;
@@ -674,6 +694,9 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "trade", m_st.tradeEnabled);
    GlobalVariableSet(key + "lots", m_st.lots);
    GlobalVariableSet(key + "oppx", m_st.oppExit);
+   GlobalVariableSet(key + "rr", m_st.targetRR);
+   GlobalVariableSet(key + "be", m_st.breakEven);
+   GlobalVariableSet(key + "bept", m_st.bePoints);
    GlobalVariableSet(key + "swing", m_st.swingLength);
    GlobalVariableSet(key + "disp", m_st.dispATRMult);
    GlobalVariableSet(key + "dist", m_st.maxOBToBOSBars);
@@ -681,7 +704,6 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "cfvg", m_st.fvgMode);
    GlobalVariableSet(key + "cmit", m_st.mitigationMode);
    GlobalVariableSet(key + "cinv", m_st.invalidationMode);
-   GlobalVariableSet(key + "czone", m_st.zoneMode);
    GlobalVariableSet(key + "covl", m_st.overlapMode);
   }
 
@@ -715,6 +737,9 @@ bool CSMCPanel::Load(const string key)
    m_st.tradeEnabled     = GlobalVariableCheck(key + "trade") ? GlobalVariableGet(key + "trade") != 0 : m_def.tradeEnabled;
    m_st.lots             = GlobalVariableCheck(key + "lots") ? GlobalVariableGet(key + "lots") : m_def.lots;
    m_st.oppExit          = GlobalVariableCheck(key + "oppx") ? GlobalVariableGet(key + "oppx") != 0 : m_def.oppExit;
+   m_st.targetRR         = GlobalVariableCheck(key + "rr") ? GlobalVariableGet(key + "rr") : m_def.targetRR;
+   m_st.breakEven        = GlobalVariableCheck(key + "be") ? GlobalVariableGet(key + "be") != 0 : m_def.breakEven;
+   m_st.bePoints         = GlobalVariableCheck(key + "bept") ? (int)GlobalVariableGet(key + "bept") : m_def.bePoints;
    m_st.swingLength      = (int)GlobalVariableGet(key + "swing");
    m_st.dispATRMult      = GlobalVariableGet(key + "disp");
    m_st.maxOBToBOSBars   = (int)GlobalVariableGet(key + "dist");
@@ -722,7 +747,6 @@ bool CSMCPanel::Load(const string key)
    m_st.fvgMode          = (int)GlobalVariableGet(key + "cfvg");
    m_st.mitigationMode   = (int)GlobalVariableGet(key + "cmit");
    m_st.invalidationMode = (int)GlobalVariableGet(key + "cinv");
-   m_st.zoneMode         = (int)GlobalVariableGet(key + "czone");
    m_st.overlapMode      = (int)GlobalVariableGet(key + "covl");
    Sanitize(m_st);
    return true;
