@@ -1,5 +1,9 @@
 # SMC Order Block EA
 
+[![Snapchat](https://img.shields.io/badge/Snapchat-cicada.kw-FFFC00?logo=snapchat&logoColor=black)](https://www.snapchat.com/@cicada.kw)
+[![TikTok](https://img.shields.io/badge/TikTok-%40z39-000000?logo=tiktok&logoColor=white)](https://www.tiktok.com/@z39)
+[![Instagram](https://img.shields.io/badge/Instagram-coding__xaid-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/coding_xaid)
+
 A MetaTrader 5 Expert Advisor that marks Smart Money Concepts structure on the chart and can trade it.
 
 It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a lower timeframe, and only enters when the higher timeframe is trending the same way. Everything is switchable from an on-chart panel.
@@ -201,30 +205,48 @@ Not financial advice. Trading risks real money, and the numbers above describe t
 
 ## Keywords
 
-For anyone searching in their own language.
+For anyone searching in their own language. English and Arabic in full, Russian in short.
 
-**English**
-`MetaTrader 5` · `MQL5` · `expert advisor` · `Smart Money Concepts` · `SMC` · `order block` ·
-`ZOrder block` · `CISD` · `change in state of delivery` · `break of structure` · `BOS` ·
-`change of character` · `CHoCH` · `fair value gap` · `FVG` · `liquidity sweep` ·
-`market structure` · `multi timeframe` · `trend filter` · `non repainting` ·
-`algorithmic trading` · `trading bot` · `backtest` · `forex` · `gold` · `XAUUSD` · `indices`
+<details>
+<summary>English keywords</summary>
 
-**العربية**
-`ميتاتريدر 5` · `إكسبرت` · `MQL5` · `سمارت موني` · `أوردر بلوك` · `مناطق الأوامر المؤسسية` ·
-`تغير حالة التسليم` · `كسر الهيكل` · `تغير الشخصية` · `فجوة القيمة العادلة` ·
-`سحب السيولة` · `هيكل السوق` · `تعدد الأطر الزمنية` · `فلتر الاتجاه` · `بدون إعادة رسم` ·
-`تداول آلي` · `روبوت تداول` · `اختبار تاريخي` · `فوركس` · `الذهب` · `المؤشرات`
+**Smart Money Concepts**
+`smart money concepts` · `SMC trading` · `smart money trading` · `institutional trading` · `institutional order flow` · `order block` · `order blocks` · `bullish order block` · `bearish order block` · `ZOrder block` · `series order block` · `breaker block` · `mitigation block` · `rejection block` · `supply zone` · `demand zone` · `supply and demand` · `imbalance` · `fair value gap` · `FVG` · `liquidity void` · `liquidity gap` · `liquidity sweep` · `liquidity grab` · `stop hunt` · `stop run` · `inducement` · `displacement` · `expansion candle` · `market structure` · `market structure shift` · `MSS` · `break of structure` · `BOS` · `change of character` · `CHoCH` · `change in state of delivery` · `CISD` · `delivery change` · `internal structure` · `external structure` · `swing high` · `swing low` · `higher high` · `higher low` · `lower high` · `lower low` · `equal highs` · `equal lows` · `dealing range` · `premium and discount` · `equilibrium` · `optimal trade entry` · `OTE` · `point of interest` · `POI` · `mitigation` · `invalidation` · `retest` · `zone retest` · `confirmation entry` · `ICT concepts` · `ICT trading` · `Wyckoff` · `accumulation` · `distribution` · `orderflow`
+
+**Platform**
+`MetaTrader 5` · `MetaTrader5` · `MT5` · `MT5 EA` · `MQL5` · `MQL5 source code` · `expert advisor` · `expert advisor MT5` · `EA` · `trading EA` · `MT5 indicator` · `chart indicator` · `custom indicator` · `strategy tester` · `MT5 strategy tester` · `backtest` · `backtesting` · `forward test` · `optimization` · `preset file` · `set file` · `configuration profile` · `magic number` · `MetaEditor` · `OnTick` · `OnChartEvent` · `chart objects` · `on chart panel` · `control panel EA` · `dashboard EA` · `open source EA` · `free expert advisor` · `MQL5 include` · `standard library` · `CTrade`
+
+**Strategy and risk**
+`algorithmic trading` · `algo trading` · `automated trading` · `trading bot` · `trading robot` · `systematic trading` · `quantitative trading` · `trend following` · `trend filter` · `multi timeframe` · `multi timeframe analysis` · `higher timeframe bias` · `lower timeframe entry` · `non repainting` · `no repaint` · `closed candle confirmation` · `ATR` · `average true range` · `ATR filter` · `volatility filter` · `risk reward` · `risk to reward` · `risk management` · `stop loss` · `take profit` · `break even stop` · `trailing stop` · `fixed lot` · `position sizing` · `one position at a time` · `drawdown` · `maximum drawdown` · `expectancy` · `win rate` · `profit factor` · `recovery factor` · `Sharpe ratio` · `R multiple` · `Monte Carlo` · `walk forward analysis` · `in sample` · `out of sample` · `overfitting` · `curve fitting` · `statistical validation` · `Wilson interval` · `binomial test` · `Bonferroni correction` · `signal validation` · `trade journal` · `self test` · `unit test`
+
+**Markets**
+`forex` · `forex trading` · `FX majors` · `FX minors` · `currency pairs` · `EURUSD` · `GBPUSD` · `USDJPY` · `USDCHF` · `AUDUSD` · `USDCAD` · `NZDUSD` · `CADJPY` · `EURCAD` · `gold` · `gold trading` · `XAUUSD` · `silver` · `XAGUSD` · `metals` · `indices` · `stock indices` · `US30` · `Dow Jones` · `NAS100` · `US100` · `Nasdaq` · `SPX500` · `US500` · `SP500` · `DAX40` · `GER30` · `GER40` · `UK100` · `FTSE100` · `US2000` · `Russell 2000` · `oil` · `crude oil` · `WTI` · `Brent` · `energy` · `CFD` · `spot` · `scalping` · `day trading` · `intraday trading` · `swing trading` · `London session` · `New York session` · `Asian session` · `killzone` · `session timing`
+
+</details>
+
+<details>
+<summary>الكلمات المفتاحية بالعربية</summary>
+
+**مفاهيم السمارت موني**
+`سمارت موني` · `مفاهيم السمارت موني` · `التداول المؤسسي` · `أوامر المؤسسات` · `أوردر بلوك` · `أوردر بلوك شرائي` · `أوردر بلوك بيعي` · `مناطق الأوامر` · `مناطق الأوامر المؤسسية` · `بلوك الكسر` · `بلوك التعويض` · `منطقة العرض` · `منطقة الطلب` · `العرض والطلب` · `عدم التوازن` · `فجوة القيمة العادلة` · `فجوة سعرية` · `فراغ السيولة` · `سحب السيولة` · `اقتناص السيولة` · `صيد وقف الخسارة` · `استدراج` · `اندفاع سعري` · `شمعة اندفاعية` · `هيكل السوق` · `تغير هيكل السوق` · `كسر الهيكل` · `تغير الشخصية` · `تغير حالة التسليم` · `الهيكل الداخلي` · `الهيكل الخارجي` · `قمة سعرية` · `قاع سعري` · `قمم أعلى` · `قيعان أعلى` · `قمم أدنى` · `قيعان أدنى` · `قمم متساوية` · `قيعان متساوية` · `نطاق التداول` · `منطقة الخصم` · `منطقة العلاوة` · `نقطة التوازن` · `أفضل نقطة دخول` · `نقطة اهتمام` · `إعادة الاختبار` · `تعويض المنطقة` · `إبطال المنطقة` · `دخول بعد التأكيد` · `مفاهيم ICT` · `وايكوف` · `تجميع` · `تصريف` · `تدفق الأوامر`
+
+**المنصة**
+`ميتاتريدر 5` · `ميتاتريدر` · `إم تي 5` · `إكسبرت` · `إكسبرت ميتاتريدر 5` · `إكسبرت تداول` · `MQL5` · `كود MQL5` · `مؤشر ميتاتريدر` · `مؤشر مخصص` · `مختبر الاستراتيجيات` · `اختبار تاريخي` · `باك تست` · `اختبار أمامي` · `تحسين الإعدادات` · `ملف إعدادات` · `ملف preset` · `ملف تعريف` · `الرقم السحري` · `ميتا إيديتور` · `لوحة تحكم على الشارت` · `داشبورد` · `إكسبرت مفتوح المصدر` · `إكسبرت مجاني` · `مكتبة قياسية`
+
+**الاستراتيجية وإدارة المخاطر**
+`تداول آلي` · `تداول خوارزمي` · `روبوت تداول` · `بوت تداول` · `تداول مبرمج` · `تداول كمي` · `تتبع الاتجاه` · `فلتر الاتجاه` · `تعدد الأطر الزمنية` · `تحليل متعدد الأطر` · `اتجاه الفريم الكبير` · `دخول من فريم صغير` · `بدون إعادة رسم` · `تأكيد إغلاق الشمعة` · `متوسط المدى الحقيقي` · `فلتر التقلب` · `المخاطرة إلى العائد` · `إدارة المخاطر` · `وقف الخسارة` · `أخذ الربح` · `نقل الوقف لنقطة التعادل` · `وقف متحرك` · `حجم عقد ثابت` · `حجم المركز` · `مركز واحد فقط` · `أقصى تراجع` · `التوقع الرياضي` · `نسبة الربح` · `عامل الربح` · `عامل الاسترداد` · `مضاعف المخاطرة` · `مونت كارلو` · `تحليل أمامي متدرج` · `بيانات داخل النطاق` · `بيانات خارج النطاق` · `الإفراط في التحسين` · `تحقق إحصائي` · `اختبار ذاتي` · `سجل التداولات`
+
+**الأسواق**
+`فوركس` · `تداول الفوركس` · `العملات الرئيسية` · `العملات الثانوية` · `أزواج العملات` · `يورو دولار` · `باوند دولار` · `دولار ين` · `دولار فرنك` · `أسترالي دولار` · `دولار كندي` · `نيوزلندي دولار` · `الذهب` · `تداول الذهب` · `أوقية الذهب` · `الفضة` · `المعادن` · `المؤشرات` · `مؤشر داو جونز` · `مؤشر ناسداك` · `مؤشر إس آند بي` · `مؤشر داكس` · `مؤشر فوتسي` · `النفط` · `النفط الخام` · `خام برنت` · `خام غرب تكساس` · `الطاقة` · `عقود الفروقات` · `سكالبينج` · `تداول يومي` · `تداول سوينج` · `جلسة لندن` · `جلسة نيويورك` · `الجلسة الآسيوية` · `أوقات الجلسات`
+
+</details>
 
 **Русский**
-`MetaTrader 5` · `советник` · `MQL5` · `смарт мани` · `ордер блок` · `зоны институциональных ордеров` ·
-`смена характера поставки` · `слом структуры` · `смена характера рынка` · `имбаланс` ·
-`снятие ликвидности` · `структура рынка` · `мультитаймфрейм` · `фильтр тренда` · `без перерисовки` ·
-`алготрейдинг` · `торговый робот` · `бэктест` · `форекс` · `золото` · `индексы`
+`MetaTrader 5` · `советник` · `MQL5` · `смарт мани` · `ордер блок` · `зоны институциональных ордеров` · `смена характера поставки` · `слом структуры` · `смена характера рынка` · `имбаланс` · `снятие ликвидности` · `структура рынка` · `мультитаймфрейм` · `фильтр тренда` · `без перерисовки` · `алготрейдинг` · `торговый робот` · `бэктест` · `форекс` · `золото` · `индексы`
 
 GitHub repository topics only accept Latin letters, digits and hyphens, so the Arabic and
-Russian terms above live here in the README, where search still finds them. The topics to set
-on the repository itself:
+Russian terms live here in the README, where search still finds them. Topics for the
+repository itself:
 
 ```text
 mql5  metatrader5  expert-advisor  smart-money-concepts  smc  order-block  cisd
