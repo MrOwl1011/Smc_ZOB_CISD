@@ -24,6 +24,7 @@ It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a 
 10. [Troubleshooting](#troubleshooting)
 11. [Contributing](#contributing)
 12. [License](#license)
+13. [Keywords](#keywords)
 
 ## Install
 
@@ -197,3 +198,36 @@ Pull requests welcome. Two asks: run the self tests and paste the journal summar
 MIT, see [LICENSE](LICENSE). Free to use, change and redistribute, including commercially, with the copyright notice kept.
 
 Not financial advice. Trading risks real money, and the numbers above describe the past.
+
+## Keywords
+
+For anyone searching in their own language.
+
+**English**
+`MetaTrader 5` · `MQL5` · `expert advisor` · `Smart Money Concepts` · `SMC` · `order block` ·
+`ZOrder block` · `CISD` · `change in state of delivery` · `break of structure` · `BOS` ·
+`change of character` · `CHoCH` · `fair value gap` · `FVG` · `liquidity sweep` ·
+`market structure` · `multi timeframe` · `trend filter` · `non repainting` ·
+`algorithmic trading` · `trading bot` · `backtest` · `forex` · `gold` · `XAUUSD` · `indices`
+
+**العربية**
+`ميتاتريدر 5` · `إكسبرت` · `MQL5` · `سمارت موني` · `أوردر بلوك` · `مناطق الأوامر المؤسسية` ·
+`تغير حالة التسليم` · `كسر الهيكل` · `تغير الشخصية` · `فجوة القيمة العادلة` ·
+`سحب السيولة` · `هيكل السوق` · `تعدد الأطر الزمنية` · `فلتر الاتجاه` · `بدون إعادة رسم` ·
+`تداول آلي` · `روبوت تداول` · `اختبار تاريخي` · `فوركس` · `الذهب` · `المؤشرات`
+
+**Русский**
+`MetaTrader 5` · `советник` · `MQL5` · `смарт мани` · `ордер блок` · `зоны институциональных ордеров` ·
+`смена характера поставки` · `слом структуры` · `смена характера рынка` · `имбаланс` ·
+`снятие ликвидности` · `структура рынка` · `мультитаймфрейм` · `фильтр тренда` · `без перерисовки` ·
+`алготрейдинг` · `торговый робот` · `бэктест` · `форекс` · `золото` · `индексы`
+
+GitHub repository topics only accept Latin letters, digits and hyphens, so the Arabic and
+Russian terms above live here in the README, where search still finds them. The topics to set
+on the repository itself:
+
+```text
+mql5  metatrader5  expert-advisor  smart-money-concepts  smc  order-block  cisd
+market-structure  break-of-structure  fair-value-gap  algorithmic-trading  trading-bot
+forex  gold  xauusd  indices  backtesting  non-repainting
+```
