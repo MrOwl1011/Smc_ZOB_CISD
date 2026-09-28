@@ -11,7 +11,7 @@
 
 # SMC Order Block EA
 
-A MetaTrader 5 Expert Advisor that detects Smart Money Concepts structure on the chart and can trade it. It marks Order Blocks and ZOrder Blocks on a higher timeframe, waits for a CISD confirmation on a lower timeframe, and enters only when the higher timeframe is trending in the same direction.
+A MetaTrader 5 Expert Advisor that detects Smart Money Concepts structure on the chart and can trade it. It marks Order Blocks on a higher timeframe, waits for a CISD confirmation on a lower timeframe, and enters only when the higher timeframe is trending in the same direction.
 
 Trading is switched off by default. Out of the box the EA draws and nothing else.
 
@@ -33,8 +33,7 @@ The strategy was then validated offline on 19 instruments over 20 months. That r
 
 | Feature | Description |
 | --- | --- |
-| Order Blocks | Last opposite-colour candle before an impulsive break of structure, with four zone models including Open-Last Ext |
-| ZOrder Blocks | Same idea applied to the full run of opposite candles instead of one |
+| Order Blocks | The complete run of opposite-colour candles before an impulsive break of structure, with four zone models including Open-Last Ext. This series zone is the EA's only block type. |
 | Structure | Swing detection with ATR prominence, BOS and CHoCH, each swing breakable once |
 | Displacement filter | Four independent impulse tests measured before the move, so a big candle cannot justify itself |
 | FVG confluence | Optional requirement that a Fair Value Gap accompanies the block |
@@ -108,7 +107,7 @@ Nothing. The defaults draw on the current chart timeframe and place no orders.
 
 ### Recommended starting point
 
-Load `presets/SMC_1_BestOverall.set` in the EA properties dialog. It sets H1 blocks, M5 confirmations, ZOrder Blocks only, and the parameters that tested best.
+Load `presets/SMC_1_BestOverall.set` in the EA properties dialog. It sets H1 blocks, M5 confirmations and the parameters that tested best.
 
 ### Inputs worth knowing
 
@@ -155,10 +154,10 @@ The panel edits a state record and tells the EA what to rebuild, so switching an
 | Section | Controls |
 | --- | --- |
 | Mode | Easy (zones only) or Advanced |
-| Display | Bull and bear zones, ZOrder zones, labels, fills, old zones, retests, retest start, swings |
+| Display | Bull and bear zones, labels, fills, old zones, retests, retest start, swings |
 | Timeframes | Order Block TF and CISD TF, independent of the chart |
 | CISD | Liquidity sweep, confirmation close, retracement stages |
-| Connection | OB source, retest mode, CISD mode, mitigation stops CISD, trend filter |
+| Connection | Retest mode, CISD mode, mitigation stops CISD, trend filter |
 | Trading | Trade execution, lot size, opposite block exit |
 | Configuration | Save, Load, Reset to input values |
 
@@ -183,7 +182,7 @@ SMC_OrderBlock_EA/
 ├── SMC_OB_Structure.mqh         swings, BOS, CHoCH
 ├── SMC_OB_Displacement.mqh      impulse tests, block candle selection
 ├── SMC_OB_FVG.mqh               Fair Value Gaps
-├── SMC_OB_Engine.mqh            Order Block and ZOrder Block lifecycle
+├── SMC_OB_Engine.mqh            Order Block lifecycle
 ├── SMC_CISD_Engine.mqh          sweep, series, confirmation, retracement
 ├── SMC_Connect_Engine.mqh       HTF block to LTF CISD, M1 retest, trend filter
 ├── SMC_OB_TradeHooks.mqh        the only file that sends orders
@@ -205,7 +204,7 @@ flowchart LR
     A[Swing highs and lows] --> B[Break of structure]
     B --> C{Displacement<br/>tests pass?}
     C -- no --> X[Rejected]
-    C -- yes --> D[Order Block / ZOrder Block]
+    C -- yes --> D[Order Block]
     D --> E[Price returns to the zone<br/>retest checked on M1]
     E --> F[CISD engine starts<br/>on the lower timeframe]
     F --> G{Sweep, series,<br/>confirmation close}
@@ -219,7 +218,7 @@ A block stays usable until price closes through it. Mitigation is recorded but d
 
 ## Results
 
-From [`research/REPORT.md`](research/REPORT.md). ZOrder Blocks only, 19 instruments, January 2025 to September 2026, outcomes measured in R rather than currency because block heights differ by instrument.
+From [`research/REPORT.md`](research/REPORT.md). 19 instruments, January 2025 to September 2026, outcomes measured in R rather than currency because block heights differ by instrument.
 
 | Configuration | Trades | Win rate | Expectancy | Profit factor | Max drawdown |
 | --- | --- | --- | --- | --- | --- |

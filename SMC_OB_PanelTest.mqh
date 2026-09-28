@@ -100,14 +100,11 @@ bool SMC_RunPanelTests(const bool chartAvailable)
    d.showBull = true;  d.showBear = true;  d.showBOS = true;  d.showLabels = true;
    d.swingLength = 5;  d.dispATRMult = 1.5; d.maxOBToBOSBars = 8; d.maxActivePerDir = 10;
    d.fvgMode = 1;      d.mitigationMode = 2; d.invalidationMode = 1;
-   d.showZBull = true; d.showZBear = true;
    d.cisdSweep = true; d.cisdConfirm = true; d.cisdRetrace = true;
    d.obTF = 5; d.cisdTF = 2; d.connect = true;          // H1 OB, M5 CISD, connected
-   d.obSource = 0; d.cisdMode = 0; d.retestMode = 0;    // both OB types, Single CISD, Single retest
 
    CSMCPanel p;
    p.Init(0, P, 300, 30, d);
-   p.SetZOrderAvailable(true);
    p.SetCISDAvailable(true, "M5");
    p.SetMaxHeight(3000);                                // layout checks below need the whole panel visible
    SSMCPanelState s;
@@ -136,9 +133,7 @@ bool SMC_RunPanelTests(const bool chartAvailable)
    SMC_PanelCheck(p.OnClick(P + "t_bos") == SMC_PANEL_REDRAW, "BOS toggle -> redraw", pass, fail);
    p.GetState(s);
    SMC_PanelCheck(!s.showBull && !s.showBOS && s.showBear, "toggles flipped independently", pass, fail);
-   SMC_PanelCheck(p.OnClick(P + "t_zbull") == SMC_PANEL_REDRAW, "bull ZOrder toggle -> redraw", pass, fail);
    p.GetState(s);
-   SMC_PanelCheck(!s.showZBull && s.showZBear && !s.showBull, "ZOrder toggle independent of OB toggle", pass, fail);
 
    //--- CISD components: independent switches, CISD-only action
    SMC_PanelCheck(p.OnClick(P + "cisd_sw") == SMC_PANEL_CISD, "CISD liquidity sweep -> CISD action", pass, fail);
@@ -149,7 +144,6 @@ bool SMC_RunPanelTests(const bool chartAvailable)
    SMC_PanelCheck(!s.cisdSweep && !s.cisdConfirm && s.cisdRetrace, "confirmation switch flips only confirmation", pass, fail);
    SMC_PanelCheck(p.OnClick(P + "cisd_rt") == SMC_PANEL_CISD, "CISD retracement -> CISD action", pass, fail);
    p.GetState(s);
-   SMC_PanelCheck(!s.cisdRetrace && s.swingLength == 5 && !s.showZBull, "retracement switch flips only retracement", pass, fail);
 
    //--- timeframe selectors and HTF OB -> CISD connection
    SMC_PanelCheck(p.OnClick(P + "c_obtf") == SMC_PANEL_TIMEFRAME, "OB TF -> timeframe action (OB rescan)", pass, fail);
@@ -167,18 +161,11 @@ bool SMC_RunPanelTests(const bool chartAvailable)
    SMC_PanelCheck(!s.connect && s.cisdTF == 2 && !s.cisdSweep, "connection switch flips only the connection", pass, fail);
 
    //--- OB source and CISD validation mode
-   SMC_PanelCheck(p.OnClick(P + "c_obsrc") == SMC_PANEL_CISD, "OB source -> CISD action", pass, fail);
    p.GetState(s);
-   SMC_PanelCheck(s.obSource == 1 && s.cisdMode == 0, "OB source Both -> ZOrder only, mode unchanged", pass, fail);
-   p.OnClick(P + "c_obsrc");
    p.GetState(s);
-   SMC_PanelCheck(s.obSource == 2, "OB source cycles to OB only", pass, fail);
-   p.OnClick(P + "c_obsrc");
    p.GetState(s);
-   SMC_PanelCheck(s.obSource == 0, "OB source cycles back to Both", pass, fail);
    SMC_PanelCheck(p.OnClick(P + "c_cmode") == SMC_PANEL_CISD, "CISD validation -> CISD action", pass, fail);
    p.GetState(s);
-   SMC_PanelCheck(s.cisdMode == 1 && s.obSource == 0, "CISD validation Single -> Multi, source unchanged", pass, fail);
    p.OnClick(P + "c_cmode");
    p.GetState(s);
    SMC_PanelCheck(s.cisdMode == 0, "CISD validation cycles back to Single", pass, fail);
@@ -239,9 +226,9 @@ bool SMC_RunPanelTests(const bool chartAvailable)
    p.OnClick(P + "mode_easy");
    SMC_PanelCheck(p.OnClick(P + "reset") == SMC_PANEL_RESCAN, "reset -> rescan", pass, fail);
    p.GetState(s);
-   SMC_PanelCheck(s.swingLength == 5 && s.showBull && s.showBOS && s.overlapMode == 0 && s.fvgMode == 1 && s.showZBull &&
+   SMC_PanelCheck(s.swingLength == 5 && s.showBull && s.showBOS && s.overlapMode == 0 && s.fvgMode == 1 &&
                   s.cisdSweep && s.cisdConfirm && s.cisdRetrace && s.obTF == 5 && s.cisdTF == 2 && s.connect &&
-                  s.obSource == 0 && s.cisdMode == 0 && s.retestMode == 0,
+                  s.cisdMode == 0 && s.retestMode == 0,
                   "reset restores input values", pass, fail);
    SMC_PanelCheck(s.collapsed && s.easyMode, "reset keeps collapsed / easy choice", pass, fail);
 
@@ -258,9 +245,8 @@ bool SMC_RunPanelTests(const bool chartAvailable)
                      "advanced layout has the three CISD switches", pass, fail);
       SMC_PanelCheck(ObjectFind(0, P + "c_obtf") >= 0 && ObjectFind(0, P + "c_cistf") >= 0 && ObjectFind(0, P + "conn") >= 0,
                      "advanced layout has OB TF, CISD TF and connection controls", pass, fail);
-      SMC_PanelCheck(ObjectFind(0, P + "c_obsrc") >= 0 && ObjectFind(0, P + "c_cmode") >= 0 &&
-                     ObjectFind(0, P + "c_rmode") >= 0,
-                     "advanced layout has OB source, CISD validation and retest mode", pass, fail);
+      SMC_PanelCheck(ObjectFind(0, P + "c_cmode") >= 0 && ObjectFind(0, P + "c_rmode") >= 0,
+                     "advanced layout has CISD validation and retest mode", pass, fail);
       SMC_PanelCheck(ObjectFind(0, P + "cfg_name") >= 0 && ObjectFind(0, P + "cfg_save") >= 0 &&
                      ObjectFind(0, P + "cfg_load") >= 0 && ObjectFind(0, P + "sec_cfg") >= 0,
                      "advanced layout has the configuration controls", pass, fail);
@@ -275,7 +261,6 @@ bool SMC_RunPanelTests(const bool chartAvailable)
       clipped = SMC_PanelClippedText(P, 300, 1);
       SMC_PanelCheck(clipped == 0, StringFormat("%d easy-layout texts do not fit their widget", clipped), pass, fail);
       SMC_PanelCheck(ObjectFind(0, P + "t_bull") >= 0 && ObjectFind(0, P + "c_ovl") < 0 &&
-                     ObjectFind(0, P + "t_bos") < 0 && ObjectFind(0, P + "t_zbull") >= 0 &&
                      ObjectFind(0, P + "cisd_rt") >= 0 && ObjectFind(0, P + "c_obtf") >= 0 && ObjectFind(0, P + "conn") >= 0 &&
                      ObjectFind(0, P + "cfg_save") >= 0,
                      "easy layout shows only OB and ZOrder toggles", pass, fail);

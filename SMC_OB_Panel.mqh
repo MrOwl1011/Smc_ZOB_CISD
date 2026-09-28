@@ -39,8 +39,6 @@ struct SSMCPanelState
    bool              showLabels;
    bool              showSwings;
    bool              fillZones;
-   bool              showZBull;
-   bool              showZBear;
    //--- CISD components
    bool              cisdSweep;
    bool              cisdConfirm;
@@ -49,7 +47,6 @@ struct SSMCPanelState
    int               obTF;
    int               cisdTF;
    bool              connect;
-   int               obSource;        // 0 = both, 1 = ZOrder only, 2 = Order Block only
    int               cisdMode;        // 0 = Single (first CISD), 1 = Multi (all CISDs) per sequence
    int               retestMode;      // 0 = Single (first retest only), 1 = Multi (every retest)
    bool              mitStopsCISD;    // a mitigated OB stops its CISD search (like invalidation)
@@ -93,7 +90,6 @@ private:
    SSMCPanelState    m_st;
    SSMCPanelState    m_def;
    string            m_status;
-   bool              m_zAvailable;     // show the ZOrder toggles
    bool              m_cisdAvailable;  // show the CISD section
    string            m_cisdTF;         // CISD timeframe text
    string            m_profile;        // configuration profile name
@@ -128,14 +124,13 @@ private:
    void              Sanitize(SSMCPanelState &s) const;
 
 public:
-                     CSMCPanel(void) : m_chart(0), m_x(10), m_y(30), m_zAvailable(false), m_cisdAvailable(false),
+                     CSMCPanel(void) : m_chart(0), m_x(10), m_y(30), m_cisdAvailable(false),
                                         m_maxHeight(0), m_scroll(0), m_maxScroll(0), m_contentHeight(0),
                                         m_bodyTop(0), m_bodyBottom(0), m_chartHeight(0), m_draw(true), m_clip(false) { ZeroMemory(m_st); ZeroMemory(m_def); }
    void              Init(const long chart, const string prefix, const int x, const int y, const SSMCPanelState &defaults);
    void              SetState(const SSMCPanelState &s) { m_st = s; Sanitize(m_st); }
    void              GetState(SSMCPanelState &s) const { s = m_st; }
    string            Prefix(void) const { return m_p; }
-   void              SetZOrderAvailable(const bool on) { m_zAvailable = on; }
    void              SetCISDAvailable(const bool on, const string tfText) { m_cisdAvailable = on; m_cisdTF = tfText; }
    //--- configuration profile (the panel only holds the name; the EA reads / writes the file)
    void              SetProfile(const string name) { m_profile = (name == "" ? "default" : name); }
@@ -210,7 +205,6 @@ void CSMCPanel::Sanitize(SSMCPanelState &s) const
    s.overlapMode      = (int)MathMax(0, MathMin(2, s.overlapMode));
    s.obTF             = (int)MathMax(0, MathMin(7, s.obTF));
    s.cisdTF           = (int)MathMax(0, MathMin(7, s.cisdTF));
-   s.obSource         = (int)MathMax(0, MathMin(2, s.obSource));
    s.cisdMode         = (int)MathMax(0, MathMin(1, s.cisdMode));
    s.retestMode       = (int)MathMax(0, MathMin(1, s.retestMode));
   }
@@ -460,12 +454,6 @@ int CSMCPanel::LayoutBody(void)
    Toggle("t_bull", x + pad, cy, half, "Bullish OBs", m_st.showBull);
    Toggle("t_bear", col2, cy, half, "Bearish OBs", m_st.showBear);
    cy += SMC_PNL_ROW + 4;
-   if(m_zAvailable)
-     {
-      Toggle("t_zbull", x + pad, cy, half, "Bull ZOrder", m_st.showZBull);
-      Toggle("t_zbear", col2, cy, half, "Bear ZOrder", m_st.showZBear);
-      cy += SMC_PNL_ROW + 4;
-     }
    Cycle("c_obtf", cy, "Order Block TF", TFText(m_st.obTF) + " ▼");
    cy += SMC_PNL_ROW + 4;
    if(m_cisdAvailable)
@@ -475,7 +463,6 @@ int CSMCPanel::LayoutBody(void)
       cy += 16;
       Cycle("c_cistf", cy, "CISD TF", TFText(m_st.cisdTF) + " ▼");     cy += SMC_PNL_ROW + 4;
       Switch("conn", cy, "HTF OB -> CISD", m_st.connect);               cy += SMC_PNL_ROW + 4;
-      Cycle("c_obsrc", cy, "OB Source", SrcText(m_st.obSource));        cy += SMC_PNL_ROW + 4;
       Cycle("c_cmode", cy, "CISD Validation", ModeText(m_st.cisdMode)); cy += SMC_PNL_ROW + 4;
       Cycle("c_rmode", cy, "Retest Mode", ModeText(m_st.retestMode));   cy += SMC_PNL_ROW + 4;
       Switch("mitstop", cy, "Mitigation stops CISD", m_st.mitStopsCISD); cy += SMC_PNL_ROW + 4;
@@ -598,8 +585,6 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
 
    if(id == "t_bull") { m_st.showBull     = !m_st.showBull;     return SMC_PANEL_REDRAW; }
    if(id == "t_bear") { m_st.showBear     = !m_st.showBear;     return SMC_PANEL_REDRAW; }
-   if(id == "t_zbull") { m_st.showZBull   = !m_st.showZBull;    return SMC_PANEL_REDRAW; }
-   if(id == "t_zbear") { m_st.showZBear   = !m_st.showZBear;    return SMC_PANEL_REDRAW; }
    if(id == "cisd_sw") { m_st.cisdSweep   = !m_st.cisdSweep;    return SMC_PANEL_CISD; }
    if(id == "cisd_cf") { m_st.cisdConfirm = !m_st.cisdConfirm;  return SMC_PANEL_CISD; }
    if(id == "cisd_rt") { m_st.cisdRetrace = !m_st.cisdRetrace;  return SMC_PANEL_CISD; }
@@ -630,7 +615,6 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "c_obtf")  { iv = m_st.obTF;   Next(iv, 8); m_st.obTF = iv;   return SMC_PANEL_TIMEFRAME; }
    if(id == "c_cistf") { iv = m_st.cisdTF; Next(iv, 8); m_st.cisdTF = iv; return SMC_PANEL_CISD; }
    if(id == "conn")    { m_st.connect = !m_st.connect;                     return SMC_PANEL_CISD; }
-   if(id == "c_obsrc") { iv = m_st.obSource; Next(iv, 3); m_st.obSource = iv; return SMC_PANEL_CISD; }
    if(id == "c_cmode") { iv = m_st.cisdMode; Next(iv, 2); m_st.cisdMode = iv; return SMC_PANEL_CISD; }
    if(id == "c_rmode") { iv = m_st.retestMode; Next(iv, 2); m_st.retestMode = iv; return SMC_PANEL_CISD; }
    if(id == "mitstop") { m_st.mitStopsCISD = !m_st.mitStopsCISD;           return SMC_PANEL_CISD; }
@@ -677,15 +661,12 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "sw", m_st.showSwings);
    GlobalVariableSet(key + "fill", m_st.fillZones);
    GlobalVariableSet(key + "rs", m_st.showRetestStart);
-   GlobalVariableSet(key + "zbull", m_st.showZBull);
-   GlobalVariableSet(key + "zbear", m_st.showZBear);
    GlobalVariableSet(key + "csw", m_st.cisdSweep);
    GlobalVariableSet(key + "ccf", m_st.cisdConfirm);
    GlobalVariableSet(key + "crt", m_st.cisdRetrace);
    GlobalVariableSet(key + "obtf", m_st.obTF);
    GlobalVariableSet(key + "cistf", m_st.cisdTF);
    GlobalVariableSet(key + "conn", m_st.connect);
-   GlobalVariableSet(key + "obsrc", m_st.obSource);
    GlobalVariableSet(key + "cmode", m_st.cisdMode);
    GlobalVariableSet(key + "rmode", m_st.retestMode);
    GlobalVariableSet(key + "mstop", m_st.mitStopsCISD);
@@ -721,15 +702,12 @@ bool CSMCPanel::Load(const string key)
    m_st.fillZones        = GlobalVariableGet(key + "fill") != 0;
    m_st.showRetestStart  = GlobalVariableCheck(key + "rs") ? GlobalVariableGet(key + "rs") != 0 : m_def.showRetestStart;
    //--- settings saved by v1.10 have no ZOrder keys: keep the input defaults
-   m_st.showZBull        = GlobalVariableCheck(key + "zbull") ? GlobalVariableGet(key + "zbull") != 0 : m_def.showZBull;
-   m_st.showZBear        = GlobalVariableCheck(key + "zbear") ? GlobalVariableGet(key + "zbear") != 0 : m_def.showZBear;
    m_st.cisdSweep        = GlobalVariableCheck(key + "csw") ? GlobalVariableGet(key + "csw") != 0 : m_def.cisdSweep;
    m_st.cisdConfirm      = GlobalVariableCheck(key + "ccf") ? GlobalVariableGet(key + "ccf") != 0 : m_def.cisdConfirm;
    m_st.cisdRetrace      = GlobalVariableCheck(key + "crt") ? GlobalVariableGet(key + "crt") != 0 : m_def.cisdRetrace;
    m_st.obTF             = GlobalVariableCheck(key + "obtf") ? (int)GlobalVariableGet(key + "obtf") : m_def.obTF;
    m_st.cisdTF           = GlobalVariableCheck(key + "cistf") ? (int)GlobalVariableGet(key + "cistf") : m_def.cisdTF;
    m_st.connect          = GlobalVariableCheck(key + "conn") ? GlobalVariableGet(key + "conn") != 0 : m_def.connect;
-   m_st.obSource         = GlobalVariableCheck(key + "obsrc") ? (int)GlobalVariableGet(key + "obsrc") : m_def.obSource;
    m_st.cisdMode         = GlobalVariableCheck(key + "cmode") ? (int)GlobalVariableGet(key + "cmode") : m_def.cisdMode;
    m_st.retestMode       = GlobalVariableCheck(key + "rmode") ? (int)GlobalVariableGet(key + "rmode") : m_def.retestMode;
    m_st.mitStopsCISD     = GlobalVariableCheck(key + "mstop") ? GlobalVariableGet(key + "mstop") != 0 : m_def.mitStopsCISD;

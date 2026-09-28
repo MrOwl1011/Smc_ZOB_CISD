@@ -61,17 +61,6 @@ input int                        InpMaxAgeBars         = 0;                     
 input ENUM_SMC_OVERLAP_MODE      InpOverlapMode        = SMC_OVERLAP_SKIP_NEW;  // Overlapping zones
 input double                     InpOverlapPct         = 50.0;                  // Overlap threshold (% of smaller zone)
 
-//--- ZOrder blocks (same BOS / displacement / extension / mitigation settings as standard OBs;
-//--- zone = complete consecutive opposite-candle series)
-input group "=== ZOrder Blocks ==="
-input bool                       InpEnableZOrder       = true;                  // Enable ZOrder Blocks
-input bool                       InpShowZBull          = true;                  // Show Bullish ZOrder
-input bool                       InpShowZBear          = true;                  // Show Bearish ZOrder
-input color                      InpZBullColor         = clrDeepSkyBlue;        // Bullish ZOrder color
-input color                      InpZBearColor         = clrMagenta;            // Bearish ZOrder color
-input ENUM_LINE_STYLE            InpZStyle             = STYLE_DASH;            // ZOrder border style
-input bool                       InpZFill              = false;                 // Fill ZOrder rectangles
-
 //--- FVG
 input group "=== Fair Value Gap ==="
 input ENUM_SMC_FVG_MODE          InpFVGMode            = SMC_FVG_CONFLUENCE;    // FVG confirmation
@@ -115,9 +104,6 @@ input color                      InpCISDRetraceColor   = C'40,60,90';           
 //--- HTF PD Array (OB / ZOrder) -> LTF CISD workflow
 input group "=== HTF OB -> LTF CISD ==="
 input bool                       InpConnEnable         = true;                  // HTF OB -> CISD connection (panel default)
-input bool                       InpConnUseStandard    = true;                  // Standard OB can activate CISD
-input bool                       InpConnUseZOrder      = true;                  // ZOrder Block can activate CISD
-input ENUM_CONN_OB_SOURCE        InpConnOBSource       = CONN_SRC_BOTH;         // Order Block source (panel default)
 input ENUM_CONN_CISD_MODE        InpConnCISDMode       = CONN_CISD_SINGLE;      // CISD validation (panel default)
 input int                        InpConnMaxCISDBars    = 100;                   // Bars to find a CISD after the retest (CISD TF)
 input int                        InpConnWarmupBars     = 200;                   // CISD warm-up bars before the retest (liquidity)
@@ -189,10 +175,9 @@ input int                        InpSelfTestBars       = 2000;                  
 #define SMC_PANEL_PREFIX "SMCPNL_"
 
 //--- engine instances
+//--- the only Order Block type: the zone is the complete opposite-candle series
 CSMCDetector    g_detector;
 CSMCVisualizer  g_visual;
-CSMCDetector    g_zdetector;           // ZOrder Blocks (independent state, ids and events)
-CSMCVisualizer  g_zvisual;
 
 //--- CISD module (own timeframe, own state)
 CSMCCISDEngine     g_cisd;
@@ -220,7 +205,6 @@ MqlRates g_connRates[];
 //--- last detector state the connection was synchronised with (see ProcessConnection)
 datetime g_syncTime  = 0;
 int      g_syncStd   = -1;
-int      g_syncZ     = -1;
 bool     g_draw           = true;
 bool     g_usePanel       = false;
 bool     g_persistPanel   = false;
@@ -248,15 +232,12 @@ void PanelDefaults(SSMCPanelState &p)
    p.showLabels       = InpShowLabels;
    p.showSwings       = InpShowSwings;
    p.fillZones        = InpFillZones;
-   p.showZBull        = InpShowZBull;
-   p.showZBear        = InpShowZBear;
    p.cisdSweep        = InpCISDSweep;
    p.cisdConfirm      = InpCISDConfirm;
    p.cisdRetrace      = InpCISDRetrace;
    p.obTF             = (int)InpOBTimeframe;
    p.cisdTF           = (int)InpCISDTimeframe;
    p.connect          = InpConnEnable;
-   p.obSource         = (int)InpConnOBSource;
    p.cisdMode         = (int)InpConnCISDMode;
    p.retestMode       = (int)InpConnRetestMode;
    p.mitStopsCISD     = InpConnMitigationStops;
@@ -295,6 +276,7 @@ void BuildSettings(SSMCSettings &s)
    s.dispMinRelStrength = InpDispMinRelStrength;
    s.maxOBToBOSBars     = p.maxOBToBOSBars;
    s.rejectLegViolation = InpRejectLegViolation;
+   s.zoneSource         = SMC_SOURCE_CANDLE_SERIES;   // the only zone model in this EA
    s.zoneMode           = (ENUM_SMC_ZONE_MODE)p.zoneMode;
    s.overlapMode        = (ENUM_SMC_OVERLAP_MODE)p.overlapMode;
    s.overlapPct         = InpOverlapPct;
@@ -360,35 +342,6 @@ void BuildVisualSettings(SSMCVisualSettings &v)
    v.bosBearColor   = InpBOSBearColor;
    v.retestColor    = InpRetestColor;
    v.swingColor     = InpSwingColor;
-  }
-
-//+------------------------------------------------------------------+
-//| ZOrder Blocks: identical detection settings, series zones.       |
-//+------------------------------------------------------------------+
-void BuildZSettings(SSMCSettings &s)
-  {
-   BuildSettings(s);
-   s.zoneSource = SMC_SOURCE_CANDLE_SERIES;
-  }
-
-void BuildZVisualSettings(SSMCVisualSettings &v)
-  {
-   SSMCPanelState p;
-   g_panel.GetState(p);
-   BuildVisualSettings(v);             // same extension, state colours and Easy-mode rules
-   v.prefix     = "SMCZOB_";
-   v.showBull   = p.showZBull;
-   v.showBear   = p.showZBear;
-   v.showBOS    = false;               // BOS / swings / FVG are drawn by the standard layer
-   v.showSwings = false;
-   v.showFVG    = false;
-   v.fillZones  = InpZFill;
-   v.bullColor  = InpZBullColor;
-   v.bearColor  = InpZBearColor;
-   v.bullLabel  = "ZOrder Bullish";
-   v.bearLabel  = "ZOrder Bearish";
-   v.liveStyle  = InpZStyle;
-   v.zoneWidth  = 1;
   }
 
 //+------------------------------------------------------------------+
@@ -516,7 +469,6 @@ int OnInit(void)
    g_panel.Init(0, SMC_PANEL_PREFIX, InpPanelX, InpPanelY, defaults);
    g_panel.SetMaxHeight(InpPanelMaxHeight);
    g_panel.SetProfile(InpConfigProfile);
-   g_panel.SetZOrderAvailable(InpEnableZOrder);
    if(g_persistPanel && g_panel.Load(PanelKey()))
       Print("[SMC-OB] Restored control panel settings for this chart");
    SyncTimeframesFromPanel();          // OB / CISD timeframes come from the panel state
@@ -528,25 +480,11 @@ int OnInit(void)
       Print("[SMC-OB] Detector initialisation failed");
       return INIT_PARAMETERS_INCORRECT;
      }
-   if(InpEnableZOrder)
-     {
-      SSMCSettings zs;
-      BuildZSettings(zs);
-      if(!g_zdetector.Init(zs))
-        {
-         Print("[SMC-OB] ZOrder detector initialisation failed");
-         return INIT_PARAMETERS_INCORRECT;
-        }
-     }
 
    SSMCVisualSettings v;
    BuildVisualSettings(v);
    g_visual.Init(v, 0);
    g_visual.Cleanup();
-   SSMCVisualSettings zv;
-   BuildZVisualSettings(zv);
-   g_zvisual.Init(zv, 0);
-   g_zvisual.Cleanup();
    g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage);
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
@@ -579,12 +517,9 @@ void OnDeinit(const int reason)
    DeinitConnection();
    if(InpLogLevel >= SMC_LOG_EVENTS)
       Print("[SMC-OB] Final statistics:\n", g_detector.StatsText());
-   if(InpEnableZOrder && InpLogLevel >= SMC_LOG_EVENTS)
-      Print("[SMC-OB][ZOrder] Final statistics:\n", g_zdetector.StatsText());
    if(InpDeleteOnExit)
      {
       g_visual.Cleanup();
-      g_zvisual.Cleanup();
      }
    g_panel.Destroy();
 
@@ -612,8 +547,6 @@ void OnTick(void)
       //--- redrawn on ticks: zones change only when a closed candle changes them
       double bid = SymbolInfoDouble(_Symbol, SYMBOL_BID);
       g_detector.OnTickPrice(bid);
-      if(InpEnableZOrder)
-         g_zdetector.OnTickPrice(bid);
      }
   }
 
@@ -673,13 +606,6 @@ void ApplyPanelAction(const ENUM_SMC_PANEL_ACTION action)
       BuildVisualSettings(v);
       g_visual.SetSettings(v);
       g_visual.RedrawAll(g_detector, g_lastClosedBar);
-      if(InpEnableZOrder)
-        {
-         SSMCVisualSettings zv;
-         BuildZVisualSettings(zv);
-         g_zvisual.SetSettings(zv);
-         g_zvisual.RedrawAll(g_zdetector, g_lastClosedBar);
-        }
      }
    else if(action == SMC_PANEL_RESCAN || action == SMC_PANEL_TIMEFRAME)
      {
@@ -731,16 +657,6 @@ void Rescan(void)
       Print("[SMC-OB] Rescan aborted: invalid settings");
       return;
      }
-   if(InpEnableZOrder)
-     {
-      SSMCSettings zs;
-      BuildZSettings(zs);
-      g_zdetector.Init(zs);
-      SSMCVisualSettings zv;
-      BuildZVisualSettings(zv);
-      g_zvisual.SetSettings(zv);
-      g_zvisual.Cleanup();
-     }
    SSMCVisualSettings v;
    BuildVisualSettings(v);
    g_visual.SetSettings(v);
@@ -776,13 +692,6 @@ bool TryInitialScan(void)
    g_detector.SetHistoricalMode(true);
    g_detector.ProcessWindow(rates, got);
    g_detector.SetHistoricalMode(false);
-   if(InpEnableZOrder)
-     {
-      g_zdetector.Reset();
-      g_zdetector.SetHistoricalMode(true);
-      g_zdetector.ProcessWindow(rates, got);
-      g_zdetector.SetHistoricalMode(false);
-     }
 
    g_lastClosedBar = rates[0].time;
    g_lastBarOpen   = 0;                // force a new-bar check on the next tick
@@ -795,12 +704,6 @@ bool TryInitialScan(void)
                (GetMicrosecondCount() - t0) / 1000.0);
    if(InpLogLevel >= SMC_LOG_EVENTS)
       Print("[SMC-OB] ", g_detector.StatsText());
-   if(InpEnableZOrder)
-     {
-      PrintFormat("[SMC-OB][ZOrder] History scan: %d ZOrder Blocks stored", g_zdetector.OBCount());
-      if(InpLogLevel >= SMC_LOG_EVENTS)
-         Print("[SMC-OB][ZOrder] ", g_zdetector.StatsText());
-     }
    return true;
   }
 
@@ -822,7 +725,6 @@ void ProcessNewBars(void)
      {
       Print("[SMC-OB] Large data gap detected - rescanning history");
       g_visual.Cleanup();
-      g_zvisual.Cleanup();
       g_scanned = false;
       TryInitialScan();
       return;
@@ -840,8 +742,6 @@ void ProcessNewBars(void)
       return;                          // retry on next tick
 
    g_detector.ProcessWindow(g_obRates, got);
-   if(InpEnableZOrder)
-      g_zdetector.ProcessWindow(g_obRates, got);
    g_conn.ProcessOBWindow(g_obRates, got);     // trend filter context
    g_lastBarOpen   = open0;
    g_lastClosedBar = g_obRates[0].time;
@@ -856,8 +756,6 @@ void HandleEvents(void)
    if(g_draw)
      {
       g_visual.HandleEvents(g_detector, g_lastClosedBar);
-      if(InpEnableZOrder)
-         g_zvisual.HandleEvents(g_zdetector, g_lastClosedBar);
      }
 
    SSMCEvent e;
@@ -879,27 +777,6 @@ void HandleEvents(void)
      }
    g_detector.ClearEvents();
 
-   if(InpEnableZOrder)
-     {
-      n = g_zdetector.EventCount();
-      for(int k = 0; k < n; k++)
-        {
-         if(!g_zdetector.GetEvent(k, e))
-            continue;
-         g_trade.OnZOrderEvent(e, g_zdetector);
-         if(InpAlerts && !e.historical)
-           {
-            string side = (e.dir == SMC_DIR_BULL) ? "Bullish" : "Bearish";
-            if(e.type == SMC_EVT_OB_CREATED)
-               Alert(StringFormat("%s %s: ZOrder %s #%I64d confirmed", _Symbol,
-                                  EnumToString(g_obTF), side, e.obId));
-            else if(e.type == SMC_EVT_OB_RETEST && e.flag)
-               Alert(StringFormat("%s %s: first retest of ZOrder %s #%I64d", _Symbol,
-                                  EnumToString(g_obTF), side, e.obId));
-           }
-        }
-      g_zdetector.ClearEvents();
-     }
 
    if(g_draw)
      {
@@ -936,14 +813,7 @@ void UpdatePanelStatus(void)
       return;
    int nb = g_detector.LiveCount(SMC_DIR_BULL);
    int ns = g_detector.LiveCount(SMC_DIR_BEAR);
-   if(InpEnableZOrder)
-     {
-      int zb = g_zdetector.LiveCount(SMC_DIR_BULL);
-      int zs = g_zdetector.LiveCount(SMC_DIR_BEAR);
-      g_panel.SetStatus(StringFormat("OB %d bull | %d bear     ZOrder %d | %d%s", nb, ns, zb, zs, TradeStatusText()));
-     }
-   else
-      g_panel.SetStatus(StringFormat("Live OBs:  %d bull  |  %d bear%s", nb, ns, TradeStatusText()));
+   g_panel.SetStatus(StringFormat("Live OBs:  %d bull  |  %d bear%s", nb, ns, TradeStatusText()));
   }
 
 //+------------------------------------------------------------------+
@@ -1206,16 +1076,7 @@ bool ConnActive(void)
       return false;
    SSMCPanelState p;
    g_panel.GetState(p);
-   bool useStd = InpConnUseStandard && (p.obSource != (int)CONN_SRC_ZORDER);
-   bool useZ   = InpConnUseZOrder && InpEnableZOrder && (p.obSource != (int)CONN_SRC_OB);
-   return p.connect && (useStd || useZ);
-  }
-
-CSMCDetector *ZOrderSource(void)
-  {
-   if(InpEnableZOrder)
-      return GetPointer(g_zdetector);
-   return NULL;
+   return p.connect;
   }
 
 void BuildConnSettings(SConnSettings &s, const datetime windowStart)
@@ -1225,9 +1086,9 @@ void BuildConnSettings(SConnSettings &s, const datetime windowStart)
    ZeroMemory(s);
    s.obTF           = g_obTF;
    s.cisdTF         = g_cisdTF;
-   //--- OB source: Both / ZOrder only / Order Block only
-   s.useStandard    = InpConnUseStandard && (p.obSource != (int)CONN_SRC_ZORDER);
-   s.useZOrder      = InpConnUseZOrder && InpEnableZOrder && (p.obSource != (int)CONN_SRC_OB);
+   //--- a single Order Block type, always the source
+   s.useStandard    = true;
+   s.useZOrder      = false;
    s.multiCISD      = (p.cisdMode == (int)CONN_CISD_MULTI);
    s.multiRetest    = (p.retestMode == (int)CONN_RETEST_MULTI);
    s.maxRetests     = InpConnMaxRetests;
@@ -1283,7 +1144,6 @@ void InitConnection(void)
   {
    g_syncTime = 0;
    g_syncStd  = -1;
-   g_syncZ    = -1;
    SConnVisualSettings v;
    BuildConnVisualSettings(v);
    g_connVisual.Init(v, 0);
@@ -1311,7 +1171,6 @@ void RebuildConnection(void)
    g_conn.Reset();
    g_syncTime = 0;                     // the rebuilt engine must be synchronised again
    g_syncStd  = -1;
-   g_syncZ    = -1;
    SConnVisualSettings v;
    BuildConnVisualSettings(v);
    g_connVisual.SetSettings(v);
@@ -1354,7 +1213,7 @@ bool TryConnScan(void)
 
    SConnSettings cs;
    BuildConnSettings(cs, ws);
-   if(!g_conn.Init(cs, GetPointer(g_detector), ZOrderSource()))
+   if(!g_conn.Init(cs, GetPointer(g_detector), NULL))
      {
       Print("[SMC-CONN] Initialisation failed");
       return false;
@@ -1412,13 +1271,11 @@ void ProcessConnection(void)
    //--- is skipped while the detectors stand still. Same input -> same monitors.
    datetime dt = g_detector.LastProcessedTime();
    int cStd = g_detector.OBCount();
-   int cZ   = g_zdetector.OBCount();
-   if(dt != g_syncTime || cStd != g_syncStd || cZ != g_syncZ)
+   if(dt != g_syncTime || cStd != g_syncStd)
      {
       g_conn.SyncOBs();
       g_syncTime = dt;
       g_syncStd  = cStd;
-      g_syncZ    = cZ;
      }
    datetime hz = ConnHorizon();
    bool changed = false;
@@ -1467,17 +1324,8 @@ void TradeConfirmedSetup(const SConnEvent &e)
    if(!g_trade.IsEnabled())
       return;
    SOrderBlock ob;
-   bool found = false;
-   if(e.kind == CONN_KIND_ZORDER)
-     {
-      int idx = g_zdetector.FindById(e.obId);
-      found = (idx >= 0 && g_zdetector.GetOB(idx, ob));
-     }
-   else
-     {
-      int idx = g_detector.FindById(e.obId);
-      found = (idx >= 0 && g_detector.GetOB(idx, ob));
-     }
+   int idx = g_detector.FindById(e.obId);
+   bool found = (idx >= 0 && g_detector.GetOB(idx, ob));
    if(!found)
      {
       PrintFormat("[SMC-TRADE] confirmed setup skipped: Order Block #%I64d not found", e.obId);
@@ -1525,7 +1373,7 @@ void DeinitConnection(void)
       if(InpRunSelfTest)
         {
          CSMCConnSelfTest test;
-         test.Verify(g_conn, GetPointer(g_detector), ZOrderSource());
+         test.Verify(g_conn, GetPointer(g_detector), NULL);
          if(g_draw)
            {
             VerifyRetestStartMarks();
@@ -1550,17 +1398,15 @@ void VerifyRetestStartMarks(void)
    int zones = 0, missing = 0, badTime = 0, stray = 0, connChecked = 0, connBad = 0;
    SSMCPanelState p;
    g_panel.GetState(p);
-   for(int layer = 0; layer < 2; layer++)
+   for(int layer = 0; layer < 1; layer++)
      {
-      if(layer == 1 && !InpEnableZOrder)
-         continue;
-      string pf = (layer == 0) ? "SMCOB_" : "SMCZOB_";
-      int kind  = (layer == 0) ? CONN_KIND_STANDARD : CONN_KIND_ZORDER;
-      int n = (layer == 0) ? g_detector.OBCount() : g_zdetector.OBCount();
+      string pf = "SMCOB_";
+      int kind  = CONN_KIND_STANDARD;
+      int n = g_detector.OBCount();
       SOrderBlock o;
       for(int k = 0; k < n; k++)
         {
-         if(!((layer == 0) ? g_detector.GetOB(k, o) : g_zdetector.GetOB(k, o)))
+         if(!g_detector.GetOB(k, o))
             continue;
          string rs = pf + "RS_" + IntegerToString(o.id);
          bool zoneDrawn = ObjectFind(0, pf + "OB_" + IntegerToString(o.id)) >= 0;
@@ -1658,25 +1504,6 @@ void TestConnPanelWiring(void)
    else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: connection switch"); }
    g_panel.OnClick(SMC_PANEL_PREFIX + "conn");         // back ON for the checks below
 
-   //--- OB source cycles Both -> ZOrder only -> OB only and maps onto the engine flags
-   SSMCPanelState prev;
-   g_panel.GetState(prev);
-   bool srcOk = true;
-   for(int k = 0; k < 3; k++)
-     {
-      a = g_panel.OnClick(SMC_PANEL_PREFIX + "c_obsrc");
-      g_panel.GetState(p);
-      BuildConnSettings(s, 0);
-      bool expStd = InpConnUseStandard && (p.obSource != (int)CONN_SRC_ZORDER);
-      bool expZ   = InpConnUseZOrder && InpEnableZOrder && (p.obSource != (int)CONN_SRC_OB);
-      if(a != SMC_PANEL_CISD || p.obSource == prev.obSource || s.useStandard != expStd || s.useZOrder != expZ)
-         srcOk = false;
-      prev = p;
-     }
-   g_panel.GetState(p);
-   if(srcOk && p.obSource == saved.obSource)
-      pass++;
-   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: OB source selector"); }
 
    //--- CISD validation switches between Single and Multi
    BuildConnSettings(s, 0);
@@ -1788,7 +1615,7 @@ void TestConnPanelWiring(void)
    SyncTimeframesFromPanel();
    //--- the wiring test must leave the panel exactly as it found it
    g_panel.GetState(p);
-   if(p.obSource == saved.obSource && p.cisdMode == saved.cisdMode && p.connect == saved.connect &&
+   if(p.cisdMode == saved.cisdMode && p.connect == saved.connect &&
       p.obTF == saved.obTF && p.cisdTF == saved.cisdTF && p.cisdSweep == saved.cisdSweep &&
       p.cisdConfirm == saved.cisdConfirm && p.cisdRetrace == saved.cisdRetrace)
       pass++;
@@ -1815,7 +1642,6 @@ string BuildInputSnapshot(void)
    s += "input.RejectLegViolation=" + IntegerToString(InpRejectLegViolation ? 1 : 0) + "\r\n";
    s += "input.EnableBull=" + IntegerToString(InpEnableBull ? 1 : 0) + "\r\n";
    s += "input.EnableBear=" + IntegerToString(InpEnableBear ? 1 : 0) + "\r\n";
-   s += "input.EnableZOrder=" + IntegerToString(InpEnableZOrder ? 1 : 0) + "\r\n";
    s += "input.ExtendBars=" + IntegerToString(InpExtendBars) + "\r\n";
    s += "input.MaxAgeBars=" + IntegerToString(InpMaxAgeBars) + "\r\n";
    s += "input.OverlapPct=" + DoubleToString(InpOverlapPct, 1) + "\r\n";
@@ -1834,8 +1660,6 @@ string BuildInputSnapshot(void)
    s += "input.CISDScanDepth=" + IntegerToString(InpCISDScanDepth) + "\r\n";
    s += "input.CISDShowSD=" + IntegerToString(InpCISDShowSD ? 1 : 0) + "\r\n";
    s += "input.CISDSDLevels=" + InpCISDSDLevels + "\r\n";
-   s += "input.ConnUseStandard=" + IntegerToString(InpConnUseStandard ? 1 : 0) + "\r\n";
-   s += "input.ConnUseZOrder=" + IntegerToString(InpConnUseZOrder ? 1 : 0) + "\r\n";
    s += "input.ConnMaxCISDBars=" + IntegerToString(InpConnMaxCISDBars) + "\r\n";
    s += "input.ConnWarmupBars=" + IntegerToString(InpConnWarmupBars) + "\r\n";
    s += "input.ConnMaxRetests=" + IntegerToString(InpConnMaxRetests) + "\r\n";
@@ -1914,7 +1738,7 @@ void TestConfigProfiles(void)
 
    //--- round trip: everything comes back exactly
    a = saved;
-   a.cisdMode = 1; a.retestMode = 1; a.obSource = 2; a.swingLength = 7; a.dispATRMult = 2.25;
+   a.cisdMode = 1; a.retestMode = 1; a.swingLength = 7; a.dispATRMult = 2.25;
    a.showBull = false; a.cisdSweep = false; a.obTF = 5; a.cisdTF = 2; a.connect = true; a.maxActivePerDir = 13;
    a.mitStopsCISD = true; a.trendFilter = false;
    a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
@@ -1928,7 +1752,7 @@ void TestConfigProfiles(void)
    if(SMC_ConfigLoad(p1, b, InpConfigCommon, keys, vals, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  load: %s", res.message); }
-   if(b.cisdMode == a.cisdMode && b.retestMode == a.retestMode && b.obSource == a.obSource &&
+   if(b.cisdMode == a.cisdMode && b.retestMode == a.retestMode &&
       b.swingLength == a.swingLength && MathAbs(b.dispATRMult - a.dispATRMult) < 1e-9 &&
       b.showBull == a.showBull && b.cisdSweep == a.cisdSweep && b.obTF == a.obTF && b.cisdTF == a.cisdTF &&
       b.maxActivePerDir == a.maxActivePerDir && b.mitStopsCISD == a.mitStopsCISD &&
