@@ -118,7 +118,7 @@ input color                      InpConnColor          = clrHotPink;            
 input group "=== Trading ==="
 input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
 input double                     InpLots               = 0.01;                  // Lot size (panel default)
-input bool                       InpOppositeBlockExit  = true;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
+input bool                       InpOppositeBlockExit  = false;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
 input double                     InpTargetRR           = 1.0;                   // Take profit, as a multiple of risk (1.0 = 1:1) (panel default)
 input bool                       InpRideTrend          = false;                 // Ride the trend: hold to the nearest opposite OB, ignore the R:R target (panel default)
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)

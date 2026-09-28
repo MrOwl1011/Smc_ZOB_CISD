@@ -103,7 +103,7 @@ Three optional exits, each its own switch:
 | Switch | What it does |
 | --- | --- |
 | **Ride the trend** | No fixed target. Holds until price reaches the nearest opposite-direction block, which becomes a moving target. Overrides the R:R setting. |
-| **Break even** | Once the trade is a set number of points in profit, moves the stop to entry. Off by default; it cost most of the profit in testing. |
+| **Break even** | Once the trade is a set number of points in profit, moves the stop to entry. Off in every preset. |
 | **Opposite block exit** | A block forming against an open trade, then retested, closes it early. |
 
 ## Settings packages
