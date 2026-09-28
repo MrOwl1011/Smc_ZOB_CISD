@@ -129,6 +129,14 @@ input int                        InpTrendBars          = 20;                    
 input double                     InpTrendATRMult       = 1.5;                   // Trend filter: displacement needed, in ATR
 input color                      InpConnColor          = clrHotPink;            // Retest / HTF-LTF link color
 
+//--- trade execution: entry at a confirmed setup, stop on the far side of the OB, 1:1 target
+input group "=== Trading ==="
+input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
+input double                     InpLots               = 0.01;                  // Lot size (panel default)
+input bool                       InpOppositeBlockExit  = true;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
+input long                       InpMagic              = 20260928;              // Magic number
+input int                        InpSlippage           = 20;                    // Max slippage (points)
+
 //--- configuration profiles
 input group "=== Configuration ==="
 input string                     InpConfigProfile      = "default";             // Configuration profile name
@@ -253,6 +261,9 @@ void PanelDefaults(SSMCPanelState &p)
    p.retestMode       = (int)InpConnRetestMode;
    p.mitStopsCISD     = InpConnMitigationStops;
    p.trendFilter      = InpTrendFilter;
+   p.tradeEnabled     = InpEnableTrading;
+   p.lots             = InpLots;
+   p.oppExit          = InpOppositeBlockExit;
    p.swingLength      = InpSwingLength;
    p.dispATRMult      = InpDispATRMult;
    p.maxOBToBOSBars   = InpMaxOBToBOSBars;
@@ -536,7 +547,8 @@ int OnInit(void)
    BuildZVisualSettings(zv);
    g_zvisual.Init(zv, 0);
    g_zvisual.Cleanup();
-   g_trade.Init(false);
+   g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage);
+   ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
      {
@@ -692,11 +704,14 @@ void ApplyPanelAction(const ENUM_SMC_PANEL_ACTION action)
       RebuildCISD();                   // OB / ZOrder engines are not touched
       RebuildConnection();
      }
+   else if(action == SMC_PANEL_TRADE)
+      { /* nothing to rebuild: applied below */ }
    else if(action == SMC_PANEL_SAVECFG)
       SaveConfigProfile();
    else if(action == SMC_PANEL_LOADCFG)
       LoadConfigProfile();
 
+   ApplyTradeSettings();               // also after "Reset to input values" / a loaded profile
    if(g_usePanel)
       g_panel.Build();
    UpdatePanelStatus();
@@ -894,6 +909,27 @@ void HandleEvents(void)
   }
 
 //+------------------------------------------------------------------+
+string TradeStatusText(void)
+  {
+   if(!g_trade.IsEnabled())
+      return "";
+   return StringFormat("     TRADING %.2f lots (%d sent%s)", g_trade.Lots(), g_trade.Sent(),
+                       g_trade.Closed() > 0 ? StringFormat(", %d closed", g_trade.Closed()) : "");
+  }
+
+//+------------------------------------------------------------------+
+//| Push the panel's trade switch / lot size to the trade engine.    |
+//+------------------------------------------------------------------+
+void ApplyTradeSettings(void)
+  {
+   SSMCPanelState p;
+   g_panel.GetState(p);
+   g_trade.SetEnabled(p.tradeEnabled);
+   g_trade.SetLots(p.lots);
+   g_trade.SetOppositeExit(p.oppExit);
+  }
+
+//+------------------------------------------------------------------+
 void UpdatePanelStatus(void)
   {
    if(!g_usePanel)
@@ -904,10 +940,10 @@ void UpdatePanelStatus(void)
      {
       int zb = g_zdetector.LiveCount(SMC_DIR_BULL);
       int zs = g_zdetector.LiveCount(SMC_DIR_BEAR);
-      g_panel.SetStatus(StringFormat("OB %d bull | %d bear     ZOrder %d | %d", nb, ns, zb, zs));
+      g_panel.SetStatus(StringFormat("OB %d bull | %d bear     ZOrder %d | %d%s", nb, ns, zb, zs, TradeStatusText()));
      }
    else
-      g_panel.SetStatus(StringFormat("Live OBs:  %d bull  |  %d bear", nb, ns));
+      g_panel.SetStatus(StringFormat("Live OBs:  %d bull  |  %d bear%s", nb, ns, TradeStatusText()));
   }
 
 //+------------------------------------------------------------------+
@@ -1423,6 +1459,34 @@ void ProcessConnection(void)
   }
 
 //+------------------------------------------------------------------+
+//| A confirmed HTF OB + LTF CISD setup: hand the block's edges to    |
+//| the trade engine (stop = far side of that block, target 1:1).     |
+//+------------------------------------------------------------------+
+void TradeConfirmedSetup(const SConnEvent &e)
+  {
+   if(!g_trade.IsEnabled())
+      return;
+   SOrderBlock ob;
+   bool found = false;
+   if(e.kind == CONN_KIND_ZORDER)
+     {
+      int idx = g_zdetector.FindById(e.obId);
+      found = (idx >= 0 && g_zdetector.GetOB(idx, ob));
+     }
+   else
+     {
+      int idx = g_detector.FindById(e.obId);
+      found = (idx >= 0 && g_detector.GetOB(idx, ob));
+     }
+   if(!found)
+     {
+      PrintFormat("[SMC-TRADE] confirmed setup skipped: Order Block #%I64d not found", e.obId);
+      return;
+     }
+   g_trade.OnSignal(e.dir, ob.top, ob.bottom, e.obId, e.cisdId);
+  }
+
+//+------------------------------------------------------------------+
 void HandleConnEvents(void)
   {
    if(g_draw)
@@ -1434,6 +1498,8 @@ void HandleConnEvents(void)
       if(!g_conn.GetEvent(k, e))
          continue;
       g_trade.OnConnectionEvent((int)e.type, e.setupId, e.obId, e.kind, e.dir, e.cisdId, e.time, e.price, e.historical);
+      if(e.type == CONN_EVT_CONFIRMED && !e.historical)
+         TradeConfirmedSetup(e);
       if(!InpAlerts || e.historical)
          continue;
       string side = (e.dir == SMC_DIR_BULL) ? "Bullish" : "Bearish";
@@ -1639,6 +1705,48 @@ void TestConnPanelWiring(void)
       pass++;
    else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: trend filter switch"); }
 
+   //--- trade execution switch and lot stepper reach the trade engine, and nothing else
+   BuildConnSettings(s, 0);
+   bool trFilter0 = s.trendFilter;
+   bool trEnabled0 = g_trade.IsEnabled();
+   double trLots0 = g_trade.Lots();
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "trade");
+   ApplyTradeSettings();
+   BuildConnSettings(s, 0);
+   bool trOk = (a == SMC_PANEL_TRADE && g_trade.IsEnabled() != trEnabled0 && s.trendFilter == trFilter0);
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "lots_p");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && MathAbs(g_trade.Lots() - (trLots0 + 0.01)) < 1e-9);
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "lots_m");
+   ApplyTradeSettings();
+   trOk = trOk && MathAbs(g_trade.Lots() - trLots0) < 1e-9;
+   //--- the minimum is 0.01: stepping down from there changes nothing
+   for(int k = 0; k < 200; k++)
+      g_panel.OnClick(SMC_PANEL_PREFIX + "lots_m");
+   ApplyTradeSettings();
+   trOk = trOk && MathAbs(g_trade.Lots() - 0.01) < 1e-9 &&
+          g_panel.OnClick(SMC_PANEL_PREFIX + "lots_m") == SMC_PANEL_NONE;
+   //--- the opposite block exit is an independent switch
+   bool opp0 = g_trade.OppositeExit();
+   double lotsNow = g_trade.Lots();
+   bool enNow = g_trade.IsEnabled();
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "oppx");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && g_trade.OppositeExit() != opp0 &&
+                   g_trade.IsEnabled() == enNow && MathAbs(g_trade.Lots() - lotsNow) < 1e-9);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "oppx");
+   ApplyTradeSettings();
+   trOk = trOk && (g_trade.OppositeExit() == opp0);
+
+   g_panel.OnClick(SMC_PANEL_PREFIX + "trade");        // back to the starting state
+   g_panel.SetState(saved);
+   ApplyTradeSettings();
+   trOk = trOk && (g_trade.IsEnabled() == trEnabled0) && MathAbs(g_trade.Lots() - trLots0) < 1e-9 &&
+          (g_trade.OppositeExit() == saved.oppExit);
+   if(trOk)
+      pass++;
+   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: trade execution switch / lot size"); }
+
    //--- "Mitigation stops CISD" switch toggles only its engine flag
    BuildConnSettings(s, 0);
    bool mit0 = s.stopOnMitigation, multi0 = s.multiCISD, retestMode0 = s.multiRetest;
@@ -1809,12 +1917,14 @@ void TestConfigProfiles(void)
    a.cisdMode = 1; a.retestMode = 1; a.obSource = 2; a.swingLength = 7; a.dispATRMult = 2.25;
    a.showBull = false; a.cisdSweep = false; a.obTF = 5; a.cisdTF = 2; a.connect = true; a.maxActivePerDir = 13;
    a.mitStopsCISD = true; a.trendFilter = false;
+   a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
    if(SMC_ConfigSave(p1, a, BuildInputSnapshot(), InpConfigCommon, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  save: %s", res.message); }
 
    b = saved;                           // deliberately different starting point
    b.cisdMode = 0; b.retestMode = 0; b.swingLength = 3; b.mitStopsCISD = false; b.trendFilter = true;
+   b.tradeEnabled = false; b.lots = 0.55; b.oppExit = true;
    if(SMC_ConfigLoad(p1, b, InpConfigCommon, keys, vals, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  load: %s", res.message); }
@@ -1822,7 +1932,8 @@ void TestConfigProfiles(void)
       b.swingLength == a.swingLength && MathAbs(b.dispATRMult - a.dispATRMult) < 1e-9 &&
       b.showBull == a.showBull && b.cisdSweep == a.cisdSweep && b.obTF == a.obTF && b.cisdTF == a.cisdTF &&
       b.maxActivePerDir == a.maxActivePerDir && b.mitStopsCISD == a.mitStopsCISD &&
-      b.trendFilter == a.trendFilter && ArraySize(keys) > 0)
+      b.trendFilter == a.trendFilter && b.tradeEnabled == a.tradeEnabled &&
+      MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit && ArraySize(keys) > 0)
       pass++;
    else { fail++; Print("[SMC-CFG][TEST] FAIL  round trip: values differ after load"); }
 

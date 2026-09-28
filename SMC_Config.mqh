@@ -117,6 +117,9 @@ bool SMC_ConfigSave(const string profile, const SSMCPanelState &p, const string 
    SMC_CfgWriteInt(h, "retestMode", p.retestMode);
    SMC_CfgWriteBool(h, "mitStopsCISD", p.mitStopsCISD);
    SMC_CfgWriteBool(h, "trendFilter", p.trendFilter);
+   SMC_CfgWriteBool(h, "tradeEnabled", p.tradeEnabled);
+   SMC_CfgWrite(h, "lots", DoubleToString(p.lots, 2));
+   SMC_CfgWriteBool(h, "oppositeExit", p.oppExit);
    SMC_CfgWriteInt(h, "swingLength", p.swingLength);
    SMC_CfgWrite(h, "dispATRMult", DoubleToString(p.dispATRMult, 2));
    SMC_CfgWriteInt(h, "maxOBToBOSBars", p.maxOBToBOSBars);
@@ -216,6 +219,9 @@ bool SMC_ConfigLoad(const string profile, SSMCPanelState &p, const bool common,
       else if(key == "retestMode")         p.retestMode = iv;
       else if(key == "mitStopsCISD")       p.mitStopsCISD = bv;
       else if(key == "trendFilter")        p.trendFilter = bv;
+      else if(key == "tradeEnabled")       p.tradeEnabled = bv;
+      else if(key == "lots")               p.lots = dv;
+      else if(key == "oppositeExit")       p.oppExit = bv;
       else if(key == "swingLength")        p.swingLength = iv;
       else if(key == "dispATRMult")        p.dispATRMult = dv;
       else if(key == "maxOBToBOSBars")     p.maxOBToBOSBars = iv;

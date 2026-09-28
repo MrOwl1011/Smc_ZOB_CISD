@@ -20,7 +20,8 @@ enum ENUM_SMC_PANEL_ACTION
    SMC_PANEL_CISD,         // CISD component / CISD TF / connection switched -> rebuild CISD side only
    SMC_PANEL_TIMEFRAME,    // Order Block timeframe changed -> rescan OBs and everything depending on them
    SMC_PANEL_SAVECFG,      // save the current settings as a configuration profile
-   SMC_PANEL_LOADCFG       // load a configuration profile
+   SMC_PANEL_LOADCFG,      // load a configuration profile
+   SMC_PANEL_TRADE         // trade execution switch / lot size changed (no detection change)
   };
 
 struct SSMCPanelState
@@ -53,6 +54,10 @@ struct SSMCPanelState
    int               retestMode;      // 0 = Single (first retest only), 1 = Multi (every retest)
    bool              mitStopsCISD;    // a mitigated OB stops its CISD search (like invalidation)
    bool              trendFilter;     // only take CISDs that agree with the OB-timeframe trend
+   //--- trade execution (entry at the confirmed setup, stop on the far side of the OB, 1:1 target)
+   bool              tradeEnabled;
+   double            lots;
+   bool              oppExit;         // a retested opposite block closes the open trade
    //--- detection
    int               swingLength;
    double            dispATRMult;
@@ -193,6 +198,7 @@ void CSMCPanel::Init(const long chart, const string prefix, const int x, const i
 //+------------------------------------------------------------------+
 void CSMCPanel::Sanitize(SSMCPanelState &s) const
   {
+   s.lots             = MathMax(0.01, MathMin(100.0, MathRound(s.lots * 100.0) / 100.0));
    s.swingLength      = (int)MathMax(1, MathMin(50, s.swingLength));
    s.dispATRMult      = MathMax(0.1, MathMin(10.0, MathRound(s.dispATRMult * 100.0) / 100.0));
    s.maxOBToBOSBars   = (int)MathMax(1, MathMin(100, s.maxOBToBOSBars));
@@ -514,6 +520,14 @@ int CSMCPanel::LayoutBody(void)
       cy += SMC_PNL_ROW + 2;
      }
 
+   //--- trade execution (always available, also in Easy mode)
+   cy += 6;
+   Text("sec_trade", x + pad, cy, "TRADING", SMC_PNL_MUTED, 8);
+   cy += 16;
+   Switch("trade", cy, "Trade execution", m_st.tradeEnabled);              cy += SMC_PNL_ROW + 4;
+   Stepper("lots", cy, "Lot size", DoubleToString(m_st.lots, 2));          cy += SMC_PNL_ROW + 4;
+   Switch("oppx", cy, "Opposite block exit", m_st.oppExit);                cy += SMC_PNL_ROW + 4;
+
    //--- configuration profiles (always available, also in Easy mode)
    cy += 6;
    Text("sec_cfg", x + pad, cy, "CONFIGURATION", SMC_PNL_MUTED, 8);
@@ -621,6 +635,16 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "c_rmode") { iv = m_st.retestMode; Next(iv, 2); m_st.retestMode = iv; return SMC_PANEL_CISD; }
    if(id == "mitstop") { m_st.mitStopsCISD = !m_st.mitStopsCISD;           return SMC_PANEL_CISD; }
    if(id == "trendf")  { m_st.trendFilter  = !m_st.trendFilter;            return SMC_PANEL_CISD; }
+   if(id == "trade")   { m_st.tradeEnabled = !m_st.tradeEnabled;           return SMC_PANEL_TRADE; }
+   if(id == "oppx")    { m_st.oppExit      = !m_st.oppExit;                return SMC_PANEL_TRADE; }
+   if(id == "lots_m" || id == "lots_p")
+     {
+      double lv = m_st.lots;
+      if(StepDbl(lv, id == "lots_p" ? 0.01 : -0.01, 0.01, 100.0) == SMC_PANEL_NONE)
+         return SMC_PANEL_NONE;
+      m_st.lots = lv;
+      return SMC_PANEL_TRADE;
+     }
    if(id == "cfg_save") return SMC_PANEL_SAVECFG;
    if(id == "cfg_load") return SMC_PANEL_LOADCFG;
 
@@ -666,6 +690,9 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "rmode", m_st.retestMode);
    GlobalVariableSet(key + "mstop", m_st.mitStopsCISD);
    GlobalVariableSet(key + "trendf", m_st.trendFilter);
+   GlobalVariableSet(key + "trade", m_st.tradeEnabled);
+   GlobalVariableSet(key + "lots", m_st.lots);
+   GlobalVariableSet(key + "oppx", m_st.oppExit);
    GlobalVariableSet(key + "swing", m_st.swingLength);
    GlobalVariableSet(key + "disp", m_st.dispATRMult);
    GlobalVariableSet(key + "dist", m_st.maxOBToBOSBars);
@@ -707,6 +734,9 @@ bool CSMCPanel::Load(const string key)
    m_st.retestMode       = GlobalVariableCheck(key + "rmode") ? (int)GlobalVariableGet(key + "rmode") : m_def.retestMode;
    m_st.mitStopsCISD     = GlobalVariableCheck(key + "mstop") ? GlobalVariableGet(key + "mstop") != 0 : m_def.mitStopsCISD;
    m_st.trendFilter      = GlobalVariableCheck(key + "trendf") ? GlobalVariableGet(key + "trendf") != 0 : m_def.trendFilter;
+   m_st.tradeEnabled     = GlobalVariableCheck(key + "trade") ? GlobalVariableGet(key + "trade") != 0 : m_def.tradeEnabled;
+   m_st.lots             = GlobalVariableCheck(key + "lots") ? GlobalVariableGet(key + "lots") : m_def.lots;
+   m_st.oppExit          = GlobalVariableCheck(key + "oppx") ? GlobalVariableGet(key + "oppx") != 0 : m_def.oppExit;
    m_st.swingLength      = (int)GlobalVariableGet(key + "swing");
    m_st.dispATRMult      = GlobalVariableGet(key + "disp");
    m_st.maxOBToBOSBars   = (int)GlobalVariableGet(key + "dist");
