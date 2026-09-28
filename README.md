@@ -4,11 +4,25 @@
 [![TikTok](https://img.shields.io/badge/TikTok-%40z39-000000?logo=tiktok&logoColor=white)](https://www.tiktok.com/@z39)
 [![Instagram](https://img.shields.io/badge/Instagram-coding__xaid-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/coding_xaid)
 
-A MetaTrader 5 Expert Advisor that marks Smart Money Concepts structure on the chart and can trade it.
+An **algorithmic trading bot** for MetaTrader 5, built on Smart Money Concepts. It reads market structure, marks Order Blocks on the chart, and executes trades by itself once you switch execution on.
 
 It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a lower timeframe, and only enters when the higher timeframe is trending the same way. Everything is switchable from an on-chart panel.
 
 **Trading is off by default.** Out of the box it only draws.
+
+### What this software is
+
+| | |
+| --- | --- |
+| Type | Automated trading robot (MT5 Expert Advisor), written in MQL5 |
+| Automation | Fully automatic from signal to order: it finds the setup, opens the trade, sets the stop and target, and manages the exit without input from you |
+| Also usable manually | Leave execution off and it works as a pure SMC chart tool, marking zones and confirmations for you to trade by hand |
+| Decision making | Rule based and deterministic. The same history and settings always produce the same trades. No machine learning, no black box, no martingale, no grid, no hedging |
+| Execution | Market orders, one position at a time, fixed lot size, stop and target placed with the order |
+| Where it runs | On your own terminal or VPS, on any symbol your broker offers. Nothing is sent anywhere else |
+| Source | Open source under MIT. Every rule is readable in the files listed below and written out in `DESIGN.md` |
+
+Terms people use for this kind of software: algorithmic trading, algo trading, automated trading, auto trading, trading bot, trading robot, forex robot, expert advisor, EA, systematic trading, rule based trading, mechanical trading system.
 
 ![MQL5](https://img.shields.io/badge/MQL5-MetaTrader%205-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
