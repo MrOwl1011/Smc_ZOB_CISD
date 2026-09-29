@@ -1,0 +1,24 @@
+# Linguist: this is an MQL5 project. The Python under research/ is analysis of the
+# EA's output, not part of the product, so it should not decide the repo language.
+*.mq5  linguist-language=MQL5
+*.mqh  linguist-language=MQL5
+*.mq5  linguist-detectable=true
+*.mqh  linguist-detectable=true
+
+research/*.py       linguist-documentation
+research/*.csv      linguist-generated
+research/*.json     linguist-generated
+presets/*.set       linguist-generated
+profiles/*.cfg      linguist-generated
+compile.log         linguist-generated
+
+# Binaries: no diffs, no line-ending translation
+*.ex5    binary
+*.gif    binary
+*.webp   binary
+
+# Source stays LF in the repository
+*.mq5  text eol=lf
+*.mqh  text eol=lf
+*.md   text eol=lf
+*.py   text eol=lf
