@@ -62,5 +62,4 @@ InpBreakEven=false
 InpBreakEvenPoints=100
 InpRunSelfTest=false
 InpLogLevel=1
-InpOBTimeframe=6
-InpCISDTimeframe=3
+InpTimeframePair=0

@@ -43,7 +43,9 @@ struct SSMCPanelState
    bool              cisdSweep;
    bool              cisdConfirm;
    bool              cisdRetrace;
-   //--- timeframes (ENUM_CISD_TF order: Chart, M1, M5, M15, M30, H1, H4, D1) and HTF OB -> CISD connection
+   //--- timeframes: one of the three tested pairs. HTF is the Order Block
+   //--- timeframe; obTF and cisdTF are derived from tfPair and never set alone.
+   int               tfPair;
    int               obTF;
    int               cisdTF;
    bool              connect;
@@ -206,8 +208,9 @@ void CSMCPanel::Sanitize(SSMCPanelState &s) const
    s.mitigationMode   = (int)MathMax(0, MathMin(3, s.mitigationMode));
    s.invalidationMode = (int)MathMax(0, MathMin(2, s.invalidationMode));
    s.overlapMode      = (int)MathMax(0, MathMin(2, s.overlapMode));
-   s.obTF             = (int)MathMax(0, MathMin(7, s.obTF));
-   s.cisdTF           = (int)MathMax(0, MathMin(7, s.cisdTF));
+   s.tfPair           = (int)MathMax(0, MathMin(2, s.tfPair));
+   s.obTF             = SMC_PairOBIndex(s.tfPair);      // always in step with the pair
+   s.cisdTF           = SMC_PairCISDIndex(s.tfPair);
    s.cisdMode         = (int)MathMax(0, MathMin(1, s.cisdMode));
    s.retestMode       = (int)MathMax(0, MathMin(1, s.retestMode));
   }
@@ -457,14 +460,13 @@ int CSMCPanel::LayoutBody(void)
    Toggle("t_bull", x + pad, cy, half, "Bullish OBs", m_st.showBull);
    Toggle("t_bear", col2, cy, half, "Bearish OBs", m_st.showBear);
    cy += SMC_PNL_ROW + 4;
-   Cycle("c_obtf", cy, "Order Block TF", TFText(m_st.obTF) + " ▼");
+   Cycle("c_tfp", cy, "HTF (Order Block)", SMC_PairText(m_st.tfPair) + " ▼");
    cy += SMC_PNL_ROW + 4;
    if(m_cisdAvailable)
      {
       cy += 4;
       Text("sec_cisd", x + pad, cy, "CISD  (" + m_cisdTF + ")", SMC_PNL_MUTED, 8);
       cy += 16;
-      Cycle("c_cistf", cy, "CISD TF", TFText(m_st.cisdTF) + " ▼");     cy += SMC_PNL_ROW + 4;
       Switch("conn", cy, "HTF OB -> CISD", m_st.connect);               cy += SMC_PNL_ROW + 4;
       Cycle("c_cmode", cy, "CISD Validation", ModeText(m_st.cisdMode)); cy += SMC_PNL_ROW + 4;
       Cycle("c_rmode", cy, "Retest Mode", ModeText(m_st.retestMode));   cy += SMC_PNL_ROW + 4;
@@ -618,8 +620,15 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "c_mit")  { iv = m_st.mitigationMode;   a = Next(iv, 4); m_st.mitigationMode = iv;   return a; }
    if(id == "c_inv")  { iv = m_st.invalidationMode; a = Next(iv, 3); m_st.invalidationMode = iv; return a; }
    if(id == "c_ovl")  { iv = m_st.overlapMode;      a = Next(iv, 3); m_st.overlapMode = iv;      return a; }
-   if(id == "c_obtf")  { iv = m_st.obTF;   Next(iv, 8); m_st.obTF = iv;   return SMC_PANEL_TIMEFRAME; }
-   if(id == "c_cistf") { iv = m_st.cisdTF; Next(iv, 8); m_st.cisdTF = iv; return SMC_PANEL_CISD; }
+   if(id == "c_tfp")
+     {
+      iv = m_st.tfPair;
+      Next(iv, 3);
+      m_st.tfPair = iv;
+      m_st.obTF   = SMC_PairOBIndex(iv);
+      m_st.cisdTF = SMC_PairCISDIndex(iv);
+      return SMC_PANEL_TIMEFRAME;
+     }
    if(id == "conn")    { m_st.connect = !m_st.connect;                     return SMC_PANEL_CISD; }
    if(id == "c_cmode") { iv = m_st.cisdMode; Next(iv, 2); m_st.cisdMode = iv; return SMC_PANEL_CISD; }
    if(id == "c_rmode") { iv = m_st.retestMode; Next(iv, 2); m_st.retestMode = iv; return SMC_PANEL_CISD; }
@@ -688,6 +697,7 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "csw", m_st.cisdSweep);
    GlobalVariableSet(key + "ccf", m_st.cisdConfirm);
    GlobalVariableSet(key + "crt", m_st.cisdRetrace);
+   GlobalVariableSet(key + "tfpair", m_st.tfPair);
    GlobalVariableSet(key + "obtf", m_st.obTF);
    GlobalVariableSet(key + "cistf", m_st.cisdTF);
    GlobalVariableSet(key + "conn", m_st.connect);
@@ -732,8 +742,11 @@ bool CSMCPanel::Load(const string key)
    m_st.cisdSweep        = GlobalVariableCheck(key + "csw") ? GlobalVariableGet(key + "csw") != 0 : m_def.cisdSweep;
    m_st.cisdConfirm      = GlobalVariableCheck(key + "ccf") ? GlobalVariableGet(key + "ccf") != 0 : m_def.cisdConfirm;
    m_st.cisdRetrace      = GlobalVariableCheck(key + "crt") ? GlobalVariableGet(key + "crt") != 0 : m_def.cisdRetrace;
-   m_st.obTF             = GlobalVariableCheck(key + "obtf") ? (int)GlobalVariableGet(key + "obtf") : m_def.obTF;
-   m_st.cisdTF           = GlobalVariableCheck(key + "cistf") ? (int)GlobalVariableGet(key + "cistf") : m_def.cisdTF;
+   m_st.tfPair           = GlobalVariableCheck(key + "tfpair") ? (int)GlobalVariableGet(key + "tfpair")
+                           : (GlobalVariableCheck(key + "obtf")
+                              ? SMC_PairFromOBIndex((int)GlobalVariableGet(key + "obtf")) : m_def.tfPair);
+   m_st.obTF             = SMC_PairOBIndex(m_st.tfPair);
+   m_st.cisdTF           = SMC_PairCISDIndex(m_st.tfPair);
    m_st.connect          = GlobalVariableCheck(key + "conn") ? GlobalVariableGet(key + "conn") != 0 : m_def.connect;
    m_st.cisdMode         = GlobalVariableCheck(key + "cmode") ? (int)GlobalVariableGet(key + "cmode") : m_def.cisdMode;
    m_st.retestMode       = GlobalVariableCheck(key + "rmode") ? (int)GlobalVariableGet(key + "rmode") : m_def.retestMode;

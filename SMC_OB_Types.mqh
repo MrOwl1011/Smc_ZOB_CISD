@@ -165,6 +165,59 @@ struct SSMCSettings
   };
 
 //+------------------------------------------------------------------+
+//| The three tested timeframe pairs. HTF is the Order Block timeframe |
+//| and the CISD timeframe is tied to it, so no mismatched pair can be |
+//| selected.                                                         |
+//+------------------------------------------------------------------+
+enum ENUM_SMC_TF_PAIR
+  {
+   SMC_TFP_H4_M15 = 0,   // HTF H4 (Order Block) -> CISD M15
+   SMC_TFP_H1_M5  = 1,   // HTF H1 (Order Block) -> CISD M5
+   SMC_TFP_M15_M1 = 2    // HTF M15 (Order Block) -> CISD M1
+  };
+
+//--- pair -> ENUM_CISD_TF index (0 Chart, 1 M1, 2 M5, 3 M15, 4 M30, 5 H1, 6 H4, 7 D1)
+int SMC_PairOBIndex(const int pair)
+  {
+   switch(pair)
+     {
+      case SMC_TFP_H1_M5:  return 5;   // H1
+      case SMC_TFP_M15_M1: return 3;   // M15
+      default:             return 6;   // H4
+     }
+  }
+
+int SMC_PairCISDIndex(const int pair)
+  {
+   switch(pair)
+     {
+      case SMC_TFP_H1_M5:  return 2;   // M5
+      case SMC_TFP_M15_M1: return 1;   // M1
+      default:             return 3;   // M15
+     }
+  }
+
+//--- the pair that matches a stored OB timeframe, for settings saved before pairs
+int SMC_PairFromOBIndex(const int obIdx)
+  {
+   if(obIdx == 5)
+      return SMC_TFP_H1_M5;
+   if(obIdx == 3)
+      return SMC_TFP_M15_M1;
+   return SMC_TFP_H4_M15;
+  }
+
+string SMC_PairText(const int pair)
+  {
+   switch(pair)
+     {
+      case SMC_TFP_H1_M5:  return "H1 -> M5";
+      case SMC_TFP_M15_M1: return "M15 -> M1";
+      default:             return "H4 -> M15";
+     }
+  }
+
+//+------------------------------------------------------------------+
 //| Confirmed swing point                                            |
 //+------------------------------------------------------------------+
 struct SSwing

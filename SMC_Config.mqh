@@ -107,6 +107,7 @@ bool SMC_ConfigSave(const string profile, const SSMCPanelState &p, const string 
    SMC_CfgWriteBool(h, "cisdSweep", p.cisdSweep);
    SMC_CfgWriteBool(h, "cisdConfirm", p.cisdConfirm);
    SMC_CfgWriteBool(h, "cisdRetrace", p.cisdRetrace);
+   SMC_CfgWriteInt(h, "tfPair", p.tfPair);
    SMC_CfgWriteInt(h, "obTF", p.obTF);
    SMC_CfgWriteInt(h, "cisdTF", p.cisdTF);
    SMC_CfgWriteBool(h, "connect", p.connect);
@@ -209,8 +210,9 @@ bool SMC_ConfigLoad(const string profile, SSMCPanelState &p, const bool common,
       else if(key == "cisdSweep")          p.cisdSweep = bv;
       else if(key == "cisdConfirm")        p.cisdConfirm = bv;
       else if(key == "cisdRetrace")        p.cisdRetrace = bv;
-      else if(key == "obTF")               p.obTF = iv;
-      else if(key == "cisdTF")             p.cisdTF = iv;
+      else if(key == "tfPair")             { p.tfPair = iv; p.obTF = SMC_PairOBIndex(iv); p.cisdTF = SMC_PairCISDIndex(iv); }
+      else if(key == "obTF")               { p.tfPair = SMC_PairFromOBIndex(iv); p.obTF = SMC_PairOBIndex(p.tfPair); }
+      else if(key == "cisdTF")             p.cisdTF = SMC_PairCISDIndex(p.tfPair);   // tied to the pair
       else if(key == "connect")            p.connect = bv;
       else if(key == "cisdMode")           p.cisdMode = iv;
       else if(key == "retestMode")         p.retestMode = iv;

@@ -51,7 +51,7 @@ input bool                       InpRejectLegViolation = false;                 
 
 //--- Order blocks
 input group "=== Order Blocks ==="
-input ENUM_CISD_TF               InpOBTimeframe        = CISD_TF_CURRENT;       // Order Block timeframe (panel default)
+input ENUM_SMC_TF_PAIR           InpTimeframePair      = SMC_TFP_H1_M5;         // Timeframes: HTF is the Order Block TF, CISD follows (panel default)
 input bool                       InpEnableBull         = true;                  // Detect bullish OBs
 input bool                       InpEnableBear         = true;                  // Detect bearish OBs
 input int                        InpExtendBars         = 20;                    // OB extension (bars right of last bar)
@@ -74,7 +74,6 @@ input ENUM_SMC_INVALIDATION_MODE InpInvalidationMode   = SMC_INV_CLOSE_BEYOND;  
 //--- CISD (independent module, own timeframe)
 input group "=== CISD - Change in State of Delivery ==="
 input bool                       InpEnableCISD         = true;                  // Enable CISD
-input ENUM_CISD_TF               InpCISDTimeframe      = CISD_TF_CURRENT;       // CISD_Timeframe
 input bool                       InpCISDSweep          = true;                  // Liquidity Sweep (panel default)
 input bool                       InpCISDConfirm        = true;                  // Confirmation Close (panel default)
 input bool                       InpCISDRetrace        = true;                  // Retracement / Entry (panel default)
@@ -238,8 +237,9 @@ void PanelDefaults(SSMCPanelState &p)
    p.cisdSweep        = InpCISDSweep;
    p.cisdConfirm      = InpCISDConfirm;
    p.cisdRetrace      = InpCISDRetrace;
-   p.obTF             = (int)InpOBTimeframe;
-   p.cisdTF           = (int)InpCISDTimeframe;
+   p.tfPair           = (int)InpTimeframePair;
+   p.obTF             = SMC_PairOBIndex(p.tfPair);
+   p.cisdTF           = SMC_PairCISDIndex(p.tfPair);
    p.connect          = InpConnEnable;
    p.cisdMode         = (int)InpConnCISDMode;
    p.retestMode       = (int)InpConnRetestMode;
@@ -1490,27 +1490,40 @@ void TestConnPanelWiring(void)
    g_panel.GetState(saved);
    ENUM_TIMEFRAMES cisd0 = g_cisdTF;
 
-   ENUM_SMC_PANEL_ACTION a = g_panel.OnClick(SMC_PANEL_PREFIX + "c_obtf");
+   ENUM_SMC_PANEL_ACTION a = g_panel.OnClick(SMC_PANEL_PREFIX + "c_tfp");
    g_panel.GetState(p);
    SyncTimeframesFromPanel();
    SSMCVisualSettings v;
    BuildVisualSettings(v);
-   if(a == SMC_PANEL_TIMEFRAME && g_obTF == SMC_CISDTimeframe((ENUM_CISD_TF)p.obTF) && g_cisdTF == cisd0 &&
-      v.periodSeconds == PeriodSeconds(g_obTF))
+   //--- the pair moves both timeframes at once and can never be mismatched
+   bool pairOk = (a == SMC_PANEL_TIMEFRAME &&
+                  p.obTF == SMC_PairOBIndex(p.tfPair) && p.cisdTF == SMC_PairCISDIndex(p.tfPair) &&
+                  g_obTF == SMC_CISDTimeframe((ENUM_CISD_TF)p.obTF) &&
+                  g_cisdTF == SMC_CISDTimeframe((ENUM_CISD_TF)p.cisdTF) &&
+                  PeriodSeconds(g_obTF) > PeriodSeconds(g_cisdTF) &&
+                  v.periodSeconds == PeriodSeconds(g_obTF));
+   //--- and it cycles through all three, back to where it started
+   for(int k = 0; k < 2; k++)
+     {
+      g_panel.OnClick(SMC_PANEL_PREFIX + "c_tfp");
+      g_panel.GetState(p);
+      pairOk = pairOk && p.obTF == SMC_PairOBIndex(p.tfPair) && p.cisdTF == SMC_PairCISDIndex(p.tfPair);
+     }
+   SyncTimeframesFromPanel();
+   if(pairOk)
       pass++;
-   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: OB timeframe selector"); }
+   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: timeframe pair selector"); }
 
-   a = g_panel.OnClick(SMC_PANEL_PREFIX + "c_cistf");
    g_panel.GetState(p);
    SyncTimeframesFromPanel();
    SCISDSettings cs;
    BuildCISDSettings(cs);
    SConnSettings s;
    BuildConnSettings(s, 0);
-   if(a == SMC_PANEL_CISD && cs.timeframe == SMC_CISDTimeframe((ENUM_CISD_TF)p.cisdTF) && s.cisdTF == cs.timeframe &&
+   if(cs.timeframe == SMC_CISDTimeframe((ENUM_CISD_TF)p.cisdTF) && s.cisdTF == cs.timeframe &&
       s.obTF == g_obTF && s.cisd.timeframe == cs.timeframe)
       pass++;
-   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: CISD timeframe selector"); }
+   else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: CISD timeframe follows the pair"); }
 
    bool before = ConnActive();
    a = g_panel.OnClick(SMC_PANEL_PREFIX + "conn");
@@ -1665,7 +1678,8 @@ void TestConnPanelWiring(void)
    //--- the wiring test must leave the panel exactly as it found it
    g_panel.GetState(p);
    if(p.cisdMode == saved.cisdMode && p.connect == saved.connect &&
-      p.obTF == saved.obTF && p.cisdTF == saved.cisdTF && p.cisdSweep == saved.cisdSweep &&
+      p.tfPair == saved.tfPair && p.obTF == saved.obTF && p.cisdTF == saved.cisdTF &&
+      p.cisdSweep == saved.cisdSweep &&
       p.cisdConfirm == saved.cisdConfirm && p.cisdRetrace == saved.cisdRetrace)
       pass++;
    else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: panel state not restored after the test"); }
