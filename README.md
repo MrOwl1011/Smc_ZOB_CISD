@@ -1,16 +1,71 @@
 # SMC Order Block EA
 
-[![Snapchat](https://img.shields.io/badge/Snapchat-cicada.kw-FFFC00?logo=snapchat&logoColor=black)](https://www.snapchat.com/@cicada.kw)
-[![TikTok](https://img.shields.io/badge/TikTok-%40z39-000000?logo=tiktok&logoColor=white)](https://www.tiktok.com/@z39)
-[![Instagram](https://img.shields.io/badge/Instagram-coding__xaid-E4405F?logo=instagram&logoColor=white)](https://www.instagram.com/coding_xaid)
+<p align="center">
+  <img src="media/demo.gif" alt="SMC Order Block EA running on a MetaTrader 5 chart" width="100%">
+</p>
 
-An **algorithmic trading bot** for MetaTrader 5, built on Smart Money Concepts. It reads market structure, marks Order Blocks on the chart, and executes trades by itself once you switch execution on.
+<p align="center">
+  <b>An algorithmic trading bot for MetaTrader 5, built on Smart Money Concepts.</b><br>
+  It marks Order Blocks on your chart and, when you let it, trades them by itself.
+</p>
 
-It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a lower timeframe, and only enters when the higher timeframe is trending the same way. Everything is switchable from an on-chart panel.
+<p align="center">
+  <a href="https://www.snapchat.com/@cicada.kw"><img src="https://img.shields.io/badge/Snapchat-cicada.kw-FFFC00?logo=snapchat&logoColor=black" alt="Snapchat"></a>
+  <a href="https://www.tiktok.com/@z39"><img src="https://img.shields.io/badge/TikTok-%40z39-000000?logo=tiktok&logoColor=white" alt="TikTok"></a>
+  <a href="https://www.instagram.com/coding_xaid"><img src="https://img.shields.io/badge/Instagram-coding__xaid-E4405F?logo=instagram&logoColor=white" alt="Instagram"></a>
+  <img src="https://img.shields.io/badge/MQL5-MetaTrader%205-blue" alt="MQL5">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT licence">
+</p>
 
-**Trading is off by default.** Out of the box it only draws.
+---
 
-### What this software is
+## Start here
+
+**1. Put it in MetaTrader**
+
+```bash
+cd "%APPDATA%\MetaQuotes\Terminal\<terminal-id>\MQL5\Experts"
+git clone https://github.com/MrOwl1011/Smc_ZOB_CISD.git SMC_OrderBlock_EA
+```
+
+Open `SMC_OrderBlock_EA.mq5` in MetaEditor, press F7. You want `0 errors, 0 warnings`.
+
+**2. Copy the ready made settings**
+
+```text
+presets\*.set   ->  MQL5\Presets\
+profiles\*.cfg  ->  MQL5\Files\SMC_OrderBlock_EA\
+```
+
+**3. Run it**
+
+1. Drag the EA onto a chart.
+2. Properties dialog, press **Load**, pick `presets/SMC_1_BestOverall.set`.
+3. Watch it mark zones, retests and confirmations.
+4. Ready to trade? Flip **Trade execution** on in the panel.
+
+Use the presets. They carry the timeframes and thresholds that work, so you are not
+guessing at forty inputs on day one. There is one per market in `presets/`.
+
+**Trading is off until you switch it on.** Until then it only draws.
+
+## What it does
+
+Finds an Order Block on the higher timeframe, waits for price to come back to it, then
+needs a CISD confirmation on the lower timeframe before entering. It only takes the trade
+if the higher timeframe is trending the same way.
+
+| | |
+| --- | --- |
+| Entry | Market, when the CISD confirms inside a retested block |
+| Stop | The far side of the block |
+| Target | 1:1 by default, changeable |
+| Size | Fixed lots, 0.01 by default |
+| Exposure | One position at a time |
+
+Everything above is switchable from the on-chart panel, no inputs window needed.
+
+## Good to know
 
 | | |
 | --- | --- |
@@ -19,62 +74,21 @@ It finds Order Blocks on a higher timeframe, waits for a CISD confirmation on a 
 | Manual use | Leave execution off and it is a pure SMC chart tool |
 | Decisions | Rule based and deterministic. No machine learning, no black box, no martingale, no grid, no hedging |
 | Runs on | Your own terminal or VPS, any symbol your broker offers |
+| Needs | MetaTrader 5, and M1 history for any symbol you trade |
 
-Also known as: algo trading, automated trading, trading bot, trading robot, forex robot, expert advisor, systematic trading.
+Also known as: algo trading, automated trading, trading bot, trading robot, forex robot,
+expert advisor, systematic trading.
 
-![MQL5](https://img.shields.io/badge/MQL5-MetaTrader%205-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Self tests](https://img.shields.io/badge/self%20tests-271%20checks-lightgrey)
+<br>
 
-## Contents
+---
 
-2. [Install](#install)
-3. [First run](#first-run)
-4. [The panel](#the-panel)
-5. [Trading rules](#trading-rules)
-6. [Settings packages](#settings-packages)
-7. [Screenshots](#screenshots)
-8. [Testing and results](#testing-and-results)
-9. [Files](#files)
-10. [Troubleshooting](#troubleshooting)
-11. [Contributing](#contributing)
-12. [License](#license)
-13. [Keywords](#keywords)
+<br>
 
-## Install
+## The details
 
-**1. Clone into your MQL5 Experts folder**
-
-```bash
-cd "%APPDATA%\MetaQuotes\Terminal\<terminal-id>\MQL5\Experts"
-git clone https://github.com/MrOwl1011/Smc_ZOB_CISD.git SMC_OrderBlock_EA
-```
-
-**2. Compile**
-
-Open `SMC_OrderBlock_EA.mq5` in MetaEditor and press F7. A clean build says `0 errors, 0 warnings`.
-
-**3. Copy the settings files**
-
-```text
-presets\*.set   ->  MQL5\Presets\
-profiles\*.cfg  ->  MQL5\Files\SMC_OrderBlock_EA\
-```
-
-Needs MetaTrader 5 (developed on build 6182) and M1 history for any symbol you trade.
-
-## First run
-
-1. Drag the EA onto a chart.
-2. In the properties dialog press **Load** and pick `presets/SMC_1_BestOverall.set`.
-3. Let it draw. Zones, retests and CISD confirmations appear as it scans history.
-4. When you are ready to trade, switch **Trade execution** on in the panel.
-
-That preset uses H1 blocks with M5 confirmations, which is the combination that tested best.
-
-## The panel
-
-Everything day-to-day is on the chart, not in the inputs dialog.
+<details>
+<summary><b>The panel</b></summary>
 
 | Section | Controls |
 | --- | --- |
@@ -88,60 +102,43 @@ Everything day-to-day is on the chart, not in the inputs dialog.
 
 Panel state is remembered per chart.
 
-## Trading rules
+</details>
 
-| | |
-| --- | --- |
-| Entry | Market, when the CISD confirms inside a retested block |
-| Stop | The far side of the block |
-| Target | Reward:risk multiple of that distance, default 1:1 |
-| Size | Fixed lots, default 0.01 |
-| Exposure | One position at a time |
+<details>
+<summary><b>Optional exits</b></summary>
 
-Three optional exits, each its own switch:
+Three extras, each its own switch, all off by default.
 
 | Switch | What it does |
 | --- | --- |
 | **Ride the trend** | No fixed target. Holds until price reaches the nearest opposite-direction block, which becomes a moving target. Overrides the R:R setting. |
-| **Break even** | Once the trade is a set number of points in profit, moves the stop to entry. Off in every preset. |
+| **Break even** | Once the trade is a set number of points in profit, moves the stop to entry. |
 | **Opposite block exit** | A block forming against an open trade, then retested, closes it early. |
 
-## Settings packages
+</details>
 
-Seven general packages plus fifteen per-symbol ones, as MT5 presets (`.set`) and panel profiles (`.cfg`).
+<details>
+<summary><b>Settings packages</b></summary>
+
+Seven general packages plus fifteen per-symbol ones, as MT5 presets (`.set`) and panel
+profiles (`.cfg`).
 
 | Preset | For |
 | --- | --- |
-| `SMC_1_BestOverall` | The default. Best and most stable in testing. |
+| `SMC_1_BestOverall` | The default |
 | `SMC_2_Forex` | FX majors |
 | `SMC_3_Metals` | Gold |
 | `SMC_4_Indices` | US500, GER30, UK100, US30 |
 | `SMC_5_Safest` | Fewer trades, smaller drawdown |
-| `SMC_SYM_*` | One symbol and timeframe pair each, from the markets that scored above 59% |
+| `SMC_SYM_*` | One symbol and timeframe pair each |
 
-Full tables: [presets/PACKAGES.md](presets/PACKAGES.md) and [presets/SYMBOL_PRESETS.md](presets/SYMBOL_PRESETS.md).
+Full tables: [presets/PACKAGES.md](presets/PACKAGES.md) and
+[presets/SYMBOL_PRESETS.md](presets/SYMBOL_PRESETS.md).
 
-## Screenshots
+</details>
 
-None yet. The repository deliberately contains no generated or illustrated images, so this section is empty until real MetaTrader screenshots are added.
-
-To add your own, drop the files in a `screenshots/` folder and reference them here:
-
-| File | Show |
-| --- | --- |
-| `screenshots/chart.png` | A chart with zones, a retest and a CISD confirmation |
-| `screenshots/panel.png` | The control panel, Advanced mode |
-| `screenshots/trade.png` | An open trade with its stop and target |
-
-## Testing and results
-
-Set `InpRunSelfTest = true` and run it in the Strategy Tester: every module checks
-itself and prints a pass or fail summary to the journal.
-
-The validation study of the signals, across 19 markets, is in
-[research/REPORT.md](research/REPORT.md) with the data tables beside it.
-
-## Files
+<details>
+<summary><b>Files and code layout</b></summary>
 
 ```text
 SMC_OrderBlock_EA.mq5    entry point: inputs, events, wiring
@@ -155,9 +152,24 @@ presets/ profiles/       settings packages
 research/                validation study and analysis scripts
 ```
 
-Three rules the code keeps: closed candles only, nothing repaints, and no trading from history-scan signals.
+Three rules the code keeps: closed candles only, nothing repaints, and no trading from
+history-scan signals.
 
-## Troubleshooting
+</details>
+
+<details>
+<summary><b>Testing it yourself</b></summary>
+
+Set `InpRunSelfTest = true` and run the EA in the Strategy Tester. Every module checks
+itself and prints a pass or fail summary to the journal.
+
+The validation study of the signals, across 19 markets, is in
+[research/REPORT.md](research/REPORT.md) with the data tables beside it.
+
+</details>
+
+<details>
+<summary><b>Troubleshooting</b></summary>
 
 | Symptom | Fix |
 | --- | --- |
@@ -167,15 +179,27 @@ Three rules the code keeps: closed candles only, nothing repaints, and no tradin
 | Signal skipped, "stop too close" | The block is narrower than the broker's minimum stop distance |
 | Self test fails after an edit | Compare against `DESIGN.md`; the tests assert what is written there |
 
+</details>
+
+<details>
+<summary><b>More screenshots</b></summary>
+
+Only the chart above so far. To add more, drop files in `media/` and link them here:
+the panel in Advanced mode, and an open trade with its stop and target.
+
+</details>
+
 ## Contributing
 
-Pull requests welcome. Two asks: run the self tests and paste the journal summary, and if you change detection, update `DESIGN.md` in the same commit.
+Pull requests welcome. Two asks: run the self tests and paste the journal summary, and if
+you change detection, update `DESIGN.md` in the same commit.
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Free to use, change and redistribute, including commercially, with the copyright notice kept.
+MIT, see [LICENSE](LICENSE). Free to use, change and redistribute, including commercially,
+with the copyright notice kept.
 
-Not financial advice. Trading risks real money, and the numbers above describe the past.
+Not financial advice. Trading risks real money.
 
 ## Keywords
 
