@@ -5,8 +5,10 @@
 </p>
 
 <p align="center">
-  <b>An algorithmic trading bot for MetaTrader 5, built on Smart Money Concepts.</b><br>
-  It marks Order Blocks on your chart and, when you let it, trades them by itself.
+  <b>A dual-timeframe algorithmic trading bot for MetaTrader 5, built on Smart Money Concepts.</b><br>
+  It reads the higher timeframe for the level and the lower timeframe for the trigger:<br>
+  Order Blocks are mapped on the HTF, the entry is confirmed by a CISD on the LTF.<br>
+  Three fixed pairs, so the two can never be mismatched: <b>H4 → M15 · H1 → M5 · M15 → M1</b>
 </p>
 
 <p align="center">
