@@ -1,0 +1,48 @@
+{
+  "chosen_thresholds": {
+    "H4->M15": 2.5,
+    "H1->M5": 1.5,
+    "M15->M1": 1.5
+  },
+  "is_oos_split": {
+    "H1->M5": "2026-02-26 21:03:00",
+    "H4->M15": "2026-03-02 18:15:18",
+    "M15->M1": "2026-07-10 11:37:21.600000"
+  },
+  "signals": 7874,
+  "symbols": [
+    "AUDUSD_",
+    "BRENT",
+    "CADJPY_",
+    "EURCAD_",
+    "EURUSD_",
+    "GBPUSD_",
+    "GER30_SPOT",
+    "NZDUSD_",
+    "UK100_SPOT",
+    "US100_Spot",
+    "US2000_SPOT",
+    "US30_SPOT",
+    "US500_SPOT",
+    "USDCAD_",
+    "USDCHF_",
+    "USDJPY_",
+    "WTI",
+    "XAGUSD_",
+    "XAUUSD_"
+  ],
+  "combos": [
+    "H4->M15",
+    "H1->M5",
+    "M15->M1"
+  ],
+  "thresholds": [
+    0.0,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0,
+    2.5
+  ]
+}
