@@ -120,6 +120,7 @@ bool SMC_ConfigSave(const string profile, const SSMCPanelState &p, const string 
    SMC_CfgWriteBool(h, "oppositeExit", p.oppExit);
    SMC_CfgWrite(h, "targetRR", DoubleToString(p.targetRR, 1));
    SMC_CfgWriteBool(h, "rideTrend", p.rideTrend);
+   SMC_CfgWriteBool(h, "entryAlert", p.entryAlert);
    SMC_CfgWriteBool(h, "breakEven", p.breakEven);
    SMC_CfgWriteInt(h, "bePoints", p.bePoints);
    SMC_CfgWriteInt(h, "swingLength", p.swingLength);
@@ -223,6 +224,7 @@ bool SMC_ConfigLoad(const string profile, SSMCPanelState &p, const bool common,
       else if(key == "oppositeExit")       p.oppExit = bv;
       else if(key == "targetRR")           p.targetRR = dv;
       else if(key == "rideTrend")          p.rideTrend = bv;
+      else if(key == "entryAlert")         p.entryAlert = bv;
       else if(key == "breakEven")          p.breakEven = bv;
       else if(key == "bePoints")           p.bePoints = iv;
       else if(key == "swingLength")        p.swingLength = iv;

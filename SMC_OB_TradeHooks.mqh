@@ -23,6 +23,10 @@
 //|  Break even (optional): once the position is a set number of     |
 //|  points in profit, the stop moves to the entry price, once.      |
 //|                                                                  |
+//|  Entry alert (optional): announces entry, stop and target at the  |
+//|  moment a setup confirms. It works whether or not execution is on, |
+//|  so the EA can be used purely as a signal tool.                   |
+//|                                                                  |
 //|  Ride the trend (optional): no fixed target at all. The position |
 //|  is held until price reaches the nearest live Order Block facing  |
 //|  the other way, which becomes a moving take profit. While this is |
@@ -42,16 +46,19 @@ private:
    bool              m_oppExit;       // close on a retested opposite block
    double            m_rr;            // take profit as a multiple of risk
    bool              m_ride;          // hold to the nearest opposite block instead of a fixed target
+   bool              m_alerts;        // announce every entry signal, with or without execution
    bool              m_beEnabled;     // move the stop to entry once in profit
    int               m_bePoints;      // profit in points that arms it
    double            m_lots;
    long              m_magic;
+   ENUM_TIMEFRAMES   m_obTF;          // for the alert text only
    bool              m_ready;
    bool              m_warned;        // "trading not allowed" logged once
    int               m_sent;          // orders accepted by the server
    int               m_closed;        // positions closed by the opposite block exit
    int               m_beMoved;       // stops moved to break even
    int               m_rideExits;     // positions closed at an opposite block
+   int               m_alerted;       // entry alerts raised
    int               m_skipped;       // signals skipped (open position, invalid stop, rejected)
    string            m_last;          // last action, for the panel status line
 
@@ -104,15 +111,15 @@ private:
      }
 
 public:
-                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false),
-                                             m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_magic(0), m_ready(false),
-                                             m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0),
+                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true),
+                                             m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
+                                             m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
                                              m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
    void              Init(const bool enabled, const double lots, const long magic, const int slippage,
                            const double rr, const bool beEnabled, const int bePoints,
-                           const bool ride)
+                           const bool ride, const bool alerts)
      {
       m_enabled = enabled;
       m_lots    = (lots > 0.0 ? lots : 0.01);
@@ -120,6 +127,7 @@ public:
       m_beEnabled = beEnabled;
       m_bePoints  = (bePoints > 0 ? bePoints : 100);
       m_ride      = ride;
+      m_alerts    = alerts;
       m_magic   = magic;
       m_trade.SetExpertMagicNumber((ulong)magic);
       m_trade.SetDeviationInPoints((ulong)MathMax(0, slippage));
@@ -130,12 +138,14 @@ public:
       m_closed = 0;
       m_beMoved = 0;
       m_rideExits = 0;
+      m_alerted = 0;
       m_skipped = 0;
       m_last = "";
      }
 
    void              SetEnabled(const bool on) { if(on != m_enabled) { m_enabled = on; Print("[SMC-TRADE] execution ", on ? "ON" : "OFF"); } }
    void              SetLots(const double lots) { if(lots > 0.0) m_lots = lots; }
+   void              SetOBTimeframe(const ENUM_TIMEFRAMES tf) { m_obTF = tf; }
    void              SetTargetRR(const double rr) { if(rr > 0.0) m_rr = rr; }
    void              SetBreakEven(const bool on, const int points)
      {
@@ -151,6 +161,14 @@ public:
          Print("[SMC-TRADE] ride the trend ", on ? "ON (no fixed target)" : "OFF");
       m_ride = on;
      }
+   void              SetAlerts(const bool on)
+     {
+      if(on != m_alerts)
+         Print("[SMC-TRADE] entry alerts ", on ? "ON" : "OFF");
+      m_alerts = on;
+     }
+   bool              Alerts(void) const { return m_alerts; }
+   int               Alerted(void) const { return m_alerted; }
    bool              RideTrend(void) const { return m_ride; }
    int               RideExits(void) const { return m_rideExits; }
    double            TargetRR(void) const { return m_rr; }
@@ -168,12 +186,30 @@ public:
    string            StatusText(void) const
      {
       return StringFormat("trading %s | lots %.2f | %s | break even %s (%d pts) | opposite exit %s | "
-                          "sent %d | closed %d | be %d | ride exits %d | skipped %d%s",
+                          "alerts %s | sent %d | closed %d | be %d | ride exits %d | skipped %d%s",
                           m_enabled ? "ON" : "OFF", m_lots,
                           m_ride ? "ride the trend" : StringFormat("1:%.2f", m_rr),
+                          m_alerts ? "ON" : "OFF",
                           m_beEnabled ? "ON" : "OFF", m_bePoints, m_oppExit ? "ON" : "OFF",
                           m_sent, m_closed, m_beMoved, m_rideExits, m_skipped,
                           m_last == "" ? "" : " | " + m_last);
+     }
+
+   //--- Announce a confirmed setup with its levels. Raised at the moment the
+   //--- trade would open, whether or not execution is switched on.
+   void              EntryAlert(const int dir, const double entry, const double sl, const double tp,
+                                const long obId, const bool traded)
+     {
+      int digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+      string side = (dir == SMC_DIR_BULL) ? "BUY" : "SELL";
+      string target = (tp > 0.0) ? StringFormat("TP %.*f", digits, tp) : "TP at the opposite block";
+      string text = StringFormat("%s %s  %s  entry %.*f  SL %.*f  %s  (OB #%I64d)%s",
+                                 _Symbol, SMC_TFText(m_obTF), side,
+                                 digits, entry, digits, sl, target, obId,
+                                 traded ? "" : " [signal only]");
+      m_alerted++;
+      Alert(text);
+      Print("[SMC-TRADE][ALERT] ", text);
      }
 
    //--- A confirmed HTF OB + LTF CISD setup: enter at market, stop on the far
@@ -181,25 +217,10 @@ public:
    bool              OnSignal(const int dir, const double obTop, const double obBottom,
                               const long obId, const long cisdId)
      {
-      if(!m_enabled || !m_ready)
-         return false;
-      if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
-        {
-         if(!m_warned)
-           {
-            m_warned = true;
-            Print("[SMC-TRADE] trading is not allowed for this terminal / EA: no orders will be sent");
-           }
-         return false;
-        }
+      if(!m_ready || (!m_enabled && !m_alerts))
+         return false;                            // nothing to do: no orders, no alerts
       if(obTop <= obBottom)
          return false;
-      if(HasPosition())
-        {
-         m_skipped++;
-         m_last = StringFormat("skip OB #%I64d: a position is already open", obId);
-         return false;
-        }
 
       int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
       double point  = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
@@ -229,8 +250,37 @@ public:
 
       if(risk <= 0.0 || risk <= stops)
         {
+         if(m_enabled)
+           {
+            m_skipped++;
+            m_last = StringFormat("skip OB #%I64d: stop too close (%.1f points)", obId, risk / (point > 0 ? point : 1));
+           }
+         return false;                            // an unusable stop is not worth announcing
+        }
+
+      //--- from here the setup is valid. Announce it before anything can stop the order,
+      //--- so the alert is identical whether or not the EA is allowed to trade.
+      bool willTrade = m_enabled &&
+                       TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED) &&
+                       !HasPosition();
+      if(m_alerts)
+         EntryAlert(dir, entry, sl, tp, obId, willTrade);
+
+      if(!m_enabled)
+         return false;
+      if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
+        {
+         if(!m_warned)
+           {
+            m_warned = true;
+            Print("[SMC-TRADE] trading is not allowed for this terminal / EA: no orders will be sent");
+           }
+         return false;
+        }
+      if(HasPosition())
+        {
          m_skipped++;
-         m_last = StringFormat("skip OB #%I64d: stop too close (%.1f points)", obId, risk / (point > 0 ? point : 1));
+         m_last = StringFormat("skip OB #%I64d: a position is already open", obId);
          return false;
         }
 

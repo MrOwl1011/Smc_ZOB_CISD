@@ -58,6 +58,7 @@ struct SSMCPanelState
    double            lots;
    double            targetRR;        // take profit as a multiple of risk
    bool              rideTrend;       // hold to the nearest opposite block instead (ignores targetRR)
+   bool              entryAlert;      // pop an alert with entry, SL and TP, with or without execution
    bool              breakEven;       // move the stop to entry once in profit
    int               bePoints;        // profit in points that arms it
    bool              oppExit;         // a retested opposite block closes the open trade
@@ -516,6 +517,7 @@ int CSMCPanel::LayoutBody(void)
    Text("sec_trade", x + pad, cy, "TRADING", SMC_PNL_MUTED, 8);
    cy += 16;
    Switch("trade", cy, "Trade execution", m_st.tradeEnabled);              cy += SMC_PNL_ROW + 4;
+   Switch("alert", cy, "Entry alert", m_st.entryAlert);                    cy += SMC_PNL_ROW + 4;
    Stepper("lots", cy, "Lot size", DoubleToString(m_st.lots, 2));          cy += SMC_PNL_ROW + 4;
    Switch("ride", cy, "Ride the trend", m_st.rideTrend);                     cy += SMC_PNL_ROW + 4;
    Stepper("rr", cy, m_st.rideTrend ? "Take profit (off)" : "Take profit  1 :",
@@ -638,6 +640,7 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "oppx")    { m_st.oppExit      = !m_st.oppExit;                return SMC_PANEL_TRADE; }
    if(id == "be")      { m_st.breakEven    = !m_st.breakEven;              return SMC_PANEL_TRADE; }
    if(id == "ride")    { m_st.rideTrend    = !m_st.rideTrend;              return SMC_PANEL_TRADE; }
+   if(id == "alert")   { m_st.entryAlert   = !m_st.entryAlert;             return SMC_PANEL_TRADE; }
    if(id == "rr_m" || id == "rr_p")
      {
       double rv = m_st.targetRR;
@@ -710,6 +713,7 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "oppx", m_st.oppExit);
    GlobalVariableSet(key + "rr", m_st.targetRR);
    GlobalVariableSet(key + "ride", m_st.rideTrend);
+   GlobalVariableSet(key + "alert", m_st.entryAlert);
    GlobalVariableSet(key + "be", m_st.breakEven);
    GlobalVariableSet(key + "bept", m_st.bePoints);
    GlobalVariableSet(key + "swing", m_st.swingLength);
@@ -757,6 +761,7 @@ bool CSMCPanel::Load(const string key)
    m_st.oppExit          = GlobalVariableCheck(key + "oppx") ? GlobalVariableGet(key + "oppx") != 0 : m_def.oppExit;
    m_st.targetRR         = GlobalVariableCheck(key + "rr") ? GlobalVariableGet(key + "rr") : m_def.targetRR;
    m_st.rideTrend        = GlobalVariableCheck(key + "ride") ? GlobalVariableGet(key + "ride") != 0 : m_def.rideTrend;
+   m_st.entryAlert       = GlobalVariableCheck(key + "alert") ? GlobalVariableGet(key + "alert") != 0 : m_def.entryAlert;
    m_st.breakEven        = GlobalVariableCheck(key + "be") ? GlobalVariableGet(key + "be") != 0 : m_def.breakEven;
    m_st.bePoints         = GlobalVariableCheck(key + "bept") ? (int)GlobalVariableGet(key + "bept") : m_def.bePoints;
    m_st.swingLength      = (int)GlobalVariableGet(key + "swing");

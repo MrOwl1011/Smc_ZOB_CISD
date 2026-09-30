@@ -120,6 +120,7 @@ input double                     InpLots               = 0.01;                  
 input bool                       InpOppositeBlockExit  = false;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
 input double                     InpTargetRR           = 1.0;                   // Take profit, as a multiple of risk (1.0 = 1:1) (panel default)
 input bool                       InpRideTrend          = false;                 // Ride the trend: hold to the nearest opposite OB, ignore the R:R target (panel default)
+input bool                       InpEntryAlert         = true;                  // Entry alert with entry / SL / TP, works with trading off (panel default)
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
 input long                       InpMagic              = 20260928;              // Magic number
@@ -250,6 +251,7 @@ void PanelDefaults(SSMCPanelState &p)
    p.oppExit          = InpOppositeBlockExit;
    p.targetRR         = InpTargetRR;
    p.rideTrend        = InpRideTrend;
+   p.entryAlert       = InpEntryAlert;
    p.breakEven        = InpBreakEven;
    p.bePoints         = InpBreakEvenPoints;
    p.swingLength      = InpSwingLength;
@@ -492,7 +494,7 @@ int OnInit(void)
    g_visual.Init(v, 0);
    g_visual.Cleanup();
    g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage,
-                InpTargetRR, InpBreakEven, InpBreakEvenPoints, InpRideTrend);
+                InpTargetRR, InpBreakEven, InpBreakEvenPoints, InpRideTrend, InpEntryAlert);
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
@@ -818,6 +820,8 @@ void ApplyTradeSettings(void)
    g_trade.SetOppositeExit(p.oppExit);
    g_trade.SetTargetRR(p.targetRR);
    g_trade.SetRideTrend(p.rideTrend);
+   g_trade.SetAlerts(p.entryAlert);
+   g_trade.SetOBTimeframe(g_obTF);
    g_trade.SetBreakEven(p.breakEven, p.bePoints);
   }
 
@@ -1336,8 +1340,8 @@ void ProcessConnection(void)
 //+------------------------------------------------------------------+
 void TradeConfirmedSetup(const SConnEvent &e)
   {
-   if(!g_trade.IsEnabled())
-      return;
+   if(!g_trade.IsEnabled() && !g_trade.Alerts())
+      return;                          // neither trading nor alerting: nothing to do
    SOrderBlock ob;
    int idx = g_detector.FindById(e.obId);
    bool found = (idx >= 0 && g_detector.GetOB(idx, ob));
@@ -1627,6 +1631,16 @@ void TestConnPanelWiring(void)
    ApplyTradeSettings();
    trOk = trOk && (g_trade.RideTrend() == ride0);
 
+   //--- the entry alert is independent of execution
+   bool al0 = g_trade.Alerts();
+   bool en1 = g_trade.IsEnabled();
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "alert");
+   ApplyTradeSettings();
+   trOk = trOk && (a == SMC_PANEL_TRADE && g_trade.Alerts() != al0 && g_trade.IsEnabled() == en1);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "alert");
+   ApplyTradeSettings();
+   trOk = trOk && (g_trade.Alerts() == al0);
+
    g_panel.OnClick(SMC_PANEL_PREFIX + "trade");        // back to the starting state
    g_panel.SetState(saved);
    ApplyTradeSettings();
@@ -1805,7 +1819,7 @@ void TestConfigProfiles(void)
    a.showBull = false; a.cisdSweep = false; a.obTF = 5; a.cisdTF = 2; a.connect = true; a.maxActivePerDir = 13;
    a.mitStopsCISD = true; a.trendFilter = false;
    a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
-   a.targetRR = 2.5; a.breakEven = true; a.bePoints = 250; a.rideTrend = true;
+   a.targetRR = 2.5; a.breakEven = true; a.bePoints = 250; a.rideTrend = true; a.entryAlert = false;
    if(SMC_ConfigSave(p1, a, BuildInputSnapshot(), InpConfigCommon, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  save: %s", res.message); }
@@ -1813,7 +1827,7 @@ void TestConfigProfiles(void)
    b = saved;                           // deliberately different starting point
    b.cisdMode = 0; b.retestMode = 0; b.swingLength = 3; b.mitStopsCISD = false; b.trendFilter = true;
    b.tradeEnabled = false; b.lots = 0.55; b.oppExit = true;
-   b.targetRR = 1.0; b.breakEven = false; b.bePoints = 100; b.rideTrend = false;
+   b.targetRR = 1.0; b.breakEven = false; b.bePoints = 100; b.rideTrend = false; b.entryAlert = true;
    if(SMC_ConfigLoad(p1, b, InpConfigCommon, keys, vals, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  load: %s", res.message); }
@@ -1824,7 +1838,8 @@ void TestConfigProfiles(void)
       b.trendFilter == a.trendFilter && b.tradeEnabled == a.tradeEnabled &&
       MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit &&
       MathAbs(b.targetRR - a.targetRR) < 1e-9 && b.breakEven == a.breakEven &&
-      b.bePoints == a.bePoints && b.rideTrend == a.rideTrend && ArraySize(keys) > 0)
+      b.bePoints == a.bePoints && b.rideTrend == a.rideTrend &&
+      b.entryAlert == a.entryAlert && ArraySize(keys) > 0)
       pass++;
    else { fail++; Print("[SMC-CFG][TEST] FAIL  round trip: values differ after load"); }
 
