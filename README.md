@@ -99,7 +99,7 @@ expert advisor, systematic trading.
 | Timeframes | One setting: HTF (the Order Block timeframe) with its CISD timeframe. H4→M15, H1→M5 or M15→M1 |
 | CISD | Liquidity sweep, confirmation close, retracement |
 | Connection | Retest mode, CISD mode, mitigation stops CISD, trend filter |
-| Trading | Trade execution, lot size, ride the trend, take profit R, break even, break even points, opposite block exit |
+| Trading | Trade execution, entry alert, lot size, ride the trend, take profit R, break even, break even points, opposite block exit |
 | Configuration | Save, Load, Reset to inputs |
 
 Panel state is remembered per chart.

@@ -57,6 +57,7 @@ InpLots=0.01
 InpMagic=20260928
 InpSlippage=20
 InpOppositeBlockExit=false
+InpEntryAlert=true
 InpTargetRR=1.0
 InpBreakEven=false
 InpBreakEvenPoints=100
