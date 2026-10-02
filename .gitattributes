@@ -17,6 +17,12 @@ compile.log         linguist-generated
 *.gif    binary
 *.webp   binary
 
+# MetaTrader writes presets and profiles with CRLF and they belong in the
+# working tree that way, but they are stored normalised so a preset diff shows
+# the settings that changed and not every line in the file.
+*.set  text eol=crlf
+*.cfg  text eol=crlf
+
 # Source stays LF in the repository
 *.mq5  text eol=lf
 *.mqh  text eol=lf
