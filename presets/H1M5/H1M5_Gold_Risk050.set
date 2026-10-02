@@ -1,0 +1,80 @@
+; H1M5_Gold_Risk050
+; Gold (XAUUSD) H1 Order Blocks -> M5 CISD confirmation, trading ENABLED.
+; Risk sizing at 0.50% of equity per trade.
+;
+; Measured 2023-10-01 to 2026-10-01 with fixed 0.01 lots:
+;   +298.76 USD, 30 trades, 66.7% correct, profit factor 3.12, recovery 2.44, drawdown 122.54, longest losing run 3
+;
+; This pairing trades about ten times a year and wins about two thirds of them,
+; with a 1:1 target. That is a different character from the M15 to M1 presets,
+; which trade three times as often, win 44% and use a 1:2 target for roughly
+; three times the profit.
+;
+; Thirty trades in three years is a small sample: treat the win rate as a
+; direction, not a number you can rely on. Chosen as the best of 16
+; configurations tested on this pairing, so expect less than the figures above.
+
+InpSwingMinATR=0.5
+InpBOSMode=0
+InpBOSBufferATR=0.1
+InpATRPeriod=14
+InpDispATRMult=2.5
+InpDispCandleATRMult=0.8
+InpDispMinBodyPct=55.0
+InpDispMinRelStrength=1.5
+InpMaxOBToBOSBars=8
+InpRejectLegViolation=false
+InpSwingLength=5
+InpEnableBull=true
+InpEnableBear=true
+InpExtendBars=20
+InpMaxActivePerDir=10
+InpMaxAgeBars=0
+InpOverlapMode=1
+InpOverlapPct=50.0
+InpFVGMode=1
+InpFVGMinATR=0.05
+InpRetestEnabled=true
+InpMitigationMode=2
+InpInvalidationMode=1
+InpScanDepth=3000
+InpEnableCISD=true
+InpCISDSweep=false
+InpCISDConfirm=true
+InpCISDRetrace=false
+InpCISDSwingLength=3
+InpCISDSwingMinATR=0.3
+InpCISDSwingMaxAge=150
+InpCISDSweepMode=0
+InpCISDSweepValidity=10
+InpCISDLevelMode=0
+InpCISDMaxSeries=12
+InpCISDMaxConfirmBars=20
+InpCISDMaxRetraceBars=50
+InpCISDScanDepth=1500
+InpConnEnable=true
+InpConnCISDMode=0
+InpConnRetestMode=0
+InpConnMaxCISDBars=100
+InpConnWarmupBars=200
+InpConnMaxRetests=10
+InpConnMitigationStops=true
+InpTrendFilter=true
+InpTrendBars=20
+InpTrendATRMult=2.5
+InpEnableTrading=true
+InpLots=0.01
+InpMagic=20260928
+InpSlippage=20
+InpOppositeBlockExit=false
+InpEntryAlert=true
+InpTargetRR=1.0
+InpBreakEven=false
+InpBreakEvenPoints=4000
+InpRunSelfTest=false
+InpLogLevel=1
+InpTimeframePair=1
+InpRideTrend=false
+InpRiskPercentMode=true
+InpRiskPercent=0.50
+InpConfidenceLog=true
