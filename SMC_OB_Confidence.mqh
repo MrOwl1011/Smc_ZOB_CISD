@@ -17,6 +17,14 @@
 
 #include "SMC_OB_Types.mqh"
 
+//--- Weights, revision 2. Revision 1 gave 8 points to the retest index and 4 to a
+//--- liquidity sweep; across 1,164 logged setups the first was 8.00 every single
+//--- time and the second 0.00 every single time, because mitigation-stops leaves
+//--- only first retests and the sweep stage is off. Twelve points that never moved
+//--- compressed every score into a 35-74 band, so the 75 and 90 thresholds could
+//--- never be reached. Those twelve points now go to the factors that actually
+//--- vary, and both readings are still recorded raw in case the settings change.
+
 //--- every component kept separately, so a score can be taken apart afterwards
 struct SSMCConfidence
   {
@@ -113,17 +121,18 @@ SSMCConfidence SMC_Confidence(const SOrderBlock &ob, const double trendScore, co
                     ? (double)(signalTime - sweepTime) / cisdPeriodSeconds : -1.0;
 
    //--- weighted components
-   c.trend     = 20.0 * SMC_Norm(MathAbs(c.trendScore), 1.5, 3.0);
-   c.quality   = 15.0 * (0.6 * SMC_Norm(c.relStrength, 1.5, 3.0) + 0.4 * SMC_Norm(c.bodyPct, 55.0, 75.0));
-   c.impulse   = 10.0 * SMC_Norm(c.impulseATR, 1.5, 3.0);
+   c.trend     = 25.0 * SMC_Norm(MathAbs(c.trendScore), 1.5, 3.0);
+   c.quality   = 18.0 * (0.6 * SMC_Norm(c.relStrength, 1.5, 3.0) + 0.4 * SMC_Norm(c.bodyPct, 55.0, 75.0));
+   c.impulse   = 12.0 * SMC_Norm(c.impulseATR, 1.5, 3.0);
    c.freshness = 10.0 * (1.0 - SMC_Norm(c.ageBars, 10.0, 60.0));
-   c.retest    =  8.0 * (retestNo <= 1 ? 1.0 : (retestNo == 2 ? 0.5 : 0.0));
-   c.height    =  8.0 * SMC_Band(c.zoneATR, 0.4, 1.2);
-   c.fvg       =  7.0 * (ob.hasFVG ? (ob.fvgLate ? 0.5 : 1.0) : 0.0);
-   c.cisd      =  7.0 * SMC_Norm(c.confirmBeyondATR, 0.0, 0.3);
-   c.spread    =  6.0 * (1.0 - SMC_Norm(c.spreadPctOfR, 0.005, 0.03));
-   c.session   =  5.0 * SMC_SessionWeight(c.hour);
-   c.sweep     =  4.0 * ((c.sweepAgeBars < 0.0) ? 0.0 : (c.sweepAgeBars <= 10.0 ? 1.0 : 0.6));
+   c.height    = 10.0 * SMC_Band(c.zoneATR, 0.4, 1.2);
+   c.cisd      =  9.0 * SMC_Norm(c.confirmBeyondATR, 0.0, 0.3);
+   c.fvg       =  8.0 * (ob.hasFVG ? (ob.fvgLate ? 0.5 : 1.0) : 0.0);
+   c.spread    =  5.0 * (1.0 - SMC_Norm(c.spreadPctOfR, 0.005, 0.03));
+   c.session   =  3.0 * SMC_SessionWeight(c.hour);
+   //--- recorded, not scored: both were constant across 1,164 setups
+   c.retest    =  0.0 * (retestNo <= 1 ? 1.0 : (retestNo == 2 ? 0.5 : 0.0));
+   c.sweep     =  0.0 * ((c.sweepAgeBars < 0.0) ? 0.0 : (c.sweepAgeBars <= 10.0 ? 1.0 : 0.6));
 
    c.total = c.trend + c.quality + c.impulse + c.freshness + c.retest + c.height +
              c.fvg + c.cisd + c.spread + c.session + c.sweep;
