@@ -62,10 +62,13 @@ if the higher timeframe is trending the same way.
 | Entry | Market, when the CISD confirms inside a retested block |
 | Stop | The far side of the block |
 | Target | 1:1 by default, changeable |
-| Size | Fixed lots, 0.01 by default |
+| Size | Fixed lots (0.01), or a set percent of equity risked on the stop |
 | Exposure | One position at a time |
 
-Everything above is switchable from the on-chart panel, no inputs window needed.
+| Protection | Optional refusals before any new trade, off by default |
+
+Everything above except the protection guards is switchable from the on-chart panel, no
+inputs window needed.
 
 **Signal only?** An entry alert announces every confirmed setup with its entry, stop and
 target the moment it appears. It works with execution switched off, so you can leave the
@@ -124,6 +127,35 @@ Three extras, each its own switch, all off by default.
 </details>
 
 <details>
+<summary><b>Capital protection</b></summary>
+
+Six hard limits that run before a new trade is opened. Each one is a refusal, never a
+smaller trade: it either lets the setup through or skips it. The entry alert still fires
+when a guard refuses, so you keep hearing what the EA saw while it stands down.
+
+All off until you set `Capital protection` to true in the inputs. These are inputs only,
+not panel switches.
+
+| Guard | Input | What it does |
+| --- | --- | --- |
+| **Spread** | `InpGuardSpreadPctOfR` | Skips the trade when the spread is too large a share of the stop distance. **The one we recommend.** |
+| Daily loss | `InpGuardDailyLoss` | No new trades for the rest of the server day once it is down that much |
+| Weekly loss | `InpGuardWeeklyLoss` | The same for the broker's week |
+| Losing streak | `InpGuardMaxConsec` | Pauses until the next day after N losses in a row |
+| Equity stop | `InpGuardEquityStop` | Closes the open trade and stops, that far below the equity peak |
+| Volatility | `InpGuardVolSpike` | Skips the trade when ATR is far above its own average |
+
+Ready to use: `presets/Guards/Guards_Gold_Spread.set` arms the spread guard and leaves the
+rest at zero. Why only that one, with the measurements behind it:
+[presets/Guards/README.md](presets/Guards/README.md).
+
+A word on the other five. They are catastrophe brakes, and at the default thresholds they
+are far too loose to fire in normal trading - so switching them on does not protect the
+account by itself. Tighten them on purpose, or leave them at zero.
+
+</details>
+
+<details>
 <summary><b>Settings packages</b></summary>
 
 Seven general packages plus fifteen per-symbol ones, as MT5 presets (`.set`) and panel
@@ -137,6 +169,8 @@ profiles (`.cfg`).
 | `SMC_4_Indices` | US500, GER30, UK100, US30 |
 | `SMC_5_Safest` | Fewer trades, smaller drawdown |
 | `SMC_SYM_*` | One symbol and timeframe pair each |
+| `Guards/` | Capital protection, spread guard armed |
+| `RiskPercent/`, `MaxProfit/`, `H1M5/`, `SuperFast/` | Gold, by what each is tuned for |
 
 Full tables: [presets/PACKAGES.md](presets/PACKAGES.md) and
 [presets/SYMBOL_PRESETS.md](presets/SYMBOL_PRESETS.md).

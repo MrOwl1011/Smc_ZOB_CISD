@@ -132,7 +132,7 @@ input string                     InpConfidenceFile     = "SMC_Confidence.csv";  
 input string                     InpResultFile         = "SMC_Results.csv";      // Closed-trade results with their scores, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
-input bool                       InpCapitalGuards      = false;                 // Capital protection: hard refusals before any new trade (panel default)
+input bool                       InpCapitalGuards      = false;                 // Capital protection: hard refusals before any new trade (input only, no panel switch)
 input double                     InpGuardDailyLoss     = 2.0;                   // Guard: stop for the day after this loss, % of day-start equity (0 = off)
 input double                     InpGuardWeeklyLoss    = 4.0;                   // Guard: stop for the week after this loss, % of week-start equity (0 = off)
 input int                        InpGuardMaxConsec     = 5;                     // Guard: pause until the next day after this many losses in a row (0 = off)
