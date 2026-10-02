@@ -17,9 +17,9 @@
 //|   SMC_OB_SelfTest     deterministic tests                        |
 //+------------------------------------------------------------------+
 #property copyright   "Zaid"
-#property version     "1.50"
-#property description "SMC Order Block detector: BOS + displacement + last opposite candle."
-#property description "Non-repainting, closed-candle confirmation. Detection only - no trading."
+#property version     "2.00"
+#property description "SMC Order Block EA: HTF order blocks, LTF CISD confirmation, trend filter."
+#property description "Draws and, when you switch execution on, trades. Non-repainting, closed candles only."
 
 #include "SMC_OB_Visual.mqh"
 #include "SMC_OB_Panel.mqh"
