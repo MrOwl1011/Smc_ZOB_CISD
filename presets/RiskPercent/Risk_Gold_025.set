@@ -1,0 +1,81 @@
+; Risk_Gold_025
+; Gold (XAUUSD) M15 Order Blocks -> M1 CISD, trading ENABLED.
+;
+; Size comes from risk, not a fixed lot:
+;   lots = equity * 0.25% / (stop points * value per point per lot)
+; Conservative. A ten-loss run costs about 2.5% of the account.
+;
+; Detection settings are the risk-adjusted winner of 128 three-year backtests:
+;   +809.57 USD, 92 trades, 43.5% correct, profit factor 2.11, recovery 5.85,
+;   drawdown 138.38, longest losing run 5.
+;
+; Those figures were measured with FIXED 0.01 lots. Risk sizing compounds and
+; scales with the stop, so the equity curve will not match them. Re-test with
+; this preset loaded before trusting any number.
+;
+; It also lost money in the first of the three years.
+
+InpSwingMinATR=0.5
+InpBOSMode=0
+InpBOSBufferATR=0.1
+InpATRPeriod=14
+InpDispATRMult=2.5
+InpDispCandleATRMult=0.8
+InpDispMinBodyPct=55.0
+InpDispMinRelStrength=1.5
+InpMaxOBToBOSBars=8
+InpRejectLegViolation=false
+InpSwingLength=5
+InpEnableBull=true
+InpEnableBear=true
+InpExtendBars=20
+InpMaxActivePerDir=10
+InpMaxAgeBars=0
+InpOverlapMode=1
+InpOverlapPct=50.0
+InpFVGMode=1
+InpFVGMinATR=0.05
+InpRetestEnabled=true
+InpMitigationMode=2
+InpInvalidationMode=1
+InpScanDepth=3000
+InpEnableCISD=true
+InpCISDSweep=false
+InpCISDConfirm=true
+InpCISDRetrace=false
+InpCISDSwingLength=3
+InpCISDSwingMinATR=0.3
+InpCISDSwingMaxAge=150
+InpCISDSweepMode=0
+InpCISDSweepValidity=10
+InpCISDLevelMode=0
+InpCISDMaxSeries=12
+InpCISDMaxConfirmBars=20
+InpCISDMaxRetraceBars=50
+InpCISDScanDepth=1500
+InpConnEnable=true
+InpConnCISDMode=0
+InpConnRetestMode=0
+InpConnMaxCISDBars=100
+InpConnWarmupBars=200
+InpConnMaxRetests=10
+InpConnMitigationStops=true
+InpTrendFilter=true
+InpTrendBars=20
+InpTrendATRMult=2.5
+InpEnableTrading=true
+InpLots=0.01
+InpMagic=20260928
+InpSlippage=20
+InpOppositeBlockExit=false
+InpEntryAlert=true
+InpTargetRR=2.0
+InpBreakEven=true
+InpBreakEvenPoints=4000
+InpRunSelfTest=false
+InpLogLevel=1
+InpTimeframePair=2
+InpRideTrend=false
+InpRiskPercentMode=true
+InpRiskPercent=0.25
+InpConfidenceLog=true
