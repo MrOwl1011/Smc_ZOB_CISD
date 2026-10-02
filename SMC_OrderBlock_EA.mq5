@@ -609,6 +609,8 @@ double OnTester(void)
 void OnDeinit(const int reason)
   {
    EventKillTimer();
+   SMC_ConfidenceClose();
+   g_trade.CloseResultFile();
    DeinitCISD();
    DeinitConnection();
    if(InpLogLevel >= SMC_LOG_EVENTS)

@@ -161,12 +161,30 @@ string SMC_ConfidenceText(const SSMCConfidence &c)
   }
 
 //--- one CSV row per scored setup, so the weights can be fitted against realised R later
+//--- The handle is kept open: reopening per row made a three-year backtest take
+//--- tens of minutes. SMC_ConfidenceClose() releases it in OnDeinit.
+int g_smcConfHandle = INVALID_HANDLE;
+
+void SMC_ConfidenceClose(void)
+  {
+   if(g_smcConfHandle != INVALID_HANDLE)
+     {
+      FileClose(g_smcConfHandle);
+      g_smcConfHandle = INVALID_HANDLE;
+     }
+  }
+
 void SMC_ConfidenceLog(const string file, const SSMCConfidence &c, const long obId, const int dir,
                        const datetime signalTime, const double entry, const double sl, const double tp)
   {
-   int h = FileOpen(file, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON, ',');
-   if(h == INVALID_HANDLE)
-      return;
+   if(g_smcConfHandle == INVALID_HANDLE)
+     {
+      g_smcConfHandle = FileOpen(file, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON, ',');
+      if(g_smcConfHandle == INVALID_HANDLE)
+         return;
+      FileSeek(g_smcConfHandle, 0, SEEK_END);
+     }
+   int h = g_smcConfHandle;
    if(FileSize(h) == 0)
       FileWrite(h, "time", "symbol", "ob_id", "dir", "entry", "sl", "tp", "score", "band",
                 "trend", "quality", "impulse", "freshness", "retest", "height", "fvg", "cisd",
@@ -187,7 +205,7 @@ void SMC_ConfidenceLog(const string file, const SSMCConfidence &c, const long ob
              DoubleToString(c.ageBars, 1), c.retestNo, DoubleToString(c.zoneATR, 3),
              DoubleToString(c.confirmBeyondATR, 3), DoubleToString(c.spreadPctOfR, 4), c.hour,
              DoubleToString(c.sweepAgeBars, 1));
-   FileClose(h);
+   FileFlush(h);
   }
 
 #endif // SMC_OB_CONFIDENCE_MQH

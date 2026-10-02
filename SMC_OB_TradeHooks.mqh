@@ -68,6 +68,7 @@ private:
    double            m_openRiskMoney; // money risked at entry, the denominator of R
    datetime          m_openTime;
    string            m_resultFile;    // where closed trades are written
+   int               m_resultHandle;  // kept open: reopening per row is far too slow
    int               m_skipped;       // signals skipped (open position, invalid stop, rejected)
    string            m_last;          // last action, for the panel status line
 
@@ -176,7 +177,7 @@ public:
                                              m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
                                              m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
                                              m_openPosId(0), m_openObId(0), m_openScore(0.0),
-                                             m_openRiskMoney(0.0), m_openTime(0),
+                                             m_openRiskMoney(0.0), m_openTime(0), m_resultHandle(INVALID_HANDLE),
                                              m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
@@ -238,6 +239,14 @@ public:
    double            RiskPercent(void) const { return m_riskPercent; }
 
    void              SetResultFile(const string f) { m_resultFile = f; }
+   void              CloseResultFile(void)
+     {
+      if(m_resultHandle != INVALID_HANDLE)
+        {
+         FileClose(m_resultHandle);
+         m_resultHandle = INVALID_HANDLE;
+        }
+     }
 
    void              SetAlerts(const bool on)
      {
@@ -435,7 +444,13 @@ public:
       double realisedR = (m_openRiskMoney > 0.0) ? profit / m_openRiskMoney : 0.0;
       if(StringLen(m_resultFile) > 0)
         {
-         int h = FileOpen(m_resultFile, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON, ',');
+         if(m_resultHandle == INVALID_HANDLE)
+           {
+            m_resultHandle = FileOpen(m_resultFile, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON, ',');
+            if(m_resultHandle != INVALID_HANDLE)
+               FileSeek(m_resultHandle, 0, SEEK_END);
+           }
+         int h = m_resultHandle;
          if(h != INVALID_HANDLE)
            {
             if(FileSize(h) == 0)
@@ -446,7 +461,7 @@ public:
                       TimeToString(TimeCurrent(), TIME_DATE | TIME_MINUTES), _Symbol, m_openObId,
                       DoubleToString(m_openScore, 1), DoubleToString(m_openRiskMoney, 2),
                       DoubleToString(profit, 2), DoubleToString(realisedR, 3));
-            FileClose(h);
+            FileFlush(h);
            }
         }
       PrintFormat("[SMC-TRADE] closed OB #%I64d: %.2f (%.2f R), score %.1f",
