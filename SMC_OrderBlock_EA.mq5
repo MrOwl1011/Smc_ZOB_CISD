@@ -281,6 +281,7 @@ void PanelDefaults(SSMCPanelState &p)
    p.retestMode       = (int)InpConnRetestMode;
    p.mitStopsCISD     = InpConnMitigationStops;
    p.trendFilter      = InpTrendFilter;
+   p.trendGate        = InpTrendATRMult;
    p.tradeEnabled     = InpEnableTrading;
    p.lots             = InpLots;
    p.oppExit          = InpOppositeBlockExit;
@@ -1212,7 +1213,7 @@ void BuildConnSettings(SConnSettings &s, const datetime windowStart)
    s.stopOnMitigation = p.mitStopsCISD;
    s.trendFilter      = p.trendFilter;
    s.trendBars        = InpTrendBars;
-   s.trendATRMult     = InpTrendATRMult;
+   s.trendATRMult     = p.trendGate;       // the panel owns the threshold at runtime
    s.trendATRPeriod   = InpATRPeriod;
    s.mitigationMode   = p.mitigationMode;     // same level as the OB detector (Touch / 50% / Full)
    SCISDSettings cs;
@@ -1673,11 +1674,24 @@ void TestConnPanelWiring(void)
    bool tf0 = s.trendFilter, tfMulti = s.multiCISD;
    a = g_panel.OnClick(SMC_PANEL_PREFIX + "trendf");
    BuildConnSettings(s, 0);
+   SSMCPanelState tp;
+   g_panel.GetState(tp);
    bool tfOk = (a == SMC_PANEL_CISD && s.trendFilter != tf0 && s.multiCISD == tfMulti &&
-                s.trendBars == InpTrendBars && MathAbs(s.trendATRMult - InpTrendATRMult) < 1e-9);
+                s.trendBars == InpTrendBars && MathAbs(s.trendATRMult - tp.trendGate) < 1e-9);
    g_panel.OnClick(SMC_PANEL_PREFIX + "trendf");
    BuildConnSettings(s, 0);
    tfOk = tfOk && (s.trendFilter == tf0);
+   //--- the gate stepper reaches the engine and moves nothing else
+   g_panel.GetState(tp);
+   double gate0 = tp.trendGate;
+   bool gateMulti = s.multiCISD;
+   a = g_panel.OnClick(SMC_PANEL_PREFIX + "tgate_p");
+   BuildConnSettings(s, 0);
+   tfOk = tfOk && (a == SMC_PANEL_CISD && MathAbs(s.trendATRMult - (gate0 + 0.25)) < 1e-9 &&
+                   s.multiCISD == gateMulti);
+   g_panel.OnClick(SMC_PANEL_PREFIX + "tgate_m");
+   BuildConnSettings(s, 0);
+   tfOk = tfOk && MathAbs(s.trendATRMult - gate0) < 1e-9;
    if(tfOk)
       pass++;
    else { fail++; Print("[SMC-CONN][TEST] FAIL  panel wiring: trend filter switch"); }
@@ -1935,7 +1949,7 @@ void TestConfigProfiles(void)
    a = saved;
    a.cisdMode = 1; a.retestMode = 1; a.swingLength = 7; a.dispATRMult = 2.25;
    a.showBull = false; a.cisdSweep = false; a.obTF = 5; a.cisdTF = 2; a.connect = true; a.maxActivePerDir = 13;
-   a.mitStopsCISD = true; a.trendFilter = false;
+   a.mitStopsCISD = true; a.trendFilter = false; a.trendGate = 2.75;
    a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
    a.targetRR = 2.5; a.breakEven = true; a.bePoints = 250; a.rideTrend = true; a.entryAlert = false;
    a.riskPctMode = true; a.riskPercent = 1.25;
@@ -1945,6 +1959,7 @@ void TestConfigProfiles(void)
 
    b = saved;                           // deliberately different starting point
    b.cisdMode = 0; b.retestMode = 0; b.swingLength = 3; b.mitStopsCISD = false; b.trendFilter = true;
+   b.trendGate = 1.5;
    b.tradeEnabled = false; b.lots = 0.55; b.oppExit = true;
    b.targetRR = 1.0; b.breakEven = false; b.bePoints = 100; b.rideTrend = false; b.entryAlert = true;
    b.riskPctMode = false; b.riskPercent = 0.5;
@@ -1955,7 +1970,8 @@ void TestConfigProfiles(void)
       b.swingLength == a.swingLength && MathAbs(b.dispATRMult - a.dispATRMult) < 1e-9 &&
       b.showBull == a.showBull && b.cisdSweep == a.cisdSweep && b.obTF == a.obTF && b.cisdTF == a.cisdTF &&
       b.maxActivePerDir == a.maxActivePerDir && b.mitStopsCISD == a.mitStopsCISD &&
-      b.trendFilter == a.trendFilter && b.tradeEnabled == a.tradeEnabled &&
+      b.trendFilter == a.trendFilter && MathAbs(b.trendGate - a.trendGate) < 1e-9 &&
+      b.tradeEnabled == a.tradeEnabled &&
       MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit &&
       MathAbs(b.targetRR - a.targetRR) < 1e-9 && b.breakEven == a.breakEven &&
       b.bePoints == a.bePoints && b.rideTrend == a.rideTrend &&

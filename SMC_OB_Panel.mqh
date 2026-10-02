@@ -53,6 +53,7 @@ struct SSMCPanelState
    int               retestMode;      // 0 = Single (first retest only), 1 = Multi (every retest)
    bool              mitStopsCISD;    // a mitigated OB stops its CISD search (like invalidation)
    bool              trendFilter;     // only take CISDs that agree with the OB-timeframe trend
+   double            trendGate;       // displacement in ATR the trend must show
    //--- trade execution (entry at the confirmed setup, stop on the far side of the OB, 1:1 target)
    bool              tradeEnabled;
    double            lots;
@@ -240,6 +241,7 @@ void CSMCPanel::Sanitize(SSMCPanelState &s) const
   {
    s.lots             = MathMax(0.01, MathMin(100.0, MathRound(s.lots * 100.0) / 100.0));
    s.riskPercent      = MathMax(0.05, MathMin(10.0, MathRound(s.riskPercent * 100.0) / 100.0));
+   s.trendGate        = MathMax(0.1, MathMin(10.0, MathRound(s.trendGate * 100.0) / 100.0));
    s.targetRR         = MathMax(0.1, MathMin(20.0, MathRound(s.targetRR * 10.0) / 10.0));
    s.bePoints         = (int)MathMax(10, MathMin(100000, s.bePoints));
    s.swingLength      = (int)MathMax(1, MathMin(50, s.swingLength));
@@ -518,7 +520,6 @@ int CSMCPanel::LayoutBody(void)
       Cycle("c_cmode", cy, "CISD Validation", ModeText(m_st.cisdMode)); cy += SMC_PNL_ROW + 4;
       Cycle("c_rmode", cy, "Retest Mode", ModeText(m_st.retestMode));   cy += SMC_PNL_ROW + 4;
       Switch("mitstop", cy, "Mitigation stops CISD", m_st.mitStopsCISD); cy += SMC_PNL_ROW + 4;
-      Switch("trendf", cy, "Trend filter", m_st.trendFilter);           cy += SMC_PNL_ROW + 4;
       Switch("cisd_sw", cy, "Liquidity Sweep", m_st.cisdSweep);      cy += SMC_PNL_ROW + 4;
       Switch("cisd_cf", cy, "Confirmation Close", m_st.cisdConfirm); cy += SMC_PNL_ROW + 4;
       Switch("cisd_rt", cy, "Retracement / Entry", m_st.cisdRetrace); cy += SMC_PNL_ROW + 6;
@@ -563,6 +564,12 @@ int CSMCPanel::LayoutBody(void)
    Section("sec_trade", cy, "TRADING");
    cy += 16;
    Switch("trade", cy, "Trade execution", m_st.tradeEnabled);              cy += SMC_PNL_ROW + 4;
+   Switch("trendf", cy, "Trend filter", m_st.trendFilter);                 cy += SMC_PNL_ROW + 4;
+   if(m_st.trendFilter)
+     {
+      Stepper("tgate", cy, "Trend gate  x ATR", DoubleToString(m_st.trendGate, 2));
+      cy += SMC_PNL_ROW + 4;
+     }
    Switch("alert", cy, "Entry alert", m_st.entryAlert);                    cy += SMC_PNL_ROW + 4;
    Switch("rskm", cy, "Risk % sizing", m_st.riskPctMode);                   cy += SMC_PNL_ROW + 4;
    if(m_st.riskPctMode)
@@ -739,6 +746,14 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "c_rmode") { iv = m_st.retestMode; Next(iv, 2); m_st.retestMode = iv; return SMC_PANEL_CISD; }
    if(id == "mitstop") { m_st.mitStopsCISD = !m_st.mitStopsCISD;           return SMC_PANEL_CISD; }
    if(id == "trendf")  { m_st.trendFilter  = !m_st.trendFilter;            return SMC_PANEL_CISD; }
+   if(id == "tgate_m" || id == "tgate_p")
+     {
+      double gv = m_st.trendGate;
+      if(StepDbl(gv, id == "tgate_p" ? 0.25 : -0.25, 0.1, 10.0) == SMC_PANEL_NONE)
+         return SMC_PANEL_NONE;
+      m_st.trendGate = gv;
+      return SMC_PANEL_CISD;           // the connection engine owns this threshold
+     }
    if(id == "trade")   { m_st.tradeEnabled = !m_st.tradeEnabled;           return SMC_PANEL_TRADE; }
    if(id == "oppx")    { m_st.oppExit      = !m_st.oppExit;                return SMC_PANEL_TRADE; }
    if(id == "be")      { m_st.breakEven    = !m_st.breakEven;              return SMC_PANEL_TRADE; }
@@ -821,6 +836,7 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "rmode", m_st.retestMode);
    GlobalVariableSet(key + "mstop", m_st.mitStopsCISD);
    GlobalVariableSet(key + "trendf", m_st.trendFilter);
+   GlobalVariableSet(key + "tgate", m_st.trendGate);
    GlobalVariableSet(key + "trade", m_st.tradeEnabled);
    GlobalVariableSet(key + "lots", m_st.lots);
    GlobalVariableSet(key + "oppx", m_st.oppExit);
@@ -873,6 +889,7 @@ bool CSMCPanel::Load(const string key)
    m_st.retestMode       = GlobalVariableCheck(key + "rmode") ? (int)GlobalVariableGet(key + "rmode") : m_def.retestMode;
    m_st.mitStopsCISD     = GlobalVariableCheck(key + "mstop") ? GlobalVariableGet(key + "mstop") != 0 : m_def.mitStopsCISD;
    m_st.trendFilter      = GlobalVariableCheck(key + "trendf") ? GlobalVariableGet(key + "trendf") != 0 : m_def.trendFilter;
+   m_st.trendGate        = GlobalVariableCheck(key + "tgate") ? GlobalVariableGet(key + "tgate") : m_def.trendGate;
    m_st.tradeEnabled     = GlobalVariableCheck(key + "trade") ? GlobalVariableGet(key + "trade") != 0 : m_def.tradeEnabled;
    m_st.lots             = GlobalVariableCheck(key + "lots") ? GlobalVariableGet(key + "lots") : m_def.lots;
    m_st.oppExit          = GlobalVariableCheck(key + "oppx") ? GlobalVariableGet(key + "oppx") != 0 : m_def.oppExit;
