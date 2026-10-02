@@ -25,6 +25,7 @@
 #include "SMC_OB_Panel.mqh"
 #include "SMC_OB_Confidence.mqh"
 #include "SMC_OB_TradeHooks.mqh"
+#include "SMC_OB_Guards.mqh"
 #include "SMC_OB_SelfTest.mqh"
 #include "SMC_OB_PanelTest.mqh"
 #include "SMC_CISD_Visual.mqh"
@@ -131,6 +132,14 @@ input string                     InpConfidenceFile     = "SMC_Confidence.csv";  
 input string                     InpResultFile         = "SMC_Results.csv";      // Closed-trade results with their scores, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
+input bool                       InpCapitalGuards      = false;                 // Capital protection: hard refusals before any new trade (panel default)
+input double                     InpGuardDailyLoss     = 2.0;                   // Guard: stop for the day after this loss, % of day-start equity (0 = off)
+input double                     InpGuardWeeklyLoss    = 4.0;                   // Guard: stop for the week after this loss, % of week-start equity (0 = off)
+input int                        InpGuardMaxConsec     = 5;                     // Guard: pause until the next day after this many losses in a row (0 = off)
+input double                     InpGuardEquityStop    = 12.0;                  // Guard: flatten and halt this far below the equity peak, % (0 = off)
+input double                     InpGuardSpreadPctOfR  = 3.0;                   // Guard: refuse when the spread exceeds this share of the stop, % (0 = off)
+input double                     InpGuardVolSpike      = 0.0;                   // Guard: refuse when ATR(14) exceeds this multiple of its average (0 = off)
+input int                        InpGuardVolAvgBars    = 200;                   // Guard: bars in that ATR average
 input long                       InpMagic              = 20260928;              // Magic number
 input int                        InpSlippage           = 20;                    // Max slippage (points)
 
@@ -210,6 +219,7 @@ bool               g_connScanned     = false;
 int                g_connFailLogged  = 0;
 CSMCPanel       g_panel;
 CSMCTradeEngine g_trade;
+CSMCCapitalGuard g_guard;
 
 bool     g_scanned        = false;
 //--- candle buffers reused by the per-bar paths (CopyRates keeps their capacity)
@@ -558,6 +568,14 @@ int OnInit(void)
    g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage,
                 InpTargetRR, InpBreakEven, InpBreakEvenPoints, InpRideTrend, InpEntryAlert,
                 InpRiskPercentMode, InpRiskPercent);
+   //--- The tester keeps GlobalVariables between runs, so a halt from the previous
+   //--- backtest would otherwise be inherited and quietly flatten this one.
+   g_guard.Configure(InpCapitalGuards, InpGuardDailyLoss, InpGuardWeeklyLoss, InpGuardMaxConsec,
+                     InpGuardEquityStop, InpGuardSpreadPctOfR, InpGuardVolSpike,
+                     InpGuardVolAvgBars, InpMagic);
+   if(MQLInfoInteger(MQL_TESTER))
+      g_guard.ResetState();
+   g_trade.AttachGuard(GetPointer(g_guard));
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
@@ -633,6 +651,8 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick(void)
   {
+   g_guard.Update();                   // day / week rollover, equity peak, equity stop
+   g_trade.FlattenIfAsked();           // carry out an equity-stop flatten
    g_trade.RecordClosedTrade();        // write the result of a trade that just closed
    g_trade.ManageOpenPosition();       // break-even stop, if armed
    g_trade.RideOpenPosition(g_detector);   // opposite-block target, if riding

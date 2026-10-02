@@ -27,6 +27,12 @@
 //|  moment a setup confirms. It works whether or not execution is on, |
 //|  so the EA can be used purely as a signal tool.                   |
 //|                                                                  |
+//|  Capital protection (optional): a CSMCCapitalGuard, when attached, |
+//|  can refuse a new trade - daily or weekly loss reached, a losing  |
+//|  streak, the equity stop, too wide a spread, a volatility spike.  |
+//|  It refuses only execution: the entry alert still fires, so the   |
+//|  EA keeps telling you what it saw while it is standing down.     |
+//|                                                                  |
 //|  Ride the trend (optional): no fixed target at all. The position |
 //|  is held until price reaches the nearest live Order Block facing  |
 //|  the other way, which becomes a moving take profit. While this is |
@@ -37,6 +43,7 @@
 
 #include <Trade\Trade.mqh>
 #include "SMC_OB_Engine.mqh"
+#include "SMC_OB_Guards.mqh"
 
 class CSMCTradeEngine
   {
@@ -47,6 +54,7 @@ private:
    double            m_rr;            // take profit as a multiple of risk
    bool              m_ride;          // hold to the nearest opposite block instead of a fixed target
    bool              m_alerts;        // announce every entry signal, with or without execution
+   CSMCCapitalGuard *m_guard;        // capital protection, or NULL when none is attached
    bool              m_riskPct;       // size from a percent of equity instead of fixed lots
    double            m_riskPercent;   // percent of equity risked per trade when m_riskPct is on
    bool              m_beEnabled;     // move the stop to entry once in profit
@@ -173,7 +181,7 @@ private:
      }
 
 public:
-                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true), m_riskPct(false), m_riskPercent(0.5),
+                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true), m_guard(NULL), m_riskPct(false), m_riskPercent(0.5),
                                              m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
                                              m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
                                              m_openPosId(0), m_openObId(0), m_openScore(0.0),
@@ -227,6 +235,8 @@ public:
          Print("[SMC-TRADE] ride the trend ", on ? "ON (no fixed target)" : "OFF");
       m_ride = on;
      }
+   void              AttachGuard(CSMCCapitalGuard *g) { m_guard = g; }
+
    void              SetRiskPercent(const bool on, const double pct)
      {
       if(on != m_riskPct)
@@ -348,7 +358,10 @@ public:
 
       //--- from here the setup is valid. Announce it before anything can stop the order,
       //--- so the alert is identical whether or not the EA is allowed to trade.
-      bool willTrade = m_enabled &&
+      //--- a guard refusal is decided before the alert, so the alert can say
+      //--- honestly whether the EA is going to act on what it just announced
+      bool allowed   = (m_guard == NULL) ? true : m_guard.AllowNewTrade(risk);
+      bool willTrade = m_enabled && allowed &&
                        TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) && MQLInfoInteger(MQL_TRADE_ALLOWED) &&
                        !HasPosition();
       if(m_alerts)
@@ -356,6 +369,12 @@ public:
 
       if(!m_enabled)
          return false;
+      if(!allowed)
+        {
+         m_skipped++;
+         m_last = StringFormat("skip OB #%I64d: %s", obId, SMC_GuardName(m_guard.LastBlock()));
+         return false;
+        }
       if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !MQLInfoInteger(MQL_TRADE_ALLOWED))
         {
          if(!m_warned)
@@ -466,7 +485,28 @@ public:
         }
       PrintFormat("[SMC-TRADE] closed OB #%I64d: %.2f (%.2f R), score %.1f",
                   m_openObId, profit, realisedR, m_openScore);
+      if(m_guard != NULL)
+         m_guard.OnTradeClosed(profit);
       m_openPosId = 0;
+     }
+
+   //--- The equity stop asked for a flatten. Closing is this layer's job, so the
+   //--- guard never touches the broker.
+   bool              FlattenIfAsked(void)
+     {
+      if(m_guard == NULL || !m_guard.FlattenRequested())
+         return false;
+      m_guard.ClearFlatten();
+      if(!PositionSelect(_Symbol) || PositionGetInteger(POSITION_MAGIC) != m_magic)
+         return false;
+      ulong ticket = PositionGetInteger(POSITION_TICKET);
+      if(m_trade.PositionClose(ticket))
+        {
+         Print("[SMC-TRADE] flattened on the equity stop");
+         return true;
+        }
+      Print("[SMC-TRADE] equity stop could not close the position: retcode ", m_trade.ResultRetcode());
+      return false;
      }
 
    //--- Break-even: once the open position is m_bePoints in profit, the stop is
