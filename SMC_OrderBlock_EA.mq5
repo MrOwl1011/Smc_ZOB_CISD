@@ -23,6 +23,7 @@
 
 #include "SMC_OB_Visual.mqh"
 #include "SMC_OB_Panel.mqh"
+#include "SMC_OB_Confidence.mqh"
 #include "SMC_OB_TradeHooks.mqh"
 #include "SMC_OB_SelfTest.mqh"
 #include "SMC_OB_PanelTest.mqh"
@@ -117,11 +118,15 @@ input color                      InpConnColor          = clrHotPink;            
 //--- trade execution: entry at a confirmed setup, stop on the far side of the OB, 1:1 target
 input group "=== Trading ==="
 input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
-input double                     InpLots               = 0.01;                  // Lot size (panel default)
+input double                     InpLots               = 0.01;                  // Lot size, when risk sizing is off (panel default)
+input bool                       InpRiskPercentMode    = false;                 // Size from equity risk instead of fixed lots (panel default)
+input double                     InpRiskPercent        = 0.50;                  // Percent of equity risked per trade (panel default)
 input bool                       InpOppositeBlockExit  = false;                  // Opposite block exit: a retested opposite OB closes the trade (panel default)
 input double                     InpTargetRR           = 1.0;                   // Take profit, as a multiple of risk (1.0 = 1:1) (panel default)
 input bool                       InpRideTrend          = false;                 // Ride the trend: hold to the nearest opposite OB, ignore the R:R target (panel default)
 input bool                       InpEntryAlert         = true;                  // Entry alert with entry / SL / TP, works with trading off (panel default)
+input bool                       InpConfidenceLog      = true;                  // Score every confirmed setup and log it (does not change any decision)
+input string                     InpConfidenceFile     = "SMC_Confidence.csv";   // Confidence log file, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
 input long                       InpMagic              = 20260928;              // Magic number
@@ -282,6 +287,8 @@ void PanelDefaults(SSMCPanelState &p)
    p.targetRR         = InpTargetRR;
    p.rideTrend        = InpRideTrend;
    p.entryAlert       = InpEntryAlert;
+   p.riskPctMode      = InpRiskPercentMode;
+   p.riskPercent      = InpRiskPercent;
    p.breakEven        = InpBreakEven;
    p.bePoints         = InpBreakEvenPoints;
    p.swingLength      = InpSwingLength;
@@ -546,7 +553,8 @@ int OnInit(void)
    g_visual.Init(v, 0);
    g_visual.Cleanup();
    g_trade.Init(InpEnableTrading, InpLots, InpMagic, InpSlippage,
-                InpTargetRR, InpBreakEven, InpBreakEvenPoints, InpRideTrend, InpEntryAlert);
+                InpTargetRR, InpBreakEven, InpBreakEvenPoints, InpRideTrend, InpEntryAlert,
+                InpRiskPercentMode, InpRiskPercent);
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
@@ -910,6 +918,7 @@ void ApplyTradeSettings(void)
    g_trade.SetTargetRR(p.targetRR);
    g_trade.SetRideTrend(p.rideTrend);
    g_trade.SetAlerts(p.entryAlert);
+   g_trade.SetRiskPercent(p.riskPctMode, p.riskPercent);
    g_trade.SetOBTimeframe(g_obTF);
    g_trade.SetBreakEven(p.breakEven, p.bePoints);
   }
@@ -1429,8 +1438,8 @@ void ProcessConnection(void)
 //+------------------------------------------------------------------+
 void TradeConfirmedSetup(const SConnEvent &e)
   {
-   if(!g_trade.IsEnabled() && !g_trade.Alerts())
-      return;                          // neither trading nor alerting: nothing to do
+   if(!g_trade.IsEnabled() && !g_trade.Alerts() && !InpConfidenceLog)
+      return;                          // not trading, not alerting, not scoring: nothing to do
    SOrderBlock ob;
    int idx = g_detector.FindById(e.obId);
    bool found = (idx >= 0 && g_detector.GetOB(idx, ob));
@@ -1438,6 +1447,26 @@ void TradeConfirmedSetup(const SConnEvent &e)
      {
       PrintFormat("[SMC-TRADE] confirmed setup skipped: Order Block #%I64d not found", e.obId);
       return;
+     }
+   //--- Score the setup for measurement. Phase 1: logged, never acted on, so the
+   //--- weights can be fitted against realised R before they touch position size.
+   if(InpConfidenceLog)
+     {
+      double entryPx = (e.dir == SMC_DIR_BULL) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
+                                               : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+      double stopPx  = (e.dir == SMC_DIR_BULL) ? ob.bottom : ob.top;
+      double riskPx  = MathAbs(entryPx - stopPx);
+      SSMCConfidence conf = SMC_Confidence(ob, e.trendScore, e.retestNo, e.cisdLevel, e.price,
+                                           e.sweepTime, e.time, riskPx,
+                                           PeriodSeconds(g_obTF), PeriodSeconds(g_cisdTF));
+      PrintFormat("[SMC-SCORE] OB #%I64d %s %s", e.obId,
+                  e.dir == SMC_DIR_BULL ? "BUY" : "SELL", SMC_ConfidenceText(conf));
+      if(StringLen(InpConfidenceFile) > 0)
+        {
+         double tpPx = (e.dir == SMC_DIR_BULL) ? entryPx + riskPx * InpTargetRR
+                                               : entryPx - riskPx * InpTargetRR;
+         SMC_ConfidenceLog(InpConfidenceFile, conf, e.obId, e.dir, e.time, entryPx, stopPx, tpPx);
+        }
      }
    g_trade.OnSignal(e.dir, ob.top, ob.bottom, e.obId, e.cisdId);
   }
@@ -1909,6 +1938,7 @@ void TestConfigProfiles(void)
    a.mitStopsCISD = true; a.trendFilter = false;
    a.tradeEnabled = true; a.lots = 0.07; a.oppExit = false;
    a.targetRR = 2.5; a.breakEven = true; a.bePoints = 250; a.rideTrend = true; a.entryAlert = false;
+   a.riskPctMode = true; a.riskPercent = 1.25;
    if(SMC_ConfigSave(p1, a, BuildInputSnapshot(), InpConfigCommon, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  save: %s", res.message); }
@@ -1917,6 +1947,7 @@ void TestConfigProfiles(void)
    b.cisdMode = 0; b.retestMode = 0; b.swingLength = 3; b.mitStopsCISD = false; b.trendFilter = true;
    b.tradeEnabled = false; b.lots = 0.55; b.oppExit = true;
    b.targetRR = 1.0; b.breakEven = false; b.bePoints = 100; b.rideTrend = false; b.entryAlert = true;
+   b.riskPctMode = false; b.riskPercent = 0.5;
    if(SMC_ConfigLoad(p1, b, InpConfigCommon, keys, vals, res))
       pass++;
    else { fail++; PrintFormat("[SMC-CFG][TEST] FAIL  load: %s", res.message); }
@@ -1928,7 +1959,8 @@ void TestConfigProfiles(void)
       MathAbs(b.lots - a.lots) < 1e-9 && b.oppExit == a.oppExit &&
       MathAbs(b.targetRR - a.targetRR) < 1e-9 && b.breakEven == a.breakEven &&
       b.bePoints == a.bePoints && b.rideTrend == a.rideTrend &&
-      b.entryAlert == a.entryAlert && ArraySize(keys) > 0)
+      b.entryAlert == a.entryAlert && b.riskPctMode == a.riskPctMode &&
+      MathAbs(b.riskPercent - a.riskPercent) < 1e-9 && ArraySize(keys) > 0)
       pass++;
    else { fail++; Print("[SMC-CFG][TEST] FAIL  round trip: values differ after load"); }
 

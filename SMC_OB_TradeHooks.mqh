@@ -10,7 +10,7 @@
 //|    stop  : the far side of the Order Block (below a bull block,  |
 //|            above a bear block)                                   |
 //|    target: reward:risk multiple of the stop distance (def 1:1)   |
-//|    size  : fixed lots (panel / input), default 0.01              |
+//|    size  : fixed lots, or a percent of equity risked on the stop  |
 //|                                                                  |
 //|  Only one position at a time, and only on live events - history   |
 //|  scan events are ignored.                                        |
@@ -47,6 +47,8 @@ private:
    double            m_rr;            // take profit as a multiple of risk
    bool              m_ride;          // hold to the nearest opposite block instead of a fixed target
    bool              m_alerts;        // announce every entry signal, with or without execution
+   bool              m_riskPct;       // size from a percent of equity instead of fixed lots
+   double            m_riskPercent;   // percent of equity risked per trade when m_riskPct is on
    bool              m_beEnabled;     // move the stop to entry once in profit
    int               m_bePoints;      // profit in points that arms it
    double            m_lots;
@@ -95,6 +97,58 @@ private:
       return false;
      }
 
+   //--- Lots that put exactly riskMoney at risk over a stop of riskPrice.
+   //--- Falls back to the fixed lot size when the symbol does not report what a
+   //--- point is worth, so a broken quote can never silently size up.
+   double            LotsForRisk(const double riskPrice, double &riskMoneyOut) const
+     {
+      riskMoneyOut = 0.0;
+      if(riskPrice <= 0.0)
+         return m_lots;
+      double point    = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      double tickVal  = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+      double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+      if(point <= 0.0 || tickVal <= 0.0 || tickSize <= 0.0)
+        {
+         Print("[SMC-TRADE] risk sizing unavailable for ", _Symbol, ": using the fixed lot size");
+         return m_lots;
+        }
+      double equity = AccountInfoDouble(ACCOUNT_EQUITY);
+      if(equity <= 0.0)
+         return m_lots;
+      double riskMoney       = equity * m_riskPercent / 100.0;
+      double valuePerPointLot = tickVal * (point / tickSize);     // account currency per point per 1.00 lot
+      double riskPoints       = riskPrice / point;
+      if(valuePerPointLot <= 0.0 || riskPoints <= 0.0)
+         return m_lots;
+      riskMoneyOut = riskMoney;
+      return riskMoney / (riskPoints * valuePerPointLot);
+     }
+
+   //--- Shrink a size that the account cannot margin, rather than letting the
+   //--- order be rejected.
+   double            FitMargin(const double lots, const int dir) const
+     {
+      double v = lots;
+      double step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+      if(step <= 0.0)
+         step = 0.01;
+      double free = AccountInfoDouble(ACCOUNT_MARGIN_FREE) * 0.9;   // keep a tenth spare
+      double price = (dir == SMC_DIR_BULL) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
+                                           : SymbolInfoDouble(_Symbol, SYMBOL_BID);
+      ENUM_ORDER_TYPE ot = (dir == SMC_DIR_BULL) ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+      double need = 0.0;
+      for(int guard = 0; guard < 50; guard++)
+        {
+         if(!OrderCalcMargin(ot, _Symbol, v, price, need))
+            return v;                                   // cannot tell: leave it to the server
+         if(need <= free || v <= step)
+            return v;
+         v = NormalizeDouble(v - step, 2);
+        }
+      return v;
+     }
+
    double            NormLots(const double lots) const
      {
       double mn   = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
@@ -111,7 +165,7 @@ private:
      }
 
 public:
-                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true),
+                     CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true), m_riskPct(false), m_riskPercent(0.5),
                                              m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
                                              m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
                                              m_skipped(0), m_last("") {}
@@ -119,7 +173,7 @@ public:
    //--- called once from OnInit
    void              Init(const bool enabled, const double lots, const long magic, const int slippage,
                            const double rr, const bool beEnabled, const int bePoints,
-                           const bool ride, const bool alerts)
+                           const bool ride, const bool alerts, const bool riskPct, const double riskPercent)
      {
       m_enabled = enabled;
       m_lots    = (lots > 0.0 ? lots : 0.01);
@@ -128,6 +182,8 @@ public:
       m_bePoints  = (bePoints > 0 ? bePoints : 100);
       m_ride      = ride;
       m_alerts    = alerts;
+      m_riskPct     = riskPct;
+      m_riskPercent = (riskPercent > 0.0 ? riskPercent : 0.5);
       m_magic   = magic;
       m_trade.SetExpertMagicNumber((ulong)magic);
       m_trade.SetDeviationInPoints((ulong)MathMax(0, slippage));
@@ -161,6 +217,17 @@ public:
          Print("[SMC-TRADE] ride the trend ", on ? "ON (no fixed target)" : "OFF");
       m_ride = on;
      }
+   void              SetRiskPercent(const bool on, const double pct)
+     {
+      if(on != m_riskPct)
+         Print("[SMC-TRADE] position sizing: ", on ? "percent of equity" : "fixed lots");
+      m_riskPct = on;
+      if(pct > 0.0)
+         m_riskPercent = pct;
+     }
+   bool              RiskPercentMode(void) const { return m_riskPct; }
+   double            RiskPercent(void) const { return m_riskPercent; }
+
    void              SetAlerts(const bool on)
      {
       if(on != m_alerts)
@@ -185,9 +252,10 @@ public:
    string            LastAction(void) const { return m_last; }
    string            StatusText(void) const
      {
-      return StringFormat("trading %s | lots %.2f | %s | break even %s (%d pts) | opposite exit %s | "
+      return StringFormat("trading %s | %s | %s | break even %s (%d pts) | opposite exit %s | "
                           "alerts %s | sent %d | closed %d | be %d | ride exits %d | skipped %d%s",
-                          m_enabled ? "ON" : "OFF", m_lots,
+                          m_enabled ? "ON" : "OFF",
+                          m_riskPct ? StringFormat("risk %.2f%%", m_riskPercent) : StringFormat("lots %.2f", m_lots),
                           m_ride ? "ride the trend" : StringFormat("1:%.2f", m_rr),
                           m_alerts ? "ON" : "OFF",
                           m_beEnabled ? "ON" : "OFF", m_bePoints, m_oppExit ? "ON" : "OFF",
@@ -284,13 +352,26 @@ public:
          return false;
         }
 
-      double lots = NormLots(m_lots);
+      double riskMoney = 0.0;
+      double lots = m_riskPct ? NormLots(LotsForRisk(risk, riskMoney)) : NormLots(m_lots);
+      lots = FitMargin(lots, dir);
+      if(lots < SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN) - 1e-9)
+        {
+         m_skipped++;
+         m_last = StringFormat("skip OB #%I64d: risk %.2f is below one minimum lot", obId, riskMoney);
+         Print("[SMC-TRADE] ", m_last);
+         return false;
+        }
       string cm   = StringFormat("SMC OB#%I64d CISD#%I64d", obId, cisdId);
       bool   ok   = (dir == SMC_DIR_BULL) ? m_trade.Buy(lots, _Symbol, 0.0, sl, tp, cm)
                                           : m_trade.Sell(lots, _Symbol, 0.0, sl, tp, cm);
       if(ok)
         {
          m_sent++;
+         if(m_riskPct)
+            PrintFormat("[SMC-TRADE] sizing: equity %.2f, risk %.2f%% = %.2f, stop %.1f points -> %.2f lots",
+                        AccountInfoDouble(ACCOUNT_EQUITY), m_riskPercent, riskMoney,
+                        risk / (point > 0 ? point : 1), lots);
          m_last = (tp > 0.0)
                ? StringFormat("%s %.2f @ %.*f sl %.*f tp %.*f (OB #%I64d)",
                               dir == SMC_DIR_BULL ? "BUY" : "SELL", lots, digits, entry, digits, sl, digits, tp, obId)

@@ -144,6 +144,9 @@ struct SConnSetup
 //--- one retest of that Order Block = one CISD monitoring sequence
 struct SConnSeq
   {
+   double            trendScore;    // score that passed the gate, 0 when the filter is off
+   double            cisdLevel;     // confirmation level of the accepted CISD
+   datetime          cisdSweepTime; // sweep carried by that CISD, 0 when none
    long              id;
    long              setupId;
    int               setupIdx;          // index into the setup array (stable: setups are never removed)
@@ -202,6 +205,9 @@ struct SConnEvent
    long              cisdId;
    datetime          time;
    double            price;
+   double            trendScore;    // signed displacement in ATR that passed the gate (0 when off)
+   double            cisdLevel;     // level the confirmation closed through
+   datetime          sweepTime;     // liquidity sweep that preceded it, 0 when none
    bool              historical;
   };
 
@@ -449,6 +455,9 @@ void CSMCConnection::EventSeq(const ENUM_CONN_EVENT type, const int q, const dat
    m_events[n].cisdId     = m_seq[q].cisdId;
    m_events[n].time       = t;
    m_events[n].price      = price;
+   m_events[n].trendScore = m_seq[q].trendScore;
+   m_events[n].cisdLevel  = m_seq[q].cisdLevel;
+   m_events[n].sweepTime  = m_seq[q].cisdSweepTime;
    m_events[n].historical = m_hist;
   }
 
@@ -1078,6 +1087,9 @@ void CSMCConnection::Evaluate(const int q, const datetime closeTime)
                                                  m_seq[q].dir == SMC_DIR_BULL ? "+" : "-", m_s.trendATRMult));
             continue;
            }
+         m_seq[q].trendScore = tscore;        // kept for the trade layer's confidence score
+         m_seq[q].cisdLevel  = c.level;
+         m_seq[q].cisdSweepTime = c.hasSweep ? c.sweepTime : 0;
          AddHit(q, c);
          if(!m_s.multiCISD)
             break;

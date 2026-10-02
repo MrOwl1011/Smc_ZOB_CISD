@@ -59,6 +59,8 @@ struct SSMCPanelState
    double            targetRR;        // take profit as a multiple of risk
    bool              rideTrend;       // hold to the nearest opposite block instead (ignores targetRR)
    bool              entryAlert;      // pop an alert with entry, SL and TP, with or without execution
+   bool              riskPctMode;     // size from equity risk instead of a fixed lot
+   double            riskPercent;     // percent of equity risked per trade
    bool              breakEven;       // move the stop to entry once in profit
    int               bePoints;        // profit in points that arms it
    bool              oppExit;         // a retested opposite block closes the open trade
@@ -237,6 +239,7 @@ void CSMCPanel::Init(const long chart, const string prefix, const int x, const i
 void CSMCPanel::Sanitize(SSMCPanelState &s) const
   {
    s.lots             = MathMax(0.01, MathMin(100.0, MathRound(s.lots * 100.0) / 100.0));
+   s.riskPercent      = MathMax(0.05, MathMin(10.0, MathRound(s.riskPercent * 100.0) / 100.0));
    s.targetRR         = MathMax(0.1, MathMin(20.0, MathRound(s.targetRR * 10.0) / 10.0));
    s.bePoints         = (int)MathMax(10, MathMin(100000, s.bePoints));
    s.swingLength      = (int)MathMax(1, MathMin(50, s.swingLength));
@@ -561,7 +564,12 @@ int CSMCPanel::LayoutBody(void)
    cy += 16;
    Switch("trade", cy, "Trade execution", m_st.tradeEnabled);              cy += SMC_PNL_ROW + 4;
    Switch("alert", cy, "Entry alert", m_st.entryAlert);                    cy += SMC_PNL_ROW + 4;
-   Stepper("lots", cy, "Lot size", DoubleToString(m_st.lots, 2));          cy += SMC_PNL_ROW + 4;
+   Switch("rskm", cy, "Risk % sizing", m_st.riskPctMode);                   cy += SMC_PNL_ROW + 4;
+   if(m_st.riskPctMode)
+      Stepper("rskp", cy, "Risk per trade %", DoubleToString(m_st.riskPercent, 2));
+   else
+      Stepper("lots", cy, "Lot size", DoubleToString(m_st.lots, 2));
+   cy += SMC_PNL_ROW + 4;
    Switch("ride", cy, "Ride the trend", m_st.rideTrend);                     cy += SMC_PNL_ROW + 4;
    Stepper("rr", cy, m_st.rideTrend ? "Take profit (off)" : "Take profit  1 :",
            m_st.rideTrend ? "-" : DoubleToString(m_st.targetRR, 1));         cy += SMC_PNL_ROW + 4;
@@ -736,6 +744,15 @@ ENUM_SMC_PANEL_ACTION CSMCPanel::OnClick(const string objectName)
    if(id == "be")      { m_st.breakEven    = !m_st.breakEven;              return SMC_PANEL_TRADE; }
    if(id == "ride")    { m_st.rideTrend    = !m_st.rideTrend;              return SMC_PANEL_TRADE; }
    if(id == "alert")   { m_st.entryAlert   = !m_st.entryAlert;             return SMC_PANEL_TRADE; }
+   if(id == "rskm")    { m_st.riskPctMode  = !m_st.riskPctMode;            return SMC_PANEL_TRADE; }
+   if(id == "rskp_m" || id == "rskp_p")
+     {
+      double rv = m_st.riskPercent;
+      if(StepDbl(rv, id == "rskp_p" ? 0.05 : -0.05, 0.05, 10.0) == SMC_PANEL_NONE)
+         return SMC_PANEL_NONE;
+      m_st.riskPercent = rv;
+      return SMC_PANEL_TRADE;
+     }
    if(id == "rr_m" || id == "rr_p")
      {
       double rv = m_st.targetRR;
@@ -810,6 +827,8 @@ void CSMCPanel::Save(const string key) const
    GlobalVariableSet(key + "rr", m_st.targetRR);
    GlobalVariableSet(key + "ride", m_st.rideTrend);
    GlobalVariableSet(key + "alert", m_st.entryAlert);
+   GlobalVariableSet(key + "rskm", m_st.riskPctMode);
+   GlobalVariableSet(key + "rskp", m_st.riskPercent);
    GlobalVariableSet(key + "be", m_st.breakEven);
    GlobalVariableSet(key + "bept", m_st.bePoints);
    GlobalVariableSet(key + "swing", m_st.swingLength);
@@ -860,6 +879,8 @@ bool CSMCPanel::Load(const string key)
    m_st.targetRR         = GlobalVariableCheck(key + "rr") ? GlobalVariableGet(key + "rr") : m_def.targetRR;
    m_st.rideTrend        = GlobalVariableCheck(key + "ride") ? GlobalVariableGet(key + "ride") != 0 : m_def.rideTrend;
    m_st.entryAlert       = GlobalVariableCheck(key + "alert") ? GlobalVariableGet(key + "alert") != 0 : m_def.entryAlert;
+   m_st.riskPctMode      = GlobalVariableCheck(key + "rskm") ? GlobalVariableGet(key + "rskm") != 0 : m_def.riskPctMode;
+   m_st.riskPercent      = GlobalVariableCheck(key + "rskp") ? GlobalVariableGet(key + "rskp") : m_def.riskPercent;
    m_st.breakEven        = GlobalVariableCheck(key + "be") ? GlobalVariableGet(key + "be") != 0 : m_def.breakEven;
    m_st.bePoints         = GlobalVariableCheck(key + "bept") ? (int)GlobalVariableGet(key + "bept") : m_def.bePoints;
    m_st.swingLength      = (int)GlobalVariableGet(key + "swing");

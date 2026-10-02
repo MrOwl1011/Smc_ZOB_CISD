@@ -1,0 +1,75 @@
+; MaxProfit_Gold_3Y
+; Gold (XAUUSD) M15 Order Blocks -> M1 CISD, trading ENABLED, 0.01 lots.
+;
+; Best risk-adjusted result of 128 configurations tested over three years
+; (2023-10-01 to 2026-10-01) with this broker spread:
+;   profit +809.57   trades 92   win rate 43.5%
+;   profit factor 2.11   recovery factor 5.85   max drawdown 138.38
+;   longest losing run 5
+;
+; Year by year: -29.83 / +216.48 / +622.92
+; It LOST money in the first year. No configuration tested was profitable in
+; all three, so treat this as a setting that works in trending gold and bleeds
+; in quiet markets, not as an all-weather edge.
+
+InpSwingMinATR=0.5
+InpBOSMode=0
+InpBOSBufferATR=0.1
+InpATRPeriod=14
+InpDispATRMult=2.5
+InpDispCandleATRMult=0.8
+InpDispMinBodyPct=55.0
+InpDispMinRelStrength=1.5
+InpMaxOBToBOSBars=8
+InpRejectLegViolation=false
+InpSwingLength=5
+InpEnableBull=true
+InpEnableBear=true
+InpExtendBars=20
+InpMaxActivePerDir=10
+InpMaxAgeBars=0
+InpOverlapMode=1
+InpOverlapPct=50.0
+InpFVGMode=1
+InpFVGMinATR=0.05
+InpRetestEnabled=true
+InpMitigationMode=2
+InpInvalidationMode=1
+InpScanDepth=3000
+InpEnableCISD=true
+InpCISDSweep=false
+InpCISDConfirm=true
+InpCISDRetrace=false
+InpCISDSwingLength=3
+InpCISDSwingMinATR=0.3
+InpCISDSwingMaxAge=150
+InpCISDSweepMode=0
+InpCISDSweepValidity=10
+InpCISDLevelMode=0
+InpCISDMaxSeries=12
+InpCISDMaxConfirmBars=20
+InpCISDMaxRetraceBars=50
+InpCISDScanDepth=1500
+InpConnEnable=true
+InpConnCISDMode=0
+InpConnRetestMode=0
+InpConnMaxCISDBars=100
+InpConnWarmupBars=200
+InpConnMaxRetests=10
+InpConnMitigationStops=true
+InpTrendFilter=true
+InpTrendBars=20
+InpTrendATRMult=2.5
+InpEnableTrading=true
+InpLots=0.01
+InpMagic=20260928
+InpSlippage=20
+InpOppositeBlockExit=false
+InpEntryAlert=true
+InpTargetRR=2.0
+InpBreakEven=true
+InpBreakEvenPoints=4000
+InpRunSelfTest=false
+InpLogLevel=1
+InpTimeframePair=2
+InpRideTrend=false
