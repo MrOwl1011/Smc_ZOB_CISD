@@ -110,13 +110,14 @@ input int                        InpConnWarmupBars     = 200;                   
 input ENUM_CONN_RETEST_MODE      InpConnRetestMode     = CONN_RETEST_SINGLE;    // Retest mode (panel default)
 input int                        InpConnMaxRetests     = 10;                    // Max CISD sequences per Order Block
 input bool                       InpConnMitigationStops = true;                // Mitigation stops CISD search (panel default)
-input bool                       InpTrendFilter        = true;                  // Trend filter: only CISDs with the OB-timeframe trend
-input int                        InpTrendBars          = 20;                    // Trend filter: OB candles measured
-input double                     InpTrendATRMult       = 1.5;                   // Trend filter: displacement needed, in ATR
 input color                      InpConnColor          = clrHotPink;            // Retest / HTF-LTF link color
 
 //--- trade execution: entry at a confirmed setup, stop on the far side of the OB, 1:1 target
 input group "=== Trading ==="
+//--- the trend gate decides whether a confirmed CISD becomes a trade, so it lives here
+input bool                       InpTrendFilter        = true;                  // Trend filter: only CISDs with the OB-timeframe trend
+input int                        InpTrendBars          = 20;                    // Trend filter: OB candles measured
+input double                     InpTrendATRMult       = 1.5;                   // Trend filter: displacement needed, in ATR
 input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
 input double                     InpLots               = 0.01;                  // Lot size, when risk sizing is off (panel default)
 input bool                       InpRiskPercentMode    = false;                 // Size from equity risk instead of fixed lots (panel default)
@@ -127,6 +128,7 @@ input bool                       InpRideTrend          = false;                 
 input bool                       InpEntryAlert         = true;                  // Entry alert with entry / SL / TP, works with trading off (panel default)
 input bool                       InpConfidenceLog      = true;                  // Score every confirmed setup and log it (does not change any decision)
 input string                     InpConfidenceFile     = "SMC_Confidence.csv";   // Confidence log file, in the common Files folder
+input string                     InpResultFile         = "SMC_Results.csv";      // Closed-trade results with their scores, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
 input long                       InpMagic              = 20260928;              // Magic number
@@ -629,6 +631,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick(void)
   {
+   g_trade.RecordClosedTrade();        // write the result of a trade that just closed
    g_trade.ManageOpenPosition();       // break-even stop, if armed
    g_trade.RideOpenPosition(g_detector);   // opposite-block target, if riding
    if(InpEnableCISD && !ConnActive())
@@ -921,6 +924,7 @@ void ApplyTradeSettings(void)
    g_trade.SetAlerts(p.entryAlert);
    g_trade.SetRiskPercent(p.riskPctMode, p.riskPercent);
    g_trade.SetOBTimeframe(g_obTF);
+   g_trade.SetResultFile(InpResultFile);
    g_trade.SetBreakEven(p.breakEven, p.bePoints);
   }
 
@@ -1451,7 +1455,7 @@ void TradeConfirmedSetup(const SConnEvent &e)
      }
    //--- Score the setup for measurement. Phase 1: logged, never acted on, so the
    //--- weights can be fitted against realised R before they touch position size.
-   if(InpConfidenceLog)
+   double setupScore = 0.0;
      {
       double entryPx = (e.dir == SMC_DIR_BULL) ? SymbolInfoDouble(_Symbol, SYMBOL_ASK)
                                                : SymbolInfoDouble(_Symbol, SYMBOL_BID);
@@ -1460,16 +1464,18 @@ void TradeConfirmedSetup(const SConnEvent &e)
       SSMCConfidence conf = SMC_Confidence(ob, e.trendScore, e.retestNo, e.cisdLevel, e.price,
                                            e.sweepTime, e.time, riskPx,
                                            PeriodSeconds(g_obTF), PeriodSeconds(g_cisdTF));
-      PrintFormat("[SMC-SCORE] OB #%I64d %s %s", e.obId,
-                  e.dir == SMC_DIR_BULL ? "BUY" : "SELL", SMC_ConfidenceText(conf));
-      if(StringLen(InpConfidenceFile) > 0)
+      setupScore = conf.total;
+      if(InpConfidenceLog)
+         PrintFormat("[SMC-SCORE] OB #%I64d %s %s", e.obId,
+                     e.dir == SMC_DIR_BULL ? "BUY" : "SELL", SMC_ConfidenceText(conf));
+      if(InpConfidenceLog && StringLen(InpConfidenceFile) > 0)
         {
          double tpPx = (e.dir == SMC_DIR_BULL) ? entryPx + riskPx * InpTargetRR
                                                : entryPx - riskPx * InpTargetRR;
          SMC_ConfidenceLog(InpConfidenceFile, conf, e.obId, e.dir, e.time, entryPx, stopPx, tpPx);
         }
      }
-   g_trade.OnSignal(e.dir, ob.top, ob.bottom, e.obId, e.cisdId);
+   g_trade.OnSignal(e.dir, ob.top, ob.bottom, e.obId, e.cisdId, setupScore);
   }
 
 //+------------------------------------------------------------------+

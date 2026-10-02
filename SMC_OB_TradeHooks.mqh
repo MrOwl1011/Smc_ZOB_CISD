@@ -61,6 +61,13 @@ private:
    int               m_beMoved;       // stops moved to break even
    int               m_rideExits;     // positions closed at an opposite block
    int               m_alerted;       // entry alerts raised
+   //--- the open trade, kept so its outcome can be recorded against its score
+   long              m_openPosId;     // position identifier, 0 when flat
+   long              m_openObId;
+   double            m_openScore;
+   double            m_openRiskMoney; // money risked at entry, the denominator of R
+   datetime          m_openTime;
+   string            m_resultFile;    // where closed trades are written
    int               m_skipped;       // signals skipped (open position, invalid stop, rejected)
    string            m_last;          // last action, for the panel status line
 
@@ -168,6 +175,8 @@ public:
                      CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true), m_riskPct(false), m_riskPercent(0.5),
                                              m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
                                              m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
+                                             m_openPosId(0), m_openObId(0), m_openScore(0.0),
+                                             m_openRiskMoney(0.0), m_openTime(0),
                                              m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
@@ -228,6 +237,8 @@ public:
    bool              RiskPercentMode(void) const { return m_riskPct; }
    double            RiskPercent(void) const { return m_riskPercent; }
 
+   void              SetResultFile(const string f) { m_resultFile = f; }
+
    void              SetAlerts(const bool on)
      {
       if(on != m_alerts)
@@ -283,7 +294,7 @@ public:
    //--- A confirmed HTF OB + LTF CISD setup: enter at market, stop on the far
    //--- side of the Order Block, target the same distance (1:1).
    bool              OnSignal(const int dir, const double obTop, const double obBottom,
-                              const long obId, const long cisdId)
+                              const long obId, const long cisdId, const double score = 0.0)
      {
       if(!m_ready || (!m_enabled && !m_alerts))
          return false;                            // nothing to do: no orders, no alerts
@@ -368,6 +379,17 @@ public:
       if(ok)
         {
          m_sent++;
+         //--- remember this trade so its result can be matched to its score later
+         m_openPosId     = 0;
+         if(PositionSelect(_Symbol) && PositionGetInteger(POSITION_MAGIC) == m_magic)
+            m_openPosId  = PositionGetInteger(POSITION_IDENTIFIER);
+         m_openObId      = obId;
+         m_openScore     = score;
+         m_openTime      = TimeCurrent();
+         m_openRiskMoney = (riskMoney > 0.0) ? riskMoney
+                           : (risk / (point > 0.0 ? point : 1.0)) * lots *
+                             SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE) *
+                             (point / MathMax(SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE), 1e-9));
          if(m_riskPct)
             PrintFormat("[SMC-TRADE] sizing: equity %.2f, risk %.2f%% = %.2f, stop %.1f points -> %.2f lots",
                         AccountInfoDouble(ACCOUNT_EQUITY), m_riskPercent, riskMoney,
@@ -386,6 +408,50 @@ public:
          Print("[SMC-TRADE] ", m_last);
         }
       return ok;
+     }
+
+   //--- A trade that is no longer open gets its realised result written next to the
+   //--- score it was given. This is what turns the confidence log into something a
+   //--- regression can use.
+   void              RecordClosedTrade(void)
+     {
+      if(m_openPosId == 0)
+         return;
+      if(PositionSelectByTicket(m_openPosId))
+         return;                                   // still open
+      double profit = 0.0;
+      if(HistorySelectByPosition(m_openPosId))
+        {
+         int deals = HistoryDealsTotal();
+         for(int i = 0; i < deals; i++)
+           {
+            ulong d = HistoryDealGetTicket(i);
+            if(d == 0)
+               continue;
+            profit += HistoryDealGetDouble(d, DEAL_PROFIT) + HistoryDealGetDouble(d, DEAL_SWAP)
+                      + HistoryDealGetDouble(d, DEAL_COMMISSION);
+           }
+        }
+      double realisedR = (m_openRiskMoney > 0.0) ? profit / m_openRiskMoney : 0.0;
+      if(StringLen(m_resultFile) > 0)
+        {
+         int h = FileOpen(m_resultFile, FILE_READ | FILE_WRITE | FILE_CSV | FILE_ANSI | FILE_COMMON, ',');
+         if(h != INVALID_HANDLE)
+           {
+            if(FileSize(h) == 0)
+               FileWrite(h, "open_time", "close_time", "symbol", "ob_id", "score",
+                         "risk_money", "profit", "realised_r");
+            FileSeek(h, 0, SEEK_END);
+            FileWrite(h, TimeToString(m_openTime, TIME_DATE | TIME_MINUTES),
+                      TimeToString(TimeCurrent(), TIME_DATE | TIME_MINUTES), _Symbol, m_openObId,
+                      DoubleToString(m_openScore, 1), DoubleToString(m_openRiskMoney, 2),
+                      DoubleToString(profit, 2), DoubleToString(realisedR, 3));
+            FileClose(h);
+           }
+        }
+      PrintFormat("[SMC-TRADE] closed OB #%I64d: %.2f (%.2f R), score %.1f",
+                  m_openObId, profit, realisedR, m_openScore);
+      m_openPosId = 0;
      }
 
    //--- Break-even: once the open position is m_bePoints in profit, the stop is
