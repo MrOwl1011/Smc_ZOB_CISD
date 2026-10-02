@@ -586,7 +586,7 @@ rather than against the original EA.
 | 2 | Confidence score computed and **logged only**, no behaviour change | **Done, negative:** r = −0.054 on 271 trades |
 | 3 | ~~Refuse below 60~~ **cancelled** | Failed: removes 69% of profit, see below |
 | 4 | ~~Score multiplier on size~~ **cancelled** | Failed: score does not predict outcome |
-| 5 | Drawdown floor and daily/weekly stops | Worst year improves; totals may fall |
+| 5 | Drawdown floor and daily/weekly stops | **Done, partial:** only the spread guard helps; three never fired |
 | 6 | Trend-strength RR | PF and average trade beat fixed 2R |
 | 7 | Partials | Win rate and drawdown improve; check spread cost |
 
@@ -642,6 +642,55 @@ cost, not signal quality.
 The score stays computed and logged, since it costs nothing and the raw columns are the dataset
 any future attempt would need. Step 2 did the job it was there to do — it stopped a +0.090
 correlation from being built into position sizing.
+
+### Step 5 result: one guard of six is worth switching on
+
+Measured 2026-10-02, gold M15 blocks to M1 confirmation, risk 0.50% of equity per trade, each
+guard alone before the stack so a result could be attributed, over three separate one-year
+windows.
+
+| Guard | 2023-24 | 2024-25 | 2025-26 | 3-year profit | Worst DD |
+| --- | --- | --- | --- | --- | --- |
+| none | +752 | **-123** | +288 | 917 | 1089 |
+| daily 2% | +752 | -123 | +288 | 917 | 1089 |
+| weekly 4% | +752 | -123 | +288 | 917 | 1089 |
+| equity 12% | +752 | -123 | +288 | 917 | 1089 |
+| volatility 2.5x | +673 | -123 | +237 | 786 | 1089 |
+| streak 5 | +568 | -150 | +306 | 724 | 998 |
+| streak 3 | +410 | +18 | +487 | 915 | 944 |
+| **spread 3% of R** | **+955** | **+21** | **+586** | **1562** | 984 |
+| all five stacked | +737 | +246 | +604 | 1587 | 895 |
+
+**Three of the six never fired, in any of the three years.** The daily, weekly and equity stops
+recorded zero refusals across 27 runs. At 0.5% risk a 2% daily stop needs four losses inside one
+server day, which never happened on M15, and the worst drawdown of the three years was 10.3% of
+peak equity, just under the 12% equity stop. At the thresholds this document proposed they are
+not conservative, they are inert, and leaving them on grants a false sense of protection.
+
+**The spread filter is the only guard that earned its place.** It improved every year
+independently: +203, +144, +298. It is also the only one corroborated by a different dataset -
+the step-2 study found spread as a share of the stop had the strongest rank relation to outcome
+of any factor measured (Spearman -0.277). Its refusal count tracks when it is needed: 40 trades
+in 2023-24 against 4 in 2025-26, matching how much wider the broker's historical spread was in
+the earlier period.
+
+**The streak filters are noise or worse.** Streak 3 cut the best year nearly in half, from +752
+to +410, while helping the other two; streak 5 was negative in two years of three. Their
+three-year totals, 915 and 724, sit at or below the 917 of no guards at all. Pausing after
+consecutive losses assumes losses cluster, and nothing in this data says they do. The volatility
+filter was negative in every year it fired.
+
+The stack totals marginally more than the spread filter alone (1587 against 1562) with a smaller
+worst drawdown (895 against 984), but every component of that difference is a filter shown to be
+noise or harmful, and three of its five parts never acted at all. The shipped preset therefore
+arms the spread filter and leaves the rest at zero.
+
+**What the dead guards are still for.** Not being needed in three years of backtest is not
+evidence they are worthless. They are catastrophe brakes, and a backtest contains no
+disconnection, no gap through a stop, no bad tick, no broker outage. But at these values they are
+decoration. Making them real means tightening them a long way - a 1% daily stop, a 7% equity
+stop - and that is a trade between protection and participation that no backtest can settle. It
+is left to the person running the EA, deliberately.
 
 ### What this framework cannot fix
 

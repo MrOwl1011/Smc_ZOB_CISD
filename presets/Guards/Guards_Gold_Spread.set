@@ -1,0 +1,98 @@
+; Guards_Gold_Spread
+; Gold (XAUUSD) M15 Order Blocks -> M1 CISD, risk 0.50% of equity per trade.
+;
+; The spread guard is the only capital-protection filter with evidence behind
+; it. Measured over three separate years it improved the result every time:
+;
+;            no guards   spread 3% of R
+;   2023-24      +752           +955     (40 trades refused)
+;   2024-25      -123            +21     (13 refused)
+;   2025-26      +288           +586     ( 4 refused)
+;   3y total     +917          +1562
+;
+; It is also the only guard corroborated by a different dataset: across 271
+; scored trades, spread as a share of the stop had the strongest rank relation
+; to outcome of any factor measured (Spearman -0.277), with the low-spread half
+; returning +0.222R against +0.022R for the high-spread half.
+;
+; The other five guards are deliberately set to 0 here:
+;   daily, weekly and equity stops never fired once in 27 runs over three
+;     years - at these thresholds they are inert, not conservative
+;   the streak filters cost more than they saved (streak 3 cut the best year
+;     from +752 to +410) and disagree between years
+;   the volatility filter was negative in every year it fired
+;
+; Leave the dead guards at 0 or tighten them deliberately. Do not switch them
+; on at these values and believe the account is protected.
+;
+InpSwingMinATR=0.5
+InpBOSMode=0
+InpBOSBufferATR=0.1
+InpATRPeriod=14
+InpDispATRMult=2.0
+InpDispCandleATRMult=0.8
+InpDispMinBodyPct=55.0
+InpDispMinRelStrength=1.5
+InpMaxOBToBOSBars=8
+InpRejectLegViolation=false
+InpSwingLength=4
+InpEnableBull=true
+InpEnableBear=true
+InpExtendBars=20
+InpMaxActivePerDir=10
+InpMaxAgeBars=0
+InpOverlapMode=1
+InpOverlapPct=50.0
+InpFVGMode=1
+InpFVGMinATR=0.05
+InpRetestEnabled=true
+InpMitigationMode=2
+InpInvalidationMode=1
+InpScanDepth=3000
+InpEnableCISD=true
+InpCISDSweep=false
+InpCISDConfirm=true
+InpCISDRetrace=false
+InpCISDSwingLength=3
+InpCISDSwingMinATR=0.3
+InpCISDSwingMaxAge=150
+InpCISDSweepMode=0
+InpCISDSweepValidity=10
+InpCISDLevelMode=0
+InpCISDMaxSeries=12
+InpCISDMaxConfirmBars=20
+InpCISDMaxRetraceBars=50
+InpCISDScanDepth=1500
+InpConnEnable=true
+InpConnCISDMode=0
+InpConnRetestMode=0
+InpConnMaxCISDBars=100
+InpConnWarmupBars=200
+InpConnMaxRetests=10
+InpConnMitigationStops=false
+InpTrendFilter=true
+InpTrendBars=20
+InpTrendATRMult=1.5
+InpEnableTrading=true
+InpLots=0.01
+InpMagic=20260928
+InpSlippage=20
+InpOppositeBlockExit=false
+InpEntryAlert=true
+InpTargetRR=2.0
+InpBreakEven=false
+InpBreakEvenPoints=4000
+InpRunSelfTest=false
+InpLogLevel=1
+InpTimeframePair=2
+InpRideTrend=false
+InpCapitalGuards=true
+InpGuardDailyLoss=0.0
+InpGuardWeeklyLoss=0.0
+InpGuardMaxConsec=0
+InpGuardEquityStop=0.0
+InpGuardSpreadPctOfR=3.0
+InpGuardVolSpike=0.0
+InpGuardVolAvgBars=200
+InpRiskPercentMode=true
+InpRiskPercent=0.50
