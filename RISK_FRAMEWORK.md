@@ -583,9 +583,9 @@ rather than against the original EA.
 | Step | Change | Success test |
 | --- | --- | --- |
 | 1 | Risk-percent sizing replaces fixed lots | Same trades, drawdown in % falls, R-multiple results unchanged |
-| 2 | Confidence score computed and **logged only**, no behaviour change | Score correlates with outcome on ≥ 200 trades |
-| 3 | Refuse below 60 | Trade count falls, PF rises, profit per trade rises |
-| 4 | Score multiplier on size | Recovery factor rises |
+| 2 | Confidence score computed and **logged only**, no behaviour change | **Done, negative:** r = −0.054 on 271 trades |
+| 3 | ~~Refuse below 60~~ **cancelled** | Failed: removes 69% of profit, see below |
+| 4 | ~~Score multiplier on size~~ **cancelled** | Failed: score does not predict outcome |
 | 5 | Drawdown floor and daily/weekly stops | Worst year improves; totals may fall |
 | 6 | Trend-strength RR | PF and average trade beat fixed 2R |
 | 7 | Partials | Win rate and drawdown improve; check spread cost |
@@ -593,6 +593,55 @@ rather than against the original EA.
 **Step 2 is not optional.** Shipping a score that sizes trades before any evidence it predicts
 anything is how a strategy acquires complexity without edge. Log it, collect 200 trades, regress
 score against realised R, and only then let it touch position size.
+
+### Step 2 result: the score does not predict anything
+
+Measured 2026-10-02 on 271 closed trades, one year (2025-10-01 to 2026-10-01), five
+configurations run separately so the regression could be done within a configuration as well as
+pooled: gold M15→M1 at three gate widths, gold H1→M5, US30 H1→M5. Fixed 0.01 lots, break-even
+and ride-the-trend and opposite-block exit all off, so the result reflects the signal alone and
+not trade management.
+
+**Score against realised R, pooled: Pearson −0.054, Spearman −0.103, p = 0.38.**
+
+An earlier 131-trade sample gave **+0.090**. Doubling the sample flipped the sign. That is what
+noise looks like. Four of the five configurations came out negative on their own.
+
+| Score quintile | Range | Mean R | Win % |
+| --- | --- | --- | --- |
+| Q1 (lowest) | 33–61 | **+0.328** | 44.4 |
+| Q2 | 61–69 | −0.002 | 33.3 |
+| Q3 | 69–76 | −0.068 | 31.5 |
+| Q4 | 76–83 | +0.344 | 48.1 |
+| Q5 (highest) | 83–99 | +0.008 | 34.5 |
+
+The best quintile is the lowest-scoring one, and the table is not monotonic in either
+direction.
+
+Refusing low scores destroys profit rather than improving it. Across the same 271 trades, total
+R was **+32.98** with every trade taken, **+10.18** at a threshold of 60 — step 3's proposed
+cutoff removes 16% of trades and 69% of the profit — and +15.01 at a threshold of 75.
+
+No single factor rescues it. All eleven raw readings were regressed against realised R
+individually; none survives a Bonferroni correction for eleven tests (α = 0.0045). The two
+nominal hits, `impulse_atr` (p = 0.016) and `zone_atr` (p = 0.020), are fewer than chance would
+produce from eleven tests. Worse, `body_pct`, `confirm_beyond_atr` and `trend_score` all
+correlate **negatively** with outcome while the weights award points for them — components
+cancelling each other is why the total scores worse than almost any part of it.
+
+`retest_no` and `sweep_age_bars` are constant in these settings, not merely weak, so the
+revision-2 decision to zero them was right but will never be worth revisiting while
+mitigation-stops is on and the sweep stage is off.
+
+The one relationship worth a second look is `spread_pct_of_r`: Spearman −0.277, with trades in
+the low-spread half returning +0.222R against +0.022R for the high-spread half. Pearson is only
+−0.061 (p = 0.31), so it is non-linear and driven by a thin tail — and it describes execution
+cost, not signal quality.
+
+**Steps 3 and 4 are therefore cancelled**, not deferred: there is no score for them to act on.
+The score stays computed and logged, since it costs nothing and the raw columns are the dataset
+any future attempt would need. Step 2 did the job it was there to do — it stopped a +0.090
+correlation from being built into position sizing.
 
 ### What this framework cannot fix
 
