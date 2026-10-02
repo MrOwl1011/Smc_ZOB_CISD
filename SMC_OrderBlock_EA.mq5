@@ -571,6 +571,30 @@ int OnInit(void)
   }
 
 //+------------------------------------------------------------------+
+//| Strategy Tester summary. Diagnostics only: it runs after the test |
+//| and touches nothing the strategy uses.                            |
+//+------------------------------------------------------------------+
+double OnTester(void)
+  {
+   double trades  = TesterStatistics(STAT_TRADES);
+   double won     = TesterStatistics(STAT_PROFIT_TRADES);
+   double profit  = TesterStatistics(STAT_PROFIT);
+   double dd      = TesterStatistics(STAT_EQUITY_DD);
+   double ddpc    = TesterStatistics(STAT_EQUITYDD_PERCENT);
+   double pf      = TesterStatistics(STAT_PROFIT_FACTOR);
+   double rf      = TesterStatistics(STAT_RECOVERY_FACTOR);
+   double sharpe  = TesterStatistics(STAT_SHARPE_RATIO);
+   double expect  = TesterStatistics(STAT_EXPECTED_PAYOFF);
+   double maxcl   = TesterStatistics(STAT_MAX_CONLOSS_TRADES);
+   double maxcls  = TesterStatistics(STAT_CONLOSSMAX_TRADES);
+   double wr      = (trades > 0) ? 100.0 * won / trades : 0.0;
+   PrintFormat("[TESTER_STATS] profit=%.2f trades=%.0f winrate=%.2f pf=%.3f rf=%.3f dd=%.2f ddpc=%.2f "
+               "sharpe=%.3f expect=%.2f maxconsecloss=%.0f maxconseclossmoney=%.0f",
+               profit, trades, wr, pf, rf, dd, ddpc, sharpe, expect, maxcl, maxcls);
+   return profit;
+  }
+
+//+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
    EventKillTimer();
