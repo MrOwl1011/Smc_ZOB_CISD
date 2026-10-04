@@ -1,0 +1,61 @@
+{
+ "runs": [
+  {
+   "preset": "SMCValH1M5",
+   "symbol": "MNQ",
+   "from": "2021-09-01",
+   "to": "2026-10-02",
+   "commission": true,
+   "nt8_trades": 143,
+   "replica_trades": 143,
+   "matched": 143,
+   "same_pnl": 143,
+   "nt8_net": -3219.7,
+   "replica_net": -3219.7,
+   "what": "defaults (H1 OB, M5 CISD, 1:1, trend filter)"
+  },
+  {
+   "preset": "SMCValMix",
+   "symbol": "MES",
+   "from": "2021-09-01",
+   "to": "2026-10-02",
+   "commission": false,
+   "nt8_trades": 1544,
+   "replica_trades": 1544,
+   "matched": 1544,
+   "same_pnl": 1541,
+   "nt8_net": -5581.25,
+   "replica_net": -5793.75,
+   "what": "M15->M1, multi CISD and retest, 2R, break-even 80 ticks, opposite-block exit, no trend filter"
+  },
+  {
+   "preset": "SMCValH4Ride",
+   "symbol": "MGC",
+   "from": "2021-09-01",
+   "to": "2026-10-02",
+   "commission": false,
+   "nt8_trades": 93,
+   "replica_trades": 93,
+   "matched": 93,
+   "same_pnl": 92,
+   "nt8_net": 3099.0,
+   "replica_net": 3098.0,
+   "what": "H4->M15, ride the trend to the opposite OB, FVG off, no trend filter"
+  },
+  {
+   "preset": "SMCValH1M5",
+   "symbol": "MYM",
+   "from": "2021-09-01",
+   "to": "2026-10-02",
+   "commission": false,
+   "nt8_trades": 126,
+   "replica_trades": 126,
+   "matched": 126,
+   "same_pnl": 125,
+   "nt8_net": -3078.0,
+   "replica_net": -3086.0,
+   "what": "defaults (H1 OB, M5 CISD, 1:1, trend filter)"
+  }
+ ],
+ "note": "Closed trades from the strategy's own result file (SMC_Results_<preset>.csv), matched on signal minute. The 5 trades whose P&L differs all exit on the first bar after a session break, where NT8 fills a gapped-through target at a better price than its limit; the replica fills at the limit (conservative)."
+}

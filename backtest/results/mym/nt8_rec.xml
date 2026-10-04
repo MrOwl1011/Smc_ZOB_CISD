@@ -1,0 +1,1232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<StrategyAnalyzerLog>
+  <StrategyAnalyzerGridEntry xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Action>Backtest</Action>
+    <BacktestCommissionTemplate>NinjaTrader Brokerage Free</BacktestCommissionTemplate>
+    <Date>2026-10-04T06:22:02.0953726</Date>
+    <DataSeries>
+      <BarsPeriodTypeSerialize>4</BarsPeriodTypeSerialize>
+      <BaseBarsPeriodType>Minute</BaseBarsPeriodType>
+      <BaseBarsPeriodValue>1</BaseBarsPeriodValue>
+      <VolumetricDeltaType>BidAsk</VolumetricDeltaType>
+      <MarketDataType>Last</MarketDataType>
+      <PointAndFigurePriceType>Close</PointAndFigurePriceType>
+      <ReversalType>Tick</ReversalType>
+      <Value>1</Value>
+      <Value2>1</Value2>
+    </DataSeries>
+    <DurationSerialize>57</DurationSerialize>
+    <EntryHandling>AllEntries</EntryHandling>
+    <EntriesPerDirection>1</EntriesPerDirection>
+    <ExitOnSessionClose>false</ExitOnSessionClose>
+    <ExitOnSessionCloseSeconds>30</ExitOnSessionCloseSeconds>
+    <FillType>Standard</FillType>
+    <FillTypeType>Minute</FillTypeType>
+    <FillTypeValue>1</FillTypeValue>
+    <FillLimitOrdersOnTouch>false</FillLimitOrdersOnTouch>
+    <From>2021-09-01T00:00:00</From>
+    <Guid>30201bc39887434aa57b1adb36cbc0a2</Guid>
+    <Instrument>MYM 12-26</Instrument>
+    <IncludeCommission>true</IncludeCommission>
+    <IsBreakAtEod>true</IsBreakAtEod>
+    <IsTickReplay>false</IsTickReplay>
+    <IsPinned>false</IsPinned>
+    <IsWalkForwardSummaryRow>false</IsWalkForwardSummaryRow>
+    <MinBarsRequired>0</MinBarsRequired>
+    <MaximumBarsLookBack>TwoHundredFiftySix</MaximumBarsLookBack>
+    <OptimizationParameters>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">5</Max>
+        <Min xsi:type="xsd:int">5</Min>
+        <Name>SwingLength</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.5</Max>
+        <Min xsi:type="xsd:double">0.5</Min>
+        <Name>SwingMinATR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>Close</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>BOSMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcBosMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>Close</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.1</Max>
+        <Min xsi:type="xsd:double">0.1</Min>
+        <Name>BOSBufferATR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.1</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">14</Max>
+        <Min xsi:type="xsd:int">14</Min>
+        <Name>ATRPeriod</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>14</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">2</Max>
+        <Min xsi:type="xsd:double">2</Min>
+        <Name>DispATRMult</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>2</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.8</Max>
+        <Min xsi:type="xsd:double">0.8</Min>
+        <Name>DispCandleATRMult</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.8</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">55</Max>
+        <Min xsi:type="xsd:double">55</Min>
+        <Name>DispMinBodyPct</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>55</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">1.5</Max>
+        <Min xsi:type="xsd:double">1.5</Min>
+        <Name>DispMinRelStrength</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>1.5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">8</Max>
+        <Min xsi:type="xsd:int">8</Min>
+        <Name>MaxOBToBOSBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>8</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>RejectLegViolation</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>M15_M1</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>TimeframePair</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcTfPair, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>M15_M1</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>EnableBull</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>EnableBear</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">20</Max>
+        <Min xsi:type="xsd:int">20</Min>
+        <Name>ExtendBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>20</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>MaxActivePerDir</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>MaxAgeBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>SkipNew</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>OverlapMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcOverlapMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>SkipNew</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">50</Max>
+        <Min xsi:type="xsd:double">50</Min>
+        <Name>OverlapPct</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>50</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>Required</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>FVGMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcFvgMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>Required</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.05</Max>
+        <Min xsi:type="xsd:double">0.05</Min>
+        <Name>FVGMinATR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.05</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>RetestEnabled</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>Midpoint</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>MitigationMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcMitigationMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>Midpoint</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>CloseBeyond</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>InvalidationMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.SmcInvalidationMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>CloseBeyond</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>EnableCISD</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>CISDSweep</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>CISDConfirm</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>CISDRetrace</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">3</Max>
+        <Min xsi:type="xsd:int">3</Min>
+        <Name>CISDSwingLength</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>3</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.3</Max>
+        <Min xsi:type="xsd:double">0.3</Min>
+        <Name>CISDSwingMinATR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.3</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">150</Max>
+        <Min xsi:type="xsd:int">150</Min>
+        <Name>CISDSwingMaxAge</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>150</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>TradeThrough</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>CISDSweepMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.CisdSweepMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>TradeThrough</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>CISDSweepValidity</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>SeriesRange</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>CISDLevelMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.CisdLevelMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>SeriesRange</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">6</Max>
+        <Min xsi:type="xsd:int">6</Min>
+        <Name>CISDMaxSeries</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>6</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">20</Max>
+        <Min xsi:type="xsd:int">20</Min>
+        <Name>CISDMaxConfirmBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>20</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">50</Max>
+        <Min xsi:type="xsd:int">50</Min>
+        <Name>CISDMaxRetraceBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>50</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">1500</Max>
+        <Min xsi:type="xsd:int">1500</Min>
+        <Name>CISDScanDepth</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>1500</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>ConnEnable</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>Multi</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>ConnCISDMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.ConnCisdMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>Multi</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">100</Max>
+        <Min xsi:type="xsd:int">100</Min>
+        <Name>ConnMaxCISDBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>100</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">200</Max>
+        <Min xsi:type="xsd:int">200</Min>
+        <Name>ConnWarmupBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>200</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable>
+          <string>Multi</string>
+        </EnumValuesSerializable>
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">0</Max>
+        <Min xsi:type="xsd:int">0</Min>
+        <Name>ConnRetestMode</Name>
+        <ParameterTypeSerializable>NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob.ConnRetestMode, bee458f5eda84943a7eb8552e136c061, Version=8.1.8.0, Culture=neutral, PublicKeyToken=null</ParameterTypeSerializable>
+        <ValueSerializable>Multi</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">10</Max>
+        <Min xsi:type="xsd:int">10</Min>
+        <Name>ConnMaxRetests</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>ConnMitigationStops</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>TrendFilter</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">20</Max>
+        <Min xsi:type="xsd:int">20</Min>
+        <Name>TrendBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>20</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">1.5</Max>
+        <Min xsi:type="xsd:double">1.5</Min>
+        <Name>TrendATRMult</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>1.5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>EnableTrading</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">1</Max>
+        <Min xsi:type="xsd:int">1</Min>
+        <Name>Contracts</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>1</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>RiskPercentMode</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0.5</Max>
+        <Min xsi:type="xsd:double">0.5</Min>
+        <Name>RiskPercent</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0.5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>OppositeBlockExit</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">1</Max>
+        <Min xsi:type="xsd:double">1</Min>
+        <Name>TargetRR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>1</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>RideTrend</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">true</Max>
+        <Min xsi:type="xsd:boolean">true</Min>
+        <Name>EntryAlert</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>True</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>ConfidenceLog</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>BreakEven</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">100</Max>
+        <Min xsi:type="xsd:int">100</Min>
+        <Name>BreakEvenTicks</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>100</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">10000</Max>
+        <Min xsi:type="xsd:double">10000</Min>
+        <Name>EquityBase</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>10000</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:boolean">false</Max>
+        <Min xsi:type="xsd:boolean">false</Min>
+        <Name>CapitalGuards</Name>
+        <ParameterTypeSerializable>System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>False</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">2</Max>
+        <Min xsi:type="xsd:double">2</Min>
+        <Name>GuardDailyLoss</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>2</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">4</Max>
+        <Min xsi:type="xsd:double">4</Min>
+        <Name>GuardWeeklyLoss</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>4</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">5</Max>
+        <Min xsi:type="xsd:int">5</Min>
+        <Name>GuardMaxConsec</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>5</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">12</Max>
+        <Min xsi:type="xsd:double">12</Min>
+        <Name>GuardEquityStop</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>12</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">3</Max>
+        <Min xsi:type="xsd:double">3</Min>
+        <Name>GuardSpreadPctOfR</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>3</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:double">0</Max>
+        <Min xsi:type="xsd:double">0</Min>
+        <Name>GuardVolSpike</Name>
+        <ParameterTypeSerializable>System.Double, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>0</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">200</Max>
+        <Min xsi:type="xsd:int">200</Min>
+        <Name>GuardVolAvgBars</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>200</ValueSerializable>
+      </Parameter>
+      <Parameter>
+        <EnumValuesSerializable />
+        <Increment>1</Increment>
+        <Max xsi:type="xsd:int">3000</Max>
+        <Min xsi:type="xsd:int">3000</Min>
+        <Name>ScanDepth</Name>
+        <ParameterTypeSerializable>System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</ParameterTypeSerializable>
+        <ValueSerializable>3000</ValueSerializable>
+      </Parameter>
+    </OptimizationParameters>
+    <Parameters>
+      <ParameterWrapper>
+        <DisplayName>Swing strength (bars each side)</DisplayName>
+        <Name>SwingLength</Name>
+        <Value xsi:type="xsd:int">5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Min swing prominence (x ATR, 0 = off)</DisplayName>
+        <Name>SwingMinATR</Name>
+        <Value xsi:type="xsd:double">0.5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>BOS confirmation mode</DisplayName>
+        <Name>BOSMode</Name>
+        <Value xsi:type="xsd:int">0</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>BOS close buffer (x ATR, buffer mode)</DisplayName>
+        <Name>BOSBufferATR</Name>
+        <Value xsi:type="xsd:double">0.1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>ATR period</DisplayName>
+        <Name>ATRPeriod</Name>
+        <Value xsi:type="xsd:int">14</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Displacement ATR multiplier (net leg move)</DisplayName>
+        <Name>DispATRMult</Name>
+        <Value xsi:type="xsd:double">2</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Min displacement strength (strongest body x ATR)</DisplayName>
+        <Name>DispCandleATRMult</Name>
+        <Value xsi:type="xsd:double">0.8</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Min candle body % of range</DisplayName>
+        <Name>DispMinBodyPct</Name>
+        <Value xsi:type="xsd:double">55</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Min relative strength (body / avg body)</DisplayName>
+        <Name>DispMinRelStrength</Name>
+        <Value xsi:type="xsd:double">1.5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Max distance OB -&gt; BOS (bars)</DisplayName>
+        <Name>MaxOBToBOSBars</Name>
+        <Value xsi:type="xsd:int">8</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Reject if leg trades beyond OB far edge</DisplayName>
+        <Name>RejectLegViolation</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Timeframes (HTF Order Block -&gt; CISD)</DisplayName>
+        <Name>TimeframePair</Name>
+        <Value xsi:type="xsd:int">2</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Detect bullish OBs</DisplayName>
+        <Name>EnableBull</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Detect bearish OBs</DisplayName>
+        <Name>EnableBear</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>OB extension (bars right of last bar)</DisplayName>
+        <Name>ExtendBars</Name>
+        <Value xsi:type="xsd:int">20</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Max active OBs per direction</DisplayName>
+        <Name>MaxActivePerDir</Name>
+        <Value xsi:type="xsd:int">10</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Expire OB after N bars (0 = never)</DisplayName>
+        <Name>MaxAgeBars</Name>
+        <Value xsi:type="xsd:int">0</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Overlapping zones</DisplayName>
+        <Name>OverlapMode</Name>
+        <Value xsi:type="xsd:int">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Overlap threshold (% of smaller zone)</DisplayName>
+        <Name>OverlapPct</Name>
+        <Value xsi:type="xsd:double">50</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>FVG confirmation</DisplayName>
+        <Name>FVGMode</Name>
+        <Value xsi:type="xsd:int">2</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>FVG minimum size (x ATR)</DisplayName>
+        <Name>FVGMinATR</Name>
+        <Value xsi:type="xsd:double">0.05</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Retest detection</DisplayName>
+        <Name>RetestEnabled</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Mitigation detection</DisplayName>
+        <Name>MitigationMode</Name>
+        <Value xsi:type="xsd:int">2</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>OB invalidation method</DisplayName>
+        <Name>InvalidationMode</Name>
+        <Value xsi:type="xsd:int">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Enable CISD</DisplayName>
+        <Name>EnableCISD</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Liquidity Sweep</DisplayName>
+        <Name>CISDSweep</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Confirmation Close</DisplayName>
+        <Name>CISDConfirm</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Retracement / Entry</DisplayName>
+        <Name>CISDRetrace</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Liquidity swing strength (bars each side)</DisplayName>
+        <Name>CISDSwingLength</Name>
+        <Value xsi:type="xsd:int">3</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Liquidity swing min prominence (x ATR)</DisplayName>
+        <Name>CISDSwingMinATR</Name>
+        <Value xsi:type="xsd:double">0.3</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Swing stays liquidity for N bars (0 = always)</DisplayName>
+        <Name>CISDSwingMaxAge</Name>
+        <Value xsi:type="xsd:int">150</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Sweep definition</DisplayName>
+        <Name>CISDSweepMode</Name>
+        <Value xsi:type="xsd:int">0</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Sweep can feed a later series for N bars</DisplayName>
+        <Name>CISDSweepValidity</Name>
+        <Value xsi:type="xsd:int">10</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Confirmation level</DisplayName>
+        <Name>CISDLevelMode</Name>
+        <Value xsi:type="xsd:int">0</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Max candles in the series</DisplayName>
+        <Name>CISDMaxSeries</Name>
+        <Value xsi:type="xsd:int">6</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Setup expires after N bars</DisplayName>
+        <Name>CISDMaxConfirmBars</Name>
+        <Value xsi:type="xsd:int">20</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Retracement window (bars)</DisplayName>
+        <Name>CISDMaxRetraceBars</Name>
+        <Value xsi:type="xsd:int">50</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>CISD history scan depth (CISD bars)</DisplayName>
+        <Name>CISDScanDepth</Name>
+        <Value xsi:type="xsd:int">1500</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>HTF OB -&gt; CISD connection</DisplayName>
+        <Name>ConnEnable</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>CISD validation</DisplayName>
+        <Name>ConnCISDMode</Name>
+        <Value xsi:type="xsd:int">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Bars to find a CISD after the retest (CISD TF)</DisplayName>
+        <Name>ConnMaxCISDBars</Name>
+        <Value xsi:type="xsd:int">100</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>CISD warm-up bars before the retest</DisplayName>
+        <Name>ConnWarmupBars</Name>
+        <Value xsi:type="xsd:int">200</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Retest mode</DisplayName>
+        <Name>ConnRetestMode</Name>
+        <Value xsi:type="xsd:int">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Max CISD sequences per Order Block</DisplayName>
+        <Name>ConnMaxRetests</Name>
+        <Value xsi:type="xsd:int">10</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Mitigation stops CISD search</DisplayName>
+        <Name>ConnMitigationStops</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Trend filter: only CISDs with the OB-timeframe trend</DisplayName>
+        <Name>TrendFilter</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Trend filter: OB candles measured</DisplayName>
+        <Name>TrendBars</Name>
+        <Value xsi:type="xsd:int">20</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Trend filter: displacement needed, in ATR</DisplayName>
+        <Name>TrendATRMult</Name>
+        <Value xsi:type="xsd:double">1.5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Execute trades</DisplayName>
+        <Name>EnableTrading</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Contracts, when risk sizing is off (MT5: lot size)</DisplayName>
+        <Name>Contracts</Name>
+        <Value xsi:type="xsd:int">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Size from equity risk instead of fixed contracts</DisplayName>
+        <Name>RiskPercentMode</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Percent of equity risked per trade</DisplayName>
+        <Name>RiskPercent</Name>
+        <Value xsi:type="xsd:double">0.5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Opposite block exit</DisplayName>
+        <Name>OppositeBlockExit</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Take profit, as a multiple of risk (1.0 = 1:1)</DisplayName>
+        <Name>TargetRR</Name>
+        <Value xsi:type="xsd:double">1</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Ride the trend: hold to the nearest opposite OB</DisplayName>
+        <Name>RideTrend</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Entry alert (works with trading off)</DisplayName>
+        <Name>EntryAlert</Name>
+        <Value xsi:type="xsd:boolean">true</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Score every confirmed setup and log it</DisplayName>
+        <Name>ConfidenceLog</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Confidence log file (NinjaTrader 8 user folder)</DisplayName>
+        <Name>ConfidenceFile</Name>
+        <Value xsi:type="xsd:string">SMC_Confidence.csv</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Closed-trade results file (NinjaTrader 8 user folder)</DisplayName>
+        <Name>ResultFile</Name>
+        <Value xsi:type="xsd:string">SMC_Results_SMC_MYM_Rec.csv</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Break even: move the stop to entry once in profit</DisplayName>
+        <Name>BreakEven</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Break even trigger: profit in ticks (MT5: points)</DisplayName>
+        <Name>BreakEvenTicks</Name>
+        <Value xsi:type="xsd:int">100</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Account size (equity base for risk % and guards)</DisplayName>
+        <Name>EquityBase</Name>
+        <Value xsi:type="xsd:double">10000</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Capital protection</DisplayName>
+        <Name>CapitalGuards</Name>
+        <Value xsi:type="xsd:boolean">false</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Daily loss, % of day-start equity (0 = off)</DisplayName>
+        <Name>GuardDailyLoss</Name>
+        <Value xsi:type="xsd:double">2</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Weekly loss, % of week-start equity (0 = off)</DisplayName>
+        <Name>GuardWeeklyLoss</Name>
+        <Value xsi:type="xsd:double">4</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Losses in a row before pausing (0 = off)</DisplayName>
+        <Name>GuardMaxConsec</Name>
+        <Value xsi:type="xsd:int">5</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Equity stop below the peak, % (0 = off)</DisplayName>
+        <Name>GuardEquityStop</Name>
+        <Value xsi:type="xsd:double">12</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Spread above this share of the stop, % (0 = off)</DisplayName>
+        <Name>GuardSpreadPctOfR</Name>
+        <Value xsi:type="xsd:double">3</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>ATR(14) above this multiple of its average (0 = off)</DisplayName>
+        <Name>GuardVolSpike</Name>
+        <Value xsi:type="xsd:double">0</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Bars in that ATR average</DisplayName>
+        <Name>GuardVolAvgBars</Name>
+        <Value xsi:type="xsd:int">200</Value>
+      </ParameterWrapper>
+      <ParameterWrapper>
+        <DisplayName>Historical scan depth (OB bars)</DisplayName>
+        <Name>ScanDepth</Name>
+        <Value xsi:type="xsd:int">3000</Value>
+      </ParameterWrapper>
+    </Parameters>
+    <TradingHoursTemplate />
+    <SetOrderQuantity>Strategy</SetOrderQuantity>
+    <Slippage>0</Slippage>
+    <SummaryPerformances>
+      <SummaryPerformances>
+        <Denomination>UsDollar</Denomination>
+        <PerformanceUnit>Currency</PerformanceUnit>
+        <SummaryPerformancesSerialize>AverageBarsInTrade;465.6396;465.6396;0|AverageEtd;39.2221;39.2221;0|AverageMae;43.6982;43.6982;0|AverageMfe;48.8041;48.8041;0|AverageLosingTrade;-60.9693;-60.9693;0|AverageNumTradesPerDay;0.175;0.175;0|AverageTimeInMarket;705.036;705.036;0|AverageTrade;9.582;9.582;0|AverageWinningTrade;68.4719;68.4719;0|Commission;421.8;421.8;0|GrossLoss;-6157.9;-6157.9;0|GrossLossValue;NaN;NaN;NaN|GrossProfitValue;NaN;NaN;NaN|GrossProfit;8285.1;8285.1;0|NumWinningTrades;121;121;0|NumLosingTrades;101;101;0|NumEvenTrades;0;0;0|MaxTime2Recover;303.27;303.27;0|MaxDrawdown;-714.6;-714.6;0|MaxConsecWinners;7;7;0|MaxConsecLosers;5;5;0|LargestWinningTrade;744.1;744.1;0|LargestLosingTrade;-292.4;-292.4;0|LongestFlatPeriod;50.8;50.8;0|PercentProfitable;0.545;0.545;0|Probability;0.0646;0.0646;0|ProfitFactor;1.3454;1.3454;1|ProfitPerMonth;35.2798;35.2798;0|Performance;1.3454;1.3454;1.3454|RatioAvgWinAvgLoss;1.1231;1.1231;0|RSquared;0.8854;0.8854;0|SharpeRatio;0.2017;0.2017;1|SortinoRatio;0.3802;0.3802;1|TotalSlippage;0;0;0|TotalNumTrades;222;222;0|TotalNetProfit;2127.2;2127.2;0|TotalNetProfitValue;NaN;NaN;NaN|UlcerIndex;0.009;0.009;0</SummaryPerformancesSerialize>
+      </SummaryPerformances>
+      <SummaryPerformances>
+        <Denomination>UsDollar</Denomination>
+        <PerformanceUnit>Percent</PerformanceUnit>
+        <SummaryPerformancesSerialize>AverageBarsInTrade;465.6396;465.6396;0|AverageEtd;0.0018;0.0018;0|AverageMae;0.002;0.002;0|AverageMfe;0.0023;0.0023;0|AverageLosingTrade;-0.0028;-0.0028;0|AverageNumTradesPerDay;0.175;0.175;0|AverageTimeInMarket;705.036;705.036;0|AverageTrade;0.0005;0.0005;0|AverageWinningTrade;0.0032;0.0032;0|Commission;421.8;421.8;0|GrossLoss;-6157.9;-6157.9;0|GrossLossValue;-0.2486;-0.2486;0|GrossProfitValue;0.4728;0.4728;0|GrossProfit;8285.1;8285.1;0|NumWinningTrades;121;121;0|NumLosingTrades;101;101;0|NumEvenTrades;0;0;0|MaxTime2Recover;303.27;303.27;0|MaxDrawdown;-0.0304;-0.0304;0|MaxConsecWinners;7;7;0|MaxConsecLosers;5;5;0|LargestWinningTrade;0.0368;0.0368;0|LargestLosingTrade;-0.0149;-0.0149;0|LongestFlatPeriod;50.8;50.8;0|PercentProfitable;0.545;0.545;0|Probability;0.0646;0.0646;0|ProfitFactor;1.3454;1.3454;1|ProfitPerMonth;0.0017;0.0017;0|Performance;1.3454;1.3454;1.3454|RatioAvgWinAvgLoss;1.1384;1.1384;0|RSquared;0.8854;0.8854;0|SharpeRatio;0.2017;0.2017;1|SortinoRatio;0.3802;0.3802;1|TotalSlippage;0;0;0|TotalNumTrades;222;222;0|TotalNetProfit;2127.2;2127.2;0|TotalNetProfitValue;0.1067;0.1067;0|UlcerIndex;0.009;0.009;0</SummaryPerformancesSerialize>
+      </SummaryPerformances>
+      <SummaryPerformances>
+        <Denomination>UsDollar</Denomination>
+        <PerformanceUnit>Pips</PerformanceUnit>
+        <SummaryPerformancesSerialize>AverageBarsInTrade;465.6396;465.6396;0|AverageEtd;78.4441;78.4441;0|AverageMae;87.3964;87.3964;0|AverageMfe;97.6081;97.6081;0|AverageLosingTrade;-121.9386;-121.9386;0|AverageNumTradesPerDay;0.175;0.175;0|AverageTimeInMarket;705.036;705.036;0|AverageTrade;19.164;19.164;0|AverageWinningTrade;136.9438;136.9438;0|Commission;421.8;421.8;0|GrossLoss;-6157.9;-6157.9;0|GrossLossValue;-12315.8;-12315.8;0|GrossProfitValue;16570.2;16570.2;0|GrossProfit;8285.1;8285.1;0|NumWinningTrades;121;121;0|NumLosingTrades;101;101;0|NumEvenTrades;0;0;0|MaxTime2Recover;303.27;303.27;0|MaxDrawdown;-1429.2;-1429.2;0|MaxConsecWinners;7;7;0|MaxConsecLosers;5;5;0|LargestWinningTrade;1488.2;1488.2;0|LargestLosingTrade;-584.8;-584.8;0|LongestFlatPeriod;50.8;50.8;0|PercentProfitable;0.545;0.545;0|Probability;0.0646;0.0646;0|ProfitFactor;1.3454;1.3454;1|ProfitPerMonth;70.5597;70.5597;0|Performance;1.3454;1.3454;1.3454|RatioAvgWinAvgLoss;1.1231;1.1231;0|RSquared;0.8854;0.8854;0|SharpeRatio;0.2017;0.2017;1|SortinoRatio;0.3802;0.3802;1|TotalSlippage;0;0;0|TotalNumTrades;222;222;0|TotalNetProfit;2127.2;2127.2;0|TotalNetProfitValue;4254.4;4254.4;0|UlcerIndex;0.009;0.009;0</SummaryPerformancesSerialize>
+      </SummaryPerformances>
+      <SummaryPerformances>
+        <Denomination>UsDollar</Denomination>
+        <PerformanceUnit>Points</PerformanceUnit>
+        <SummaryPerformancesSerialize>AverageBarsInTrade;465.6396;465.6396;0|AverageEtd;78.4441;78.4441;0|AverageMae;87.3964;87.3964;0|AverageMfe;97.6081;97.6081;0|AverageLosingTrade;-121.9386;-121.9386;0|AverageNumTradesPerDay;0.175;0.175;0|AverageTimeInMarket;705.036;705.036;0|AverageTrade;19.164;19.164;0|AverageWinningTrade;136.9438;136.9438;0|Commission;421.8;421.8;0|GrossLoss;-6157.9;-6157.9;0|GrossLossValue;-12315.8;-12315.8;0|GrossProfitValue;16570.2;16570.2;0|GrossProfit;8285.1;8285.1;0|NumWinningTrades;121;121;0|NumLosingTrades;101;101;0|NumEvenTrades;0;0;0|MaxTime2Recover;303.27;303.27;0|MaxDrawdown;-1429.2;-1429.2;0|MaxConsecWinners;7;7;0|MaxConsecLosers;5;5;0|LargestWinningTrade;1488.2;1488.2;0|LargestLosingTrade;-584.8;-584.8;0|LongestFlatPeriod;50.8;50.8;0|PercentProfitable;0.545;0.545;0|Probability;0.0646;0.0646;0|ProfitFactor;1.3454;1.3454;1|ProfitPerMonth;70.5597;70.5597;0|Performance;1.3454;1.3454;1.3454|RatioAvgWinAvgLoss;1.1231;1.1231;0|RSquared;0.8854;0.8854;0|SharpeRatio;0.2017;0.2017;1|SortinoRatio;0.3802;0.3802;1|TotalSlippage;0;0;0|TotalNumTrades;222;222;0|TotalNetProfit;2127.2;2127.2;0|TotalNetProfitValue;4254.4;4254.4;0|UlcerIndex;0.009;0.009;0</SummaryPerformancesSerialize>
+      </SummaryPerformances>
+      <SummaryPerformances>
+        <Denomination>UsDollar</Denomination>
+        <PerformanceUnit>Ticks</PerformanceUnit>
+        <SummaryPerformancesSerialize>AverageBarsInTrade;465.6396;465.6396;0|AverageEtd;78.4441;78.4441;0|AverageMae;87.3964;87.3964;0|AverageMfe;97.6081;97.6081;0|AverageLosingTrade;-121.9386;-121.9386;0|AverageNumTradesPerDay;0.175;0.175;0|AverageTimeInMarket;705.036;705.036;0|AverageTrade;19.164;19.164;0|AverageWinningTrade;136.9438;136.9438;0|Commission;421.8;421.8;0|GrossLoss;-6157.9;-6157.9;0|GrossLossValue;-12315.8;-12315.8;0|GrossProfitValue;16570.2;16570.2;0|GrossProfit;8285.1;8285.1;0|NumWinningTrades;121;121;0|NumLosingTrades;101;101;0|NumEvenTrades;0;0;0|MaxTime2Recover;303.27;303.27;0|MaxDrawdown;-1429.2;-1429.2;0|MaxConsecWinners;7;7;0|MaxConsecLosers;5;5;0|LargestWinningTrade;1488.2;1488.2;0|LargestLosingTrade;-584.8;-584.8;0|LongestFlatPeriod;50.8;50.8;0|PercentProfitable;0.545;0.545;0|Probability;0.0646;0.0646;0|ProfitFactor;1.3454;1.3454;1|ProfitPerMonth;70.5597;70.5597;0|Performance;1.3454;1.3454;1.3454|RatioAvgWinAvgLoss;1.1231;1.1231;0|RSquared;0.8854;0.8854;0|SharpeRatio;0.2017;0.2017;1|SortinoRatio;0.3802;0.3802;1|TotalSlippage;0;0;0|TotalNumTrades;222;222;0|TotalNetProfit;2127.2;2127.2;0|TotalNetProfitValue;4254.4;4254.4;0|UlcerIndex;0.009;0.009;0</SummaryPerformancesSerialize>
+      </SummaryPerformances>
+    </SummaryPerformances>
+    <StopTargetHandling>PerEntryExecution</StopTargetHandling>
+    <StrategyTemplate>&lt;StrategyTemplate&gt;
+  &lt;StrategyType&gt;NinjaTrader.NinjaScript.Strategies.Toreda.SMCPresets.SMC_MYM_Rec&lt;/StrategyType&gt;
+  &lt;Strategy&gt;
+    &lt;SMC_MYM_Rec xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+      &lt;IsVisible&gt;true&lt;/IsVisible&gt;
+      &lt;calculate2&gt;OnBarClose&lt;/calculate2&gt;
+      &lt;AreLinesConfigurable&gt;true&lt;/AreLinesConfigurable&gt;
+      &lt;ArePlotsConfigurable&gt;true&lt;/ArePlotsConfigurable&gt;
+      &lt;BarsPeriodSerializable&gt;
+        &lt;BarsPeriodTypeSerialize&gt;4&lt;/BarsPeriodTypeSerialize&gt;
+        &lt;BaseBarsPeriodType&gt;Minute&lt;/BaseBarsPeriodType&gt;
+        &lt;BaseBarsPeriodValue&gt;1&lt;/BaseBarsPeriodValue&gt;
+        &lt;VolumetricDeltaType&gt;BidAsk&lt;/VolumetricDeltaType&gt;
+        &lt;MarketDataType&gt;Last&lt;/MarketDataType&gt;
+        &lt;PointAndFigurePriceType&gt;Close&lt;/PointAndFigurePriceType&gt;
+        &lt;ReversalType&gt;Tick&lt;/ReversalType&gt;
+        &lt;Value&gt;1&lt;/Value&gt;
+        &lt;Value2&gt;1&lt;/Value2&gt;
+      &lt;/BarsPeriodSerializable&gt;
+      &lt;BarsToLoad&gt;0&lt;/BarsToLoad&gt;
+      &lt;Calculate&gt;OnBarClose&lt;/Calculate&gt;
+      &lt;Displacement&gt;0&lt;/Displacement&gt;
+      &lt;DisplayInDataBox&gt;true&lt;/DisplayInDataBox&gt;
+      &lt;From&gt;2021-09-01T00:00:00&lt;/From&gt;
+      &lt;IsAutoScale&gt;true&lt;/IsAutoScale&gt;
+      &lt;Lines /&gt;
+      &lt;MaximumBarsLookBack&gt;TwoHundredFiftySix&lt;/MaximumBarsLookBack&gt;
+      &lt;Name&gt;SMC_MYM_Rec&lt;/Name&gt;
+      &lt;Panel&gt;-1&lt;/Panel&gt;
+      &lt;Plots /&gt;
+      &lt;ScaleJustification&gt;Right&lt;/ScaleJustification&gt;
+      &lt;ShowTransparentPlotsInDataBox&gt;false&lt;/ShowTransparentPlotsInDataBox&gt;
+      &lt;To&gt;2026-10-02T00:00:00&lt;/To&gt;
+      &lt;IsDataSeriesRequired&gt;true&lt;/IsDataSeriesRequired&gt;
+      &lt;IsOverlay&gt;true&lt;/IsOverlay&gt;
+      &lt;SelectedValueSeries&gt;0&lt;/SelectedValueSeries&gt;
+      &lt;Gtd&gt;1800-01-01T00:00:00&lt;/Gtd&gt;
+      &lt;Template /&gt;
+      &lt;TimeInForce&gt;Gtc&lt;/TimeInForce&gt;
+      &lt;BacktestCommissionTemplate&gt;NinjaTrader Brokerage Free&lt;/BacktestCommissionTemplate&gt;
+      &lt;BarsPeriodParameter&gt;
+        &lt;Increment&gt;1&lt;/Increment&gt;
+        &lt;Max xsi:type="xsd:int"&gt;0&lt;/Max&gt;
+        &lt;Min xsi:type="xsd:int"&gt;0&lt;/Min&gt;
+        &lt;Name /&gt;
+        &lt;ParameterTypeSerializable&gt;System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089&lt;/ParameterTypeSerializable&gt;
+        &lt;ValueSerializable&gt;0&lt;/ValueSerializable&gt;
+      &lt;/BarsPeriodParameter&gt;
+      &lt;BarsRequiredToTrade&gt;0&lt;/BarsRequiredToTrade&gt;
+      &lt;Category&gt;Backtest&lt;/Category&gt;
+      &lt;ConnectionLossHandling&gt;Recalculate&lt;/ConnectionLossHandling&gt;
+      &lt;DaysToLoad&gt;5&lt;/DaysToLoad&gt;
+      &lt;DefaultQuantity&gt;1&lt;/DefaultQuantity&gt;
+      &lt;DisconnectDelaySeconds&gt;10&lt;/DisconnectDelaySeconds&gt;
+      &lt;EntriesPerDirection&gt;1&lt;/EntriesPerDirection&gt;
+      &lt;EntryHandling&gt;AllEntries&lt;/EntryHandling&gt;
+      &lt;ExitOnSessionCloseSeconds&gt;30&lt;/ExitOnSessionCloseSeconds&gt;
+      &lt;IncludeCommission&gt;true&lt;/IncludeCommission&gt;
+      &lt;InstrumentOrInstrumentList&gt;MYM 12-26&lt;/InstrumentOrInstrumentList&gt;
+      &lt;IsAggregated&gt;false&lt;/IsAggregated&gt;
+      &lt;IsExitOnSessionCloseStrategy&gt;false&lt;/IsExitOnSessionCloseStrategy&gt;
+      &lt;IsFillLimitOnTouch&gt;false&lt;/IsFillLimitOnTouch&gt;
+      &lt;IsOptimizeDataSeries&gt;false&lt;/IsOptimizeDataSeries&gt;
+      &lt;IsStableSession&gt;true&lt;/IsStableSession&gt;
+      &lt;IsTickReplay&gt;false&lt;/IsTickReplay&gt;
+      &lt;IsTradingHoursBreakLineVisible&gt;true&lt;/IsTradingHoursBreakLineVisible&gt;
+      &lt;IsWaitUntilFlat&gt;false&lt;/IsWaitUntilFlat&gt;
+      &lt;NumberRestartAttempts&gt;4&lt;/NumberRestartAttempts&gt;
+      &lt;OptimizationPeriod&gt;10&lt;/OptimizationPeriod&gt;
+      &lt;OrderFillResolution&gt;Standard&lt;/OrderFillResolution&gt;
+      &lt;OrderFillResolutionType&gt;Minute&lt;/OrderFillResolutionType&gt;
+      &lt;OrderFillResolutionValue&gt;1&lt;/OrderFillResolutionValue&gt;
+      &lt;RestartsWithinMinutes&gt;5&lt;/RestartsWithinMinutes&gt;
+      &lt;SetOrderQuantity&gt;Strategy&lt;/SetOrderQuantity&gt;
+      &lt;Slippage&gt;0&lt;/Slippage&gt;
+      &lt;StartBehavior&gt;WaitUntilFlat&lt;/StartBehavior&gt;
+      &lt;StopTargetHandling&gt;PerEntryExecution&lt;/StopTargetHandling&gt;
+      &lt;SupportsOptimizationGraph&gt;true&lt;/SupportsOptimizationGraph&gt;
+      &lt;TestPeriod&gt;28&lt;/TestPeriod&gt;
+      &lt;TradingHoursSerializable /&gt;
+      &lt;DrawOnPricePanel&gt;false&lt;/DrawOnPricePanel&gt;
+      &lt;ZOrder&gt;-2147483648&lt;/ZOrder&gt;
+      &lt;SwingLength&gt;5&lt;/SwingLength&gt;
+      &lt;SwingMinATR&gt;0.5&lt;/SwingMinATR&gt;
+      &lt;BOSMode&gt;Close&lt;/BOSMode&gt;
+      &lt;BOSBufferATR&gt;0.1&lt;/BOSBufferATR&gt;
+      &lt;ATRPeriod&gt;14&lt;/ATRPeriod&gt;
+      &lt;DispATRMult&gt;2&lt;/DispATRMult&gt;
+      &lt;DispCandleATRMult&gt;0.8&lt;/DispCandleATRMult&gt;
+      &lt;DispMinBodyPct&gt;55&lt;/DispMinBodyPct&gt;
+      &lt;DispMinRelStrength&gt;1.5&lt;/DispMinRelStrength&gt;
+      &lt;MaxOBToBOSBars&gt;8&lt;/MaxOBToBOSBars&gt;
+      &lt;RejectLegViolation&gt;false&lt;/RejectLegViolation&gt;
+      &lt;TimeframePair&gt;M15_M1&lt;/TimeframePair&gt;
+      &lt;EnableBull&gt;true&lt;/EnableBull&gt;
+      &lt;EnableBear&gt;false&lt;/EnableBear&gt;
+      &lt;ExtendBars&gt;20&lt;/ExtendBars&gt;
+      &lt;MaxActivePerDir&gt;10&lt;/MaxActivePerDir&gt;
+      &lt;MaxAgeBars&gt;0&lt;/MaxAgeBars&gt;
+      &lt;OverlapMode&gt;SkipNew&lt;/OverlapMode&gt;
+      &lt;OverlapPct&gt;50&lt;/OverlapPct&gt;
+      &lt;FVGMode&gt;Required&lt;/FVGMode&gt;
+      &lt;FVGMinATR&gt;0.05&lt;/FVGMinATR&gt;
+      &lt;RetestEnabled&gt;true&lt;/RetestEnabled&gt;
+      &lt;MitigationMode&gt;Midpoint&lt;/MitigationMode&gt;
+      &lt;InvalidationMode&gt;CloseBeyond&lt;/InvalidationMode&gt;
+      &lt;EnableCISD&gt;true&lt;/EnableCISD&gt;
+      &lt;CISDSweep&gt;true&lt;/CISDSweep&gt;
+      &lt;CISDConfirm&gt;true&lt;/CISDConfirm&gt;
+      &lt;CISDRetrace&gt;false&lt;/CISDRetrace&gt;
+      &lt;CISDSwingLength&gt;3&lt;/CISDSwingLength&gt;
+      &lt;CISDSwingMinATR&gt;0.3&lt;/CISDSwingMinATR&gt;
+      &lt;CISDSwingMaxAge&gt;150&lt;/CISDSwingMaxAge&gt;
+      &lt;CISDSweepMode&gt;TradeThrough&lt;/CISDSweepMode&gt;
+      &lt;CISDSweepValidity&gt;10&lt;/CISDSweepValidity&gt;
+      &lt;CISDLevelMode&gt;SeriesRange&lt;/CISDLevelMode&gt;
+      &lt;CISDMaxSeries&gt;6&lt;/CISDMaxSeries&gt;
+      &lt;CISDMaxConfirmBars&gt;20&lt;/CISDMaxConfirmBars&gt;
+      &lt;CISDMaxRetraceBars&gt;50&lt;/CISDMaxRetraceBars&gt;
+      &lt;CISDScanDepth&gt;1500&lt;/CISDScanDepth&gt;
+      &lt;ConnEnable&gt;true&lt;/ConnEnable&gt;
+      &lt;ConnCISDMode&gt;Multi&lt;/ConnCISDMode&gt;
+      &lt;ConnMaxCISDBars&gt;100&lt;/ConnMaxCISDBars&gt;
+      &lt;ConnWarmupBars&gt;200&lt;/ConnWarmupBars&gt;
+      &lt;ConnRetestMode&gt;Multi&lt;/ConnRetestMode&gt;
+      &lt;ConnMaxRetests&gt;10&lt;/ConnMaxRetests&gt;
+      &lt;ConnMitigationStops&gt;true&lt;/ConnMitigationStops&gt;
+      &lt;TrendFilter&gt;true&lt;/TrendFilter&gt;
+      &lt;TrendBars&gt;20&lt;/TrendBars&gt;
+      &lt;TrendATRMult&gt;1.5&lt;/TrendATRMult&gt;
+      &lt;EnableTrading&gt;true&lt;/EnableTrading&gt;
+      &lt;Contracts&gt;1&lt;/Contracts&gt;
+      &lt;RiskPercentMode&gt;false&lt;/RiskPercentMode&gt;
+      &lt;RiskPercent&gt;0.5&lt;/RiskPercent&gt;
+      &lt;OppositeBlockExit&gt;false&lt;/OppositeBlockExit&gt;
+      &lt;TargetRR&gt;1&lt;/TargetRR&gt;
+      &lt;RideTrend&gt;false&lt;/RideTrend&gt;
+      &lt;EntryAlert&gt;true&lt;/EntryAlert&gt;
+      &lt;ConfidenceLog&gt;false&lt;/ConfidenceLog&gt;
+      &lt;ConfidenceFile&gt;SMC_Confidence.csv&lt;/ConfidenceFile&gt;
+      &lt;ResultFile&gt;SMC_Results_SMC_MYM_Rec.csv&lt;/ResultFile&gt;
+      &lt;BreakEven&gt;false&lt;/BreakEven&gt;
+      &lt;BreakEvenTicks&gt;100&lt;/BreakEvenTicks&gt;
+      &lt;EquityBase&gt;10000&lt;/EquityBase&gt;
+      &lt;CapitalGuards&gt;false&lt;/CapitalGuards&gt;
+      &lt;GuardDailyLoss&gt;2&lt;/GuardDailyLoss&gt;
+      &lt;GuardWeeklyLoss&gt;4&lt;/GuardWeeklyLoss&gt;
+      &lt;GuardMaxConsec&gt;5&lt;/GuardMaxConsec&gt;
+      &lt;GuardEquityStop&gt;12&lt;/GuardEquityStop&gt;
+      &lt;GuardSpreadPctOfR&gt;3&lt;/GuardSpreadPctOfR&gt;
+      &lt;GuardVolSpike&gt;0&lt;/GuardVolSpike&gt;
+      &lt;GuardVolAvgBars&gt;200&lt;/GuardVolAvgBars&gt;
+      &lt;ScanDepth&gt;3000&lt;/ScanDepth&gt;
+      &lt;ShowZones&gt;false&lt;/ShowZones&gt;
+      &lt;ShowInactive&gt;false&lt;/ShowInactive&gt;
+      &lt;DebugLogLevel&gt;Events&lt;/DebugLogLevel&gt;
+      &lt;AlertsEnabled&gt;false&lt;/AlertsEnabled&gt;
+    &lt;/SMC_MYM_Rec&gt;
+  &lt;/Strategy&gt;
+&lt;/StrategyTemplate&gt;</StrategyTemplate>
+    <StrategyName>SMC_MYM_Rec</StrategyName>
+    <To>2026-10-02T00:00:00</To>
+    <TimeInForce>Gtc</TimeInForce>
+  </StrategyAnalyzerGridEntry>
+</StrategyAnalyzerLog>

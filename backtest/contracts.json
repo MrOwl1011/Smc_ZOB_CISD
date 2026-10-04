@@ -1,0 +1,590 @@
+{
+ "from": "2021-08-01",
+ "to": "2026-10-02",
+ "symbols": {
+  "MNQ": {
+   "tick_size": 0.25,
+   "point_value": 2.0,
+   "tick_value": 0.5,
+   "front": "MNQ 12-26",
+   "export": [
+    {
+     "contract": "MNQ 09-21",
+     "key": "MNQ-0921",
+     "front_from": "2021-06-10",
+     "front_to": "2021-09-09"
+    },
+    {
+     "contract": "MNQ 12-21",
+     "key": "MNQ-1221",
+     "front_from": "2021-09-09",
+     "front_to": "2021-12-09"
+    },
+    {
+     "contract": "MNQ 03-22",
+     "key": "MNQ-0322",
+     "front_from": "2021-12-09",
+     "front_to": "2022-03-10"
+    },
+    {
+     "contract": "MNQ 06-22",
+     "key": "MNQ-0622",
+     "front_from": "2022-03-10",
+     "front_to": "2022-06-09"
+    },
+    {
+     "contract": "MNQ 09-22",
+     "key": "MNQ-0922",
+     "front_from": "2022-06-09",
+     "front_to": "2022-09-08"
+    },
+    {
+     "contract": "MNQ 12-22",
+     "key": "MNQ-1222",
+     "front_from": "2022-09-08",
+     "front_to": "2022-12-12"
+    },
+    {
+     "contract": "MNQ 03-23",
+     "key": "MNQ-0323",
+     "front_from": "2022-12-12",
+     "front_to": "2023-03-13"
+    },
+    {
+     "contract": "MNQ 06-23",
+     "key": "MNQ-0623",
+     "front_from": "2023-03-13",
+     "front_to": "2023-06-12"
+    },
+    {
+     "contract": "MNQ 09-23",
+     "key": "MNQ-0923",
+     "front_from": "2023-06-12",
+     "front_to": "2023-09-11"
+    },
+    {
+     "contract": "MNQ 12-23",
+     "key": "MNQ-1223",
+     "front_from": "2023-09-11",
+     "front_to": "2023-12-11"
+    },
+    {
+     "contract": "MNQ 03-24",
+     "key": "MNQ-0324",
+     "front_from": "2023-12-11",
+     "front_to": "2024-03-11"
+    },
+    {
+     "contract": "MNQ 06-24",
+     "key": "MNQ-0624",
+     "front_from": "2024-03-11",
+     "front_to": "2024-06-17"
+    },
+    {
+     "contract": "MNQ 09-24",
+     "key": "MNQ-0924",
+     "front_from": "2024-06-17",
+     "front_to": "2024-09-16"
+    },
+    {
+     "contract": "MNQ 12-24",
+     "key": "MNQ-1224",
+     "front_from": "2024-09-16",
+     "front_to": "2024-12-16"
+    },
+    {
+     "contract": "MNQ 03-25",
+     "key": "MNQ-0325",
+     "front_from": "2024-12-16",
+     "front_to": "2025-03-17"
+    },
+    {
+     "contract": "MNQ 06-25",
+     "key": "MNQ-0625",
+     "front_from": "2025-03-17",
+     "front_to": "2025-06-16"
+    },
+    {
+     "contract": "MNQ 09-25",
+     "key": "MNQ-0925",
+     "front_from": "2025-06-16",
+     "front_to": "2025-09-15"
+    },
+    {
+     "contract": "MNQ 12-25",
+     "key": "MNQ-1225",
+     "front_from": "2025-09-15",
+     "front_to": "2025-12-15"
+    },
+    {
+     "contract": "MNQ 03-26",
+     "key": "MNQ-0326",
+     "front_from": "2025-12-15",
+     "front_to": "2026-03-16"
+    },
+    {
+     "contract": "MNQ 06-26",
+     "key": "MNQ-0626",
+     "front_from": "2026-03-16",
+     "front_to": "2026-06-12"
+    },
+    {
+     "contract": "MNQ 09-26",
+     "key": "MNQ-0926",
+     "front_from": "2026-06-12",
+     "front_to": "2026-09-14"
+    },
+    {
+     "contract": "MNQ 12-26",
+     "key": "MNQ-1226",
+     "front_from": "2026-09-14",
+     "front_to": "2026-12-14"
+    }
+   ]
+  },
+  "MES": {
+   "tick_size": 0.25,
+   "point_value": 5.0,
+   "tick_value": 1.25,
+   "front": "MES 12-26",
+   "export": [
+    {
+     "contract": "MES 09-21",
+     "key": "MES-0921",
+     "front_from": "2021-06-10",
+     "front_to": "2021-09-09"
+    },
+    {
+     "contract": "MES 12-21",
+     "key": "MES-1221",
+     "front_from": "2021-09-09",
+     "front_to": "2021-12-09"
+    },
+    {
+     "contract": "MES 03-22",
+     "key": "MES-0322",
+     "front_from": "2021-12-09",
+     "front_to": "2022-03-10"
+    },
+    {
+     "contract": "MES 06-22",
+     "key": "MES-0622",
+     "front_from": "2022-03-10",
+     "front_to": "2022-06-13"
+    },
+    {
+     "contract": "MES 09-22",
+     "key": "MES-0922",
+     "front_from": "2022-06-13",
+     "front_to": "2022-09-12"
+    },
+    {
+     "contract": "MES 12-22",
+     "key": "MES-1222",
+     "front_from": "2022-09-12",
+     "front_to": "2022-12-12"
+    },
+    {
+     "contract": "MES 03-23",
+     "key": "MES-0323",
+     "front_from": "2022-12-12",
+     "front_to": "2023-03-13"
+    },
+    {
+     "contract": "MES 06-23",
+     "key": "MES-0623",
+     "front_from": "2023-03-13",
+     "front_to": "2023-06-12"
+    },
+    {
+     "contract": "MES 09-23",
+     "key": "MES-0923",
+     "front_from": "2023-06-12",
+     "front_to": "2023-09-11"
+    },
+    {
+     "contract": "MES 12-23",
+     "key": "MES-1223",
+     "front_from": "2023-09-11",
+     "front_to": "2023-12-11"
+    },
+    {
+     "contract": "MES 03-24",
+     "key": "MES-0324",
+     "front_from": "2023-12-11",
+     "front_to": "2024-03-11"
+    },
+    {
+     "contract": "MES 06-24",
+     "key": "MES-0624",
+     "front_from": "2024-03-11",
+     "front_to": "2024-06-17"
+    },
+    {
+     "contract": "MES 09-24",
+     "key": "MES-0924",
+     "front_from": "2024-06-17",
+     "front_to": "2024-09-16"
+    },
+    {
+     "contract": "MES 12-24",
+     "key": "MES-1224",
+     "front_from": "2024-09-16",
+     "front_to": "2024-12-16"
+    },
+    {
+     "contract": "MES 03-25",
+     "key": "MES-0325",
+     "front_from": "2024-12-16",
+     "front_to": "2025-03-17"
+    },
+    {
+     "contract": "MES 06-25",
+     "key": "MES-0625",
+     "front_from": "2025-03-17",
+     "front_to": "2025-06-16"
+    },
+    {
+     "contract": "MES 09-25",
+     "key": "MES-0925",
+     "front_from": "2025-06-16",
+     "front_to": "2025-09-15"
+    },
+    {
+     "contract": "MES 12-25",
+     "key": "MES-1225",
+     "front_from": "2025-09-15",
+     "front_to": "2025-12-15"
+    },
+    {
+     "contract": "MES 03-26",
+     "key": "MES-0326",
+     "front_from": "2025-12-15",
+     "front_to": "2026-03-16"
+    },
+    {
+     "contract": "MES 06-26",
+     "key": "MES-0626",
+     "front_from": "2026-03-16",
+     "front_to": "2026-06-12"
+    },
+    {
+     "contract": "MES 09-26",
+     "key": "MES-0926",
+     "front_from": "2026-06-12",
+     "front_to": "2026-09-14"
+    },
+    {
+     "contract": "MES 12-26",
+     "key": "MES-1226",
+     "front_from": "2026-09-14",
+     "front_to": "2026-12-14"
+    }
+   ]
+  },
+  "MYM": {
+   "tick_size": 1.0,
+   "point_value": 0.5,
+   "tick_value": 0.5,
+   "front": "MYM 12-26",
+   "export": [
+    {
+     "contract": "MYM 09-21",
+     "key": "MYM-0921",
+     "front_from": "2021-06-10",
+     "front_to": "2021-09-09"
+    },
+    {
+     "contract": "MYM 12-21",
+     "key": "MYM-1221",
+     "front_from": "2021-09-09",
+     "front_to": "2021-12-09"
+    },
+    {
+     "contract": "MYM 03-22",
+     "key": "MYM-0322",
+     "front_from": "2021-12-09",
+     "front_to": "2022-03-10"
+    },
+    {
+     "contract": "MYM 06-22",
+     "key": "MYM-0622",
+     "front_from": "2022-03-10",
+     "front_to": "2022-06-09"
+    },
+    {
+     "contract": "MYM 09-22",
+     "key": "MYM-0922",
+     "front_from": "2022-06-09",
+     "front_to": "2022-09-08"
+    },
+    {
+     "contract": "MYM 12-22",
+     "key": "MYM-1222",
+     "front_from": "2022-09-08",
+     "front_to": "2022-12-12"
+    },
+    {
+     "contract": "MYM 03-23",
+     "key": "MYM-0323",
+     "front_from": "2022-12-12",
+     "front_to": "2023-03-13"
+    },
+    {
+     "contract": "MYM 06-23",
+     "key": "MYM-0623",
+     "front_from": "2023-03-13",
+     "front_to": "2023-06-12"
+    },
+    {
+     "contract": "MYM 09-23",
+     "key": "MYM-0923",
+     "front_from": "2023-06-12",
+     "front_to": "2023-09-11"
+    },
+    {
+     "contract": "MYM 12-23",
+     "key": "MYM-1223",
+     "front_from": "2023-09-11",
+     "front_to": "2023-12-11"
+    },
+    {
+     "contract": "MYM 03-24",
+     "key": "MYM-0324",
+     "front_from": "2023-12-11",
+     "front_to": "2024-03-11"
+    },
+    {
+     "contract": "MYM 06-24",
+     "key": "MYM-0624",
+     "front_from": "2024-03-11",
+     "front_to": "2024-06-17"
+    },
+    {
+     "contract": "MYM 09-24",
+     "key": "MYM-0924",
+     "front_from": "2024-06-17",
+     "front_to": "2024-09-16"
+    },
+    {
+     "contract": "MYM 12-24",
+     "key": "MYM-1224",
+     "front_from": "2024-09-16",
+     "front_to": "2024-12-16"
+    },
+    {
+     "contract": "MYM 03-25",
+     "key": "MYM-0325",
+     "front_from": "2024-12-16",
+     "front_to": "2025-03-17"
+    },
+    {
+     "contract": "MYM 06-25",
+     "key": "MYM-0625",
+     "front_from": "2025-03-17",
+     "front_to": "2025-06-16"
+    },
+    {
+     "contract": "MYM 09-25",
+     "key": "MYM-0925",
+     "front_from": "2025-06-16",
+     "front_to": "2025-09-15"
+    },
+    {
+     "contract": "MYM 12-25",
+     "key": "MYM-1225",
+     "front_from": "2025-09-15",
+     "front_to": "2025-12-15"
+    },
+    {
+     "contract": "MYM 03-26",
+     "key": "MYM-0326",
+     "front_from": "2025-12-15",
+     "front_to": "2026-03-16"
+    },
+    {
+     "contract": "MYM 06-26",
+     "key": "MYM-0626",
+     "front_from": "2026-03-16",
+     "front_to": "2026-06-12"
+    },
+    {
+     "contract": "MYM 09-26",
+     "key": "MYM-0926",
+     "front_from": "2026-06-12",
+     "front_to": "2026-09-14"
+    },
+    {
+     "contract": "MYM 12-26",
+     "key": "MYM-1226",
+     "front_from": "2026-09-14",
+     "front_to": "2026-12-14"
+    }
+   ]
+  },
+  "MGC": {
+   "tick_size": 0.1,
+   "point_value": 10.0,
+   "tick_value": 1.0,
+   "front": "MGC 12-26",
+   "export": [
+    {
+     "contract": "MGC 12-21",
+     "key": "MGC-1221",
+     "front_from": "2021-07-28",
+     "front_to": "2021-11-26"
+    },
+    {
+     "contract": "MGC 02-22",
+     "key": "MGC-0222",
+     "front_from": "2021-11-26",
+     "front_to": "2022-01-27"
+    },
+    {
+     "contract": "MGC 04-22",
+     "key": "MGC-0422",
+     "front_from": "2022-01-27",
+     "front_to": "2022-03-29"
+    },
+    {
+     "contract": "MGC 06-22",
+     "key": "MGC-0622",
+     "front_from": "2022-03-29",
+     "front_to": "2022-05-27"
+    },
+    {
+     "contract": "MGC 08-22",
+     "key": "MGC-0822",
+     "front_from": "2022-05-27",
+     "front_to": "2022-07-27"
+    },
+    {
+     "contract": "MGC 12-22",
+     "key": "MGC-1222",
+     "front_from": "2022-07-27",
+     "front_to": "2022-11-28"
+    },
+    {
+     "contract": "MGC 02-23",
+     "key": "MGC-0223",
+     "front_from": "2022-11-28",
+     "front_to": "2023-01-27"
+    },
+    {
+     "contract": "MGC 04-23",
+     "key": "MGC-0423",
+     "front_from": "2023-01-27",
+     "front_to": "2023-03-29"
+    },
+    {
+     "contract": "MGC 06-23",
+     "key": "MGC-0623",
+     "front_from": "2023-03-29",
+     "front_to": "2023-05-29"
+    },
+    {
+     "contract": "MGC 08-23",
+     "key": "MGC-0823",
+     "front_from": "2023-05-29",
+     "front_to": "2023-07-28"
+    },
+    {
+     "contract": "MGC 12-23",
+     "key": "MGC-1223",
+     "front_from": "2023-07-28",
+     "front_to": "2023-11-28"
+    },
+    {
+     "contract": "MGC 02-24",
+     "key": "MGC-0224",
+     "front_from": "2023-11-28",
+     "front_to": "2024-01-29"
+    },
+    {
+     "contract": "MGC 04-24",
+     "key": "MGC-0424",
+     "front_from": "2024-01-29",
+     "front_to": "2024-03-27"
+    },
+    {
+     "contract": "MGC 06-24",
+     "key": "MGC-0624",
+     "front_from": "2024-03-27",
+     "front_to": "2024-05-29"
+    },
+    {
+     "contract": "MGC 08-24",
+     "key": "MGC-0824",
+     "front_from": "2024-05-29",
+     "front_to": "2024-07-26"
+    },
+    {
+     "contract": "MGC 12-24",
+     "key": "MGC-1224",
+     "front_from": "2024-07-26",
+     "front_to": "2024-11-25"
+    },
+    {
+     "contract": "MGC 02-25",
+     "key": "MGC-0225",
+     "front_from": "2024-11-25",
+     "front_to": "2025-01-29"
+    },
+    {
+     "contract": "MGC 04-25",
+     "key": "MGC-0425",
+     "front_from": "2025-01-29",
+     "front_to": "2025-03-27"
+    },
+    {
+     "contract": "MGC 06-25",
+     "key": "MGC-0625",
+     "front_from": "2025-03-27",
+     "front_to": "2025-05-28"
+    },
+    {
+     "contract": "MGC 08-25",
+     "key": "MGC-0825",
+     "front_from": "2025-05-28",
+     "front_to": "2025-07-28"
+    },
+    {
+     "contract": "MGC 12-25",
+     "key": "MGC-1225",
+     "front_from": "2025-07-28",
+     "front_to": "2025-11-24"
+    },
+    {
+     "contract": "MGC 02-26",
+     "key": "MGC-0226",
+     "front_from": "2025-11-24",
+     "front_to": "2026-01-23"
+    },
+    {
+     "contract": "MGC 04-26",
+     "key": "MGC-0426",
+     "front_from": "2026-01-23",
+     "front_to": "2026-03-27"
+    },
+    {
+     "contract": "MGC 06-26",
+     "key": "MGC-0626",
+     "front_from": "2026-03-27",
+     "front_to": "2026-05-27"
+    },
+    {
+     "contract": "MGC 08-26",
+     "key": "MGC-0826",
+     "front_from": "2026-05-27",
+     "front_to": "2026-07-28"
+    },
+    {
+     "contract": "MGC 12-26",
+     "key": "MGC-1226",
+     "front_from": "2026-07-28",
+     "front_to": "2026-11-26"
+    }
+   ]
+  }
+ }
+}

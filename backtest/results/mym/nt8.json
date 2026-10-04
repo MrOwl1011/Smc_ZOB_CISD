@@ -1,0 +1,17 @@
+{
+ "runs": [
+  {
+   "name": "NT8 Strategy Analyzer, 1 contract",
+   "trades": 222,
+   "win": 0.545,
+   "net": 2127.2,
+   "pf": 1.3454,
+   "dd": 714.6,
+   "commission_total": 421.8,
+   "ndd": 2.9767702211027145
+  }
+ ],
+ "commission": "NinjaTrader Brokerage template, $0.95/side index micros, $1.20 MGC",
+ "instrument": "MYM 12-26",
+ "note": "NT8 reports $22 more than the replica ($2,127 vs $2,105) on the same 222 trades: a few targets hit on the first bar after a session break fill better in NT8 than at their limit price, which the replica uses."
+}

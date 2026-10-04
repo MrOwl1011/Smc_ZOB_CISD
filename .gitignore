@@ -1,0 +1,5 @@
+# backtest harness: raw NT8 exports, series dumps and sweep output stay local
+backtest/work/
+backtest/replica/bin/
+backtest/replica/obj/
+__pycache__/

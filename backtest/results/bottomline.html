@@ -1,0 +1,17 @@
+<section id="bottomline"><h2>What the numbers say</h2>
+<div class="verdict">
+<div><b>MNQ</b><span>Meets the brief and holds out-of-sample. NT8: 61 trades, 60.7% wins, +$9,717, max DD $1,651 (net/DD 5.9). Profitable in every calendar year, 2022 included.</span></div>
+<div><b>MES</b><span>Meets the brief on paper (net/DD 4.3, 60.5% wins), but the dollars are small (+$2,600 in five years) and 2025 lost $370. The walk-forward came out flat.</span></div>
+<div><b>MYM</b><span>Just short: net/DD 2.98 in NT8 (54.5% wins, +$2,127 on 222 trades). Profitable every year, in small amounts.</span></div>
+<div><b>MGC</b><span>Highest win rate (77.6%, 0.5R target) and the best walk-forward, but one $1,304 drawdown in 2026 pulls five-year net/DD down to 2.1.</span></div>
+</div>
+<ul>
+<li><b>The defaults don't make money.</b> Over five years at 1 contract, the strategy as it ships loses $3,336 on MNQ and $3,325 on MYM, breaks even on MES, and makes $3,377 on MGC (net/DD 1.4). Every recommended set beats its defaults.</li>
+<li><b>Where the edge is.</b> Win rate and the 3:1 ratio come from <b>small targets (0.5&ndash;1R)</b> on <b>higher-timeframe blocks</b> (H4 Order Blocks with M15 CISD on MNQ and MGC, H1 with M5 on MES), with the trend filter <b>off</b> and, on the index micros, <b>long only</b>. The bearish-block side of the index sets lost money in most of the grid.</li>
+<li><b>Regime check.</b> The 2021&ndash;26 window is mostly an index bull market, which flatters long-only sets. The MNQ pick still made +$2,876 in the 2022 bear market (15 trades), the best sign that its edge is not just the trend. MES and MYM made far less in 2022.</li>
+<li><b>Forward test.</b> Re-optimising every six months and trading the next six untouched (the walk-forward) gave: MNQ +$1,102 (net/DD 0.4), MGC +$1,501 (1.4), MES &minus;$110, MYM &minus;$427. The forward-tested ratios are far below the in-sample ones. Expect the live ratio to land well under 3:1.</li>
+<li><b>Monte Carlo (MNQ pick).</b> Over five years, 2% of resampled histories lose money; the median max drawdown is $1,937 and the 95th percentile $3,810. In any single year there is a 19% chance of a losing year and a 5% chance of a drawdown above $2,123 (1 contract).</li>
+<li><b>Frequency.</b> The picks trade 12&ndash;16 times a year (MYM about 44). That's too few to judge from a short live sample. Give any of them several months on sim first.</li>
+</ul>
+<p class="callout">Recommendation: <b>SMC_MNQ_Rec</b> is the one set that meets the brief, survives out-of-sample, stays positive in the walk-forward and was confirmed by NT8. Run it on sim or with the smallest live size first. Treat MES as a secondary candidate. Don't deploy the MYM or MGC picks on this evidence alone.</p>
+</section>

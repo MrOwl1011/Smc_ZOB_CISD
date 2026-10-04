@@ -18,9 +18,19 @@ and trade logic is translated line for line from the `.mqh` engines:
 ## Install
 
 1. Copy `SMCZobEngines.cs` and `SMCOrderBlockStrategy.cs` to
-   `Documents\NinjaTrader 8\bin\Custom\Strategies\`.
+   `Documents\NinjaTrader 8\bin\Custom\Strategies\Toreda\`. Both files live in the
+   `NinjaTrader.NinjaScript.Strategies.Toreda` namespace (the engines in `.Toreda.SMCZob`).
 2. Open the NinjaScript Editor and compile (F5).
-3. Add **SMCOrderBlockStrategy** to a chart or the Strategy Analyzer.
+3. Add **Toreda > SMCOrderBlockStrategy** to a chart or the Strategy Analyzer.
+
+## Backtested presets
+
+`Presets/SMCPresets.cs` holds the recommended set for each market from the five-year study in
+`docs/SMC-OrderBlock-Backtest.html` (`SMC_MNQ_Rec`, `SMC_MES_Rec`, `SMC_MYM_Rec`, `SMC_MGC_Rec`), plus
+the validation presets used to check the backtest replica against the Strategy Analyzer. Each one is
+`SMCOrderBlockStrategy` with its inputs baked in and **Execute trades** on; copy the file next to the
+strategy (`Strategies\Toreda\`) and pick it under **Toreda > SMCPresets**. `Presets/SMCBarDump.cs` is a
+dev aid that writes NT8's continuous 1-minute series for the replica (`backtest/`).
 
 ## Running it
 

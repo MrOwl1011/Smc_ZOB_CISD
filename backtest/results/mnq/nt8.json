@@ -1,0 +1,16 @@
+{
+ "runs": [
+  {
+   "name": "NT8 Strategy Analyzer, 1 contract",
+   "trades": 61,
+   "win": 0.6066,
+   "net": 9716.6,
+   "pf": 2.0251,
+   "dd": 1650.6,
+   "commission_total": 115.9,
+   "ndd": 5.886707863807101
+  }
+ ],
+ "commission": "NinjaTrader Brokerage template, $0.95/side index micros, $1.20 MGC",
+ "instrument": "MNQ 12-26"
+}

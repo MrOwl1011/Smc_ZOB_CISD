@@ -1,0 +1,9 @@
+{
+ "data": {
+  "MNQ": "Micro E-mini Nasdaq-100, 1,891,434 one-minute bars 2021-05-31 to 2026-10-02 across 22 contracts (front month now MNQ 12-26)",
+  "MES": "Micro E-mini S&P 500, 1,881,102 one-minute bars 2021-05-31 to 2026-10-02 across 22 contracts (front month now MES 12-26)",
+  "MYM": "Micro E-mini Dow, 1,842,428 one-minute bars 2021-05-31 to 2026-10-02 across 22 contracts (front month now MYM 12-26)",
+  "MGC": "Micro Gold, 1,865,014 one-minute bars 2021-05-31 to 2026-10-02 across 26 contracts (front month now MGC 12-26)"
+ },
+ "stageA": 1296
+}

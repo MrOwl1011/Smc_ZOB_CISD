@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Replays NinjaTrader/SMCOrderBlockStrategy.cs (compiled unchanged, linked below) over
+       NT8-exported minute data under Strategy Analyzer semantics. Dev-only; never copy into NT8. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>SmcReplica</AssemblyName>
+    <RootNamespace>SmcReplica</RootNamespace>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+    <NoWarn>CS0162;CS0168;CS0219;CS0414;CS0649;CS0169;CS1998</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\NinjaTrader\SMCOrderBlockStrategy.cs" Link="Strategy\SMCOrderBlockStrategy.cs" />
+    <Compile Include="..\..\NinjaTrader\SMCZobEngines.cs" Link="Strategy\SMCZobEngines.cs" />
+  </ItemGroup>
+
+</Project>

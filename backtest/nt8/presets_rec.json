@@ -1,0 +1,57 @@
+{
+ "SMCValH1M5": {},
+ "SMCValMix": {
+  "TimeframePair": "M15_M1",
+  "TrendFilter": "False",
+  "ConnCISDMode": "Multi",
+  "ConnRetestMode": "Multi",
+  "TargetRR": "2.0",
+  "BreakEven": "True",
+  "BreakEvenTicks": "80",
+  "OppositeBlockExit": "True"
+ },
+ "SMCValH4Ride": {
+  "TimeframePair": "H4_M15",
+  "TrendFilter": "False",
+  "RideTrend": "True",
+  "FVGMode": "Off"
+ },
+ "SMC_MNQ_Rec": {
+  "ConnCISDMode": "Multi",
+  "ConnRetestMode": "Multi",
+  "DispATRMult": "1.5",
+  "DispMinRelStrength": "2.0",
+  "EnableBear": "False",
+  "MaxAgeBars": "100",
+  "TargetRR": "0.75",
+  "TimeframePair": "H4_M15",
+  "TrendFilter": "False"
+ },
+ "SMC_MES_Rec": {
+  "CISDSweep": "True",
+  "DispATRMult": "3.0",
+  "EnableBear": "False",
+  "MaxAgeBars": "300",
+  "SwingLength": "6",
+  "TargetRR": "0.75",
+  "TrendFilter": "False"
+ },
+ "SMC_MYM_Rec": {
+  "CISDMaxSeries": "6",
+  "CISDSweep": "True",
+  "ConnCISDMode": "Multi",
+  "ConnRetestMode": "Multi",
+  "EnableBear": "False",
+  "FVGMode": "Required",
+  "SwingLength": "5",
+  "TimeframePair": "M15_M1"
+ },
+ "SMC_MGC_Rec": {
+  "CISDLevelMode": "SeriesOpen",
+  "CISDSweep": "True",
+  "MaxAgeBars": "100",
+  "TargetRR": "0.5",
+  "TimeframePair": "H4_M15",
+  "TrendFilter": "False"
+ }
+}

@@ -1,0 +1,6 @@
+{
+ "SMCValH1M5": {},
+ "SMCValMix": {"TimeframePair": "M15_M1", "TrendFilter": "False", "ConnCISDMode": "Multi", "ConnRetestMode": "Multi",
+               "TargetRR": "2.0", "BreakEven": "True", "BreakEvenTicks": "80", "OppositeBlockExit": "True"},
+ "SMCValH4Ride": {"TimeframePair": "H4_M15", "TrendFilter": "False", "RideTrend": "True", "FVGMode": "Off"}
+}
