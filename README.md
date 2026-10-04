@@ -21,7 +21,94 @@
 
 ---
 
-## Start here
+> **About this fork.** This repository is a fork of
+> [MrOwl1011/Smc_ZOB_CISD](https://github.com/MrOwl1011/Smc_ZOB_CISD), the original MetaTrader 5
+> EA. It adds a **NinjaTrader 8 port** of the strategy ([`NinjaTrader/`](NinjaTrader/)) and a
+> **five-year futures backtest** of that port on MNQ, MES, MYM and MGC ([results](#backtest-results-ninjatrader-8-futures)).
+> The MT5 EA and everything about it below is unchanged from the original.
+
+## NinjaTrader 8 port
+
+`NinjaTrader/SMCOrderBlockStrategy.cs` is the EA as a NinjaTrader 8 strategy. The detection
+engines (structure, displacement, FVG, order blocks, CISD, the HTF OB → LTF CISD connection with
+its trend filter), the capital guards, the confidence score and the trade layer are translated
+line for line from the `.mqh` files into `NinjaTrader/SMCZobEngines.cs`.
+
+1. Copy `NinjaTrader/SMCOrderBlockStrategy.cs` and `NinjaTrader/SMCZobEngines.cs` to
+   `Documents\NinjaTrader 8\bin\Custom\Strategies\Toreda\`. They live in the
+   `NinjaTrader.NinjaScript.Strategies.Toreda` namespace.
+2. Compile in the NinjaScript Editor (F5).
+3. Pick **Toreda > SMCOrderBlockStrategy** on a chart or in the Strategy Analyzer. It adds its own
+   Order Block, CISD and 1-minute series; the instrument needs 1-minute history.
+
+**Execute trades** is off by default, as in the EA. For the backtested settings, also copy
+`NinjaTrader/Presets/SMCPresets.cs` to the same folder: it adds **Toreda > SMCPresets >
+SMC_MNQ_Rec / SMC_MES_Rec / SMC_MYM_Rec / SMC_MGC_Rec**, the strategy with each market's
+recommended inputs baked in and trading on. Platform differences from MT5 (contracts instead of
+lots, bar-close checks, H4 alignment) are listed in [NinjaTrader/README.md](NinjaTrader/README.md).
+
+## Backtest results (NinjaTrader 8, futures)
+
+Five years of 1-minute data, **2021-09-01 to 2026-10-02**: the 2022 bear market, the 2023–24
+rally and the 2025–26 tape. 1 contract, after commission ($0.95 a side on the index micros,
+$1.20 on MGC), no slippage. The brief: **profit factor above 1, net profit at least 3× the
+maximum drawdown, and within that, the highest win rate.** Full report with charts, walk-forward,
+Monte Carlo and sensitivity tables:
+[docs/SMC-OrderBlock-Backtest.html](docs/SMC-OrderBlock-Backtest.html) (download and open it in a browser).
+
+| Market | Recommended set (picked on 2021–24 data only) | Trades | Win rate | Net | Max DD | Net / DD | 2025–26 out-of-sample | Walk-forward | Verdict |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| **MNQ** | H4 → M15, long only, 0.75R target, trend filter off, multi CISD | 61 | 60.7% | +$9,717 | $1,651 | **5.9** | +$2,921 | +$1,102 | ✅ meets the brief |
+| **MES** | H1 → M5, long only, 0.75R target, liquidity sweep on | 81 | 60.5% | +$2,600 | $600 | **4.3** | +$307 | −$110 | ✅ meets it, small edge |
+| **MYM** | M15 → M1, long only, 1R target, FVG required | 222 | 54.5% | +$2,127 | $715 | **2.98** | +$955 | −$427 | ❌ just short |
+| **MGC** | H4 → M15, both ways, 0.5R target, liquidity sweep on | 76 | 77.6% | +$2,778 | $1,304 | **2.1** | +$550 | +$1,501 | ❌ drawdown too deep |
+
+All figures are NinjaTrader 8's own Strategy Analyzer numbers for each recommended set.
+
+**What the numbers say**
+
+- **The defaults don't make money.** As shipped (H1 → M5, 1:1, trend filter on) the strategy loses
+  about $3,300 over five years on MNQ and on MYM, breaks even on MES, and makes $3,377 on MGC.
+- **Where the edge is:** small targets (0.5–1R) on higher-timeframe blocks (H4 or H1), with the
+  trend filter off and, on the index micros, long only.
+- **MNQ is the one to watch.** It meets the brief, stays profitable out-of-sample, made +$2,876 in
+  the 2022 bear market, and stays positive in the walk-forward. Monte Carlo: a 2% chance of a
+  losing five years; median max drawdown $1,937, 95th percentile $3,810. It trades only about once
+  a month.
+- **Forward-tested ratios are much lower than in-sample ones.** Re-optimising every six months
+  and trading the next six untouched gave net/DD 0.4 on MNQ and 1.4 on MGC, and small losses on
+  MES and MYM. Expect live results well below 3:1, and run any preset on sim first.
+
+<details>
+<summary><b>How the backtest was run</b></summary>
+
+- **Data.** NinjaTrader 8 (Rithmic feed) supplied the exact merged, back-adjusted 1-minute series
+  it uses in a Strategy Analyzer run, rolled on NT8's own dates (written out by
+  `NinjaTrader/Presets/SMCBarDump.cs`).
+- **Replica.** For speed, [`backtest/replica`](backtest/replica) compiles the strategy files
+  **unchanged** against a small stand-in for the NinjaTrader API and replays the bars under the
+  Strategy Analyzer's fill rules. On four test configurations, all 1,906 trades appeared on both
+  sides and 1,901 had identical P&L. The other five exit on the first bar after a session break,
+  where NT8 fills slightly better.
+- **Sweep.** A 1,296-set grid per market (timeframe pair, target, trend filter, FVG mode, liquidity
+  sweep, single/multi CISD, direction). Then up to three rounds of one-input-at-a-time refinement of
+  the six best sets (displacement, swing strength, mitigation, invalidation, OB expiry, break-even,
+  ride-the-trend, opposite-block exit…). In all, 1,758–1,938 sets per market.
+- **Selection.** Using in-sample data (2021-09 to 2024-12) only: profit factor > 1, net/DD ≥ 3, at
+  least 12 trades a year and 10 losing trades, then the highest win rate. 2025–26 is never used to
+  choose.
+- **Walk-forward.** The same rule re-run every six months from 2023-07, each pick trading the next
+  six months.
+- **Monte Carlo.** 5,000 day-block bootstraps and 5,000 trade-order shuffles of each recommended set.
+- **Confirmation.** Each recommended set run in NT8's Strategy Analyzer over the full five years
+  with commission.
+
+The scripts are in [`backtest/`](backtest/). The sweep output and NT8 logs for each market are in
+`backtest/results/`. Raw data is not in the repository.
+
+</details>
+
+## Start here (MetaTrader 5)
 
 **1. Put it in MetaTrader**
 
@@ -190,6 +277,9 @@ SMC_*_SelfTest.mqh       verification suites
 DESIGN.md                every rule and threshold, precisely
 presets/ profiles/       settings packages
 research/                validation study and analysis scripts
+NinjaTrader/             NinjaTrader 8 port of the strategy, plus presets (this fork)
+backtest/                five-year NT8 futures backtest: replica, sweep, analysis (this fork)
+docs/                    the backtest report (this fork)
 ```
 
 Three rules the code keeps: closed candles only, nothing repaints, and no trading from
