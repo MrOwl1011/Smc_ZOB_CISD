@@ -28,7 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace NinjaTrader.NinjaScript.Strategies.SMCZob
+namespace NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob
 {
     #region Enums (SMC_OB_Types.mqh, SMC_CISD_Engine.mqh, SMC_Connect_Engine.mqh, SMC_OB_Guards.mqh)
 

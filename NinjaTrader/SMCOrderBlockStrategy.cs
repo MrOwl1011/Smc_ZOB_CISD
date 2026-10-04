@@ -34,10 +34,10 @@ using NinjaTrader.Data;
 using NinjaTrader.Gui;
 using NinjaTrader.NinjaScript;
 using NinjaTrader.NinjaScript.DrawingTools;
-using NinjaTrader.NinjaScript.Strategies.SMCZob;
+using NinjaTrader.NinjaScript.Strategies.Toreda.SMCZob;
 #endregion
 
-namespace NinjaTrader.NinjaScript.Strategies
+namespace NinjaTrader.NinjaScript.Strategies.Toreda
 {
     public class SMCOrderBlockStrategy : Strategy
     {
