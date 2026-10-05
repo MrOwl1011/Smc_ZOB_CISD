@@ -45,7 +45,7 @@ input double                     InpBOSBufferATR       = 0.10;                  
 //--- Displacement
 input group "=== Displacement ==="
 input int                        InpATRPeriod          = 14;                    // ATR period
-input double                     InpDispATRMult        = 2.0;                   // Displacement ATR multiplier (net leg move)
+input double                     InpDispATRMult        = 2.5;                   // Displacement ATR multiplier (net leg move)
 input double                     InpDispCandleATRMult  = 0.8;                   // Min displacement strength (strongest body x ATR)
 input double                     InpDispMinBodyPct     = 55.0;                  // Min candle body % of range
 input double                     InpDispMinRelStrength = 1.5;                   // Min relative strength (body / avg body)
@@ -118,8 +118,8 @@ input group "=== Trading ==="
 //--- the trend gate decides whether a confirmed CISD becomes a trade, so it lives here
 input bool                       InpTrendFilter        = true;                  // Trend filter: only CISDs with the OB-timeframe trend
 input int                        InpTrendBars          = 20;                    // Trend filter: OB candles measured
-input double                     InpTrendATRMult       = 1.5;                   // Trend filter: displacement needed, in ATR
-input bool                       InpEnableTrading      = false;                 // Execute trades (panel default)
+input double                     InpTrendATRMult       = 2.5;                   // Trend filter: displacement needed, in ATR
+input bool                       InpEnableTrading      = true;                 // Execute trades (panel default)
 input double                     InpLots               = 0.01;                  // Lot size, when risk sizing is off (panel default)
 input bool                       InpRiskPercentMode    = false;                 // Size from equity risk instead of fixed lots (panel default)
 input double                     InpRiskPercent        = 0.50;                  // Percent of equity risked per trade (panel default)
@@ -131,7 +131,7 @@ input bool                       InpConfidenceLog      = true;                  
 input string                     InpConfidenceFile     = "SMC_Confidence.csv";   // Confidence log file, in the common Files folder
 input string                     InpResultFile         = "SMC_Results.csv";      // Closed-trade results with their scores, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
-input int                        InpBreakEvenPoints    = 100;                   // Break even trigger: profit in points (panel default)
+input int                        InpBreakEvenPoints    = 4000;                   // Break even trigger: profit in points (panel default)
 input bool                       InpCapitalGuards      = false;                 // Capital protection: hard refusals before any new trade (input only, no panel switch)
 input double                     InpGuardDailyLoss     = 2.0;                   // Guard: stop for the day after this loss, % of day-start equity (0 = off)
 input double                     InpGuardWeeklyLoss    = 4.0;                   // Guard: stop for the week after this loss, % of week-start equity (0 = off)

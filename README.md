@@ -21,6 +21,21 @@
 
 ---
 
+> ### ⭐ **Use `Best set/H1M5_Gold_Swing4.set` — it is the best settings file in this repository.**
+>
+> **Path:** [`presets/Best set/H1M5_Gold_Swing4.set`](presets/Best%20set/H1M5_Gold_Swing4.set)
+>
+> Gold on **H1 Order Blocks → M5 CISD confirmation**, swing 4, 1:1 target. These are also the
+> EA's built-in defaults, so it runs this configuration out of the box with nothing loaded.
+> Measured over three years at a fixed 0.01 lots: **+256 USD, 31 trades, 64.5% correct, profit
+> factor 2.40, longest losing run 3.**
+>
+> It trades about ten times a year, so thirty trades across three years is a small sample —
+> read the win rate as a direction, not a number to rely on. **Trade execution is on in this
+> file: use a demo account first.**
+
+---
+
 ## Start here
 
 **1. Put it in MetaTrader**
@@ -42,12 +57,14 @@ profiles\*.cfg  ->  MQL5\Files\SMC_OrderBlock_EA\
 **3. Run it**
 
 1. Drag the EA onto a chart.
-2. Properties dialog, press **Load**, pick `presets/SMC_1_BestOverall.set`.
+2. Properties dialog, press **Load**, pick **`presets/Best set/H1M5_Gold_Swing4.set`**.
+   Or load nothing: that file's values are the EA's defaults.
 3. Watch it mark zones, retests and confirmations.
 4. The presets have **Trade execution on**. Switch it off in the panel for a dry run first.
 
 Use the presets. They carry the timeframes and thresholds that work, so you are not
-guessing at forty inputs on day one. There is one per market in `presets/`.
+guessing at forty inputs on day one. `Best set/` holds the recommended one; there is also one
+per market in `presets/`.
 
 **Every preset ships with trade execution on**, so the EA places real orders as soon as a
 setup confirms. Switch **Trade execution** off in the panel to watch it draw without trading,
@@ -172,6 +189,7 @@ profiles (`.cfg`).
 | `SMC_4_Indices` | US500, GER30, UK100, US30 |
 | `SMC_5_Safest` | Fewer trades, smaller drawdown |
 | `SMC_SYM_*` | One symbol and timeframe pair each |
+| **`Best set/`** | **The recommended file, and the EA's own defaults** |
 | `Guards/` | Capital protection, spread guard armed |
 | `RiskPercent/`, `MaxProfit/`, `H1M5/`, `SuperFast/` | Gold, by what each is tuned for |
 
