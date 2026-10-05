@@ -21,7 +21,7 @@
 
 ---
 
-> ### ⭐ **Use `Best set/H1M5_Gold_Swing4.set` — it is the best settings file in this repository.**
+> ### ⭐ **Start with `Best set/H1M5_Gold_Swing4.set` — the recommended settings.**
 >
 > **Path:** [`presets/Best set/H1M5_Gold_Swing4.set`](presets/Best%20set/H1M5_Gold_Swing4.set)
 >
@@ -29,6 +29,10 @@
 > EA's built-in defaults, so it runs this configuration out of the box with nothing loaded.
 > Measured over three years at a fixed 0.01 lots: **+256 USD, 31 trades, 64.5% correct, profit
 > factor 2.40, longest losing run 3.**
+>
+> It is recommended for being the steadier choice across instruments, not for topping the table:
+> the swing-5 file beside it measured higher on gold over the same window, and
+> [`presets/Best set/README.md`](presets/Best%20set/README.md) sets both out.
 >
 > It trades about ten times a year, so thirty trades across three years is a small sample —
 > read the win rate as a direction, not a number to rely on. **Trade execution is on in this
@@ -189,7 +193,7 @@ profiles (`.cfg`).
 | `SMC_4_Indices` | US500, GER30, UK100, US30 |
 | `SMC_5_Safest` | Fewer trades, smaller drawdown |
 | `SMC_SYM_*` | One symbol and timeframe pair each |
-| **`Best set/`** | **The recommended file, and the EA's own defaults** |
+| **`Best set/`** | **The recommended starting point, and the EA's own defaults** |
 | `Guards/` | Capital protection, spread guard armed |
 | `RiskPercent/`, `MaxProfit/`, `H1M5/`, `SuperFast/` | Gold, by what each is tuned for |
 
