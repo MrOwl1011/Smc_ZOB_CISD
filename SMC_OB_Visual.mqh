@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                SMC_OB_Visual.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Visualization Engine. Read-only consumer of detector state and  |
 //|  events: drawing can never influence detection.                  |
 //|  Recent BOS / swing events are kept so the chart can be fully    |

@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                            SMC_CISD_SelfTest.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Deterministic tests for the CISD engine.                        |
 //|                                                                  |
 //|  Synthetic bullish scenario (hand-computed, R=2, ATR 5):         |

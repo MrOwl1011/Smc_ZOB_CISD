@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                   SMC_Config.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  User configuration profiles: save / load the runtime settings   |
 //|  from the control panel without restarting the EA.               |
 //|                                                                  |

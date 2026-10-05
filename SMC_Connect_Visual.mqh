@@ -1,10 +1,12 @@
 //+------------------------------------------------------------------+
 //|                                           SMC_Connect_Visual.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  HTF OB -> LTF CISD relationship objects (prefix "SMCCONN_").    |
 //|                                                                  |
-//|  One block per RETEST SEQUENCE (Multi retest draws R1, R2, R3     |
-//|  from the same Order Block): retest marker, "CISD ACTIVE" line,   |
-//|  liquidity sweep, then every CISD of that sequence with a link    |
+//|  One block per RETEST SEQUENCE (Multi retest draws R1, R2, R3    |
+//|  from the same Order Block): retest marker, "CISD ACTIVE" line,  |
+//|  liquidity sweep, then every CISD of that sequence with a link   |
 //|  line back to its retest. Standard OB, ZOrder and standalone CISD |
 //|  objects are not touched.                                        |
 //+------------------------------------------------------------------+

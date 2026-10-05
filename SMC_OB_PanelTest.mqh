@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             SMC_OB_PanelTest.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Self tests for the control panel: click state machine, value    |
 //|  clamping, reset, and (when a chart is available) the layout of  |
 //|  Advanced / Easy / collapsed modes.                              |

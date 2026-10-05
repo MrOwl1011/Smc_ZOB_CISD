@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                    SMC_Theme.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Chart theme: midnight background, no grid, mint / rose candles. |
 //|  The chart's own colours are saved the first time the theme is   |
 //|  applied and put back when the EA is removed.                    |

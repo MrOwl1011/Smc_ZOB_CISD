@@ -1,40 +1,42 @@
 //+------------------------------------------------------------------+
 //|                                            SMC_OB_TradeHooks.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Trade execution layer.                                          |
 //|                                                                  |
-//|  Detection never calls into the broker. This layer only receives  |
-//|  detector / connection events and, when trading is switched on,   |
-//|  places ONE market order per confirmed HTF OB + LTF CISD setup:   |
+//|  Detection never calls into the broker. This layer only receives |
+//|  detector / connection events and, when trading is switched on,  |
+//|  places ONE market order per confirmed HTF OB + LTF CISD setup:  |
 //|                                                                  |
 //|    entry : market, at the CISD confirmation                      |
 //|    stop  : the far side of the Order Block (below a bull block,  |
 //|            above a bear block)                                   |
 //|    target: reward:risk multiple of the stop distance (def 1:1)   |
-//|    size  : fixed lots, or a percent of equity risked on the stop  |
+//|    size  : fixed lots, or a percent of equity risked on the stop |
 //|                                                                  |
-//|  Only one position at a time, and only on live events - history   |
+//|  Only one position at a time, and only on live events - history  |
 //|  scan events are ignored.                                        |
 //|                                                                  |
-//|  Opposite Block Exit (optional): while a position is open, a new  |
-//|  Order Block / ZOrder Block against it that price then retests    |
-//|  closes the position - the market built and respected structure   |
+//|  Opposite Block Exit (optional): while a position is open, a new |
+//|  Order Block / ZOrder Block against it that price then retests   |
+//|  closes the position - the market built and respected structure  |
 //|  in the other direction.                                         |
 //|                                                                  |
 //|  Break even (optional): once the position is a set number of     |
 //|  points in profit, the stop moves to the entry price, once.      |
 //|                                                                  |
-//|  Entry alert (optional): announces entry, stop and target at the  |
+//|  Entry alert (optional): announces entry, stop and target at the |
 //|  moment a setup confirms. It works whether or not execution is on, |
-//|  so the EA can be used purely as a signal tool.                   |
+//|  so the EA can be used purely as a signal tool.                  |
 //|                                                                  |
 //|  Capital protection (optional): a CSMCCapitalGuard, when attached, |
-//|  can refuse a new trade - daily or weekly loss reached, a losing  |
-//|  streak, the equity stop, too wide a spread, a volatility spike.  |
-//|  It refuses only execution: the entry alert still fires, so the   |
+//|  can refuse a new trade - daily or weekly loss reached, a losing |
+//|  streak, the equity stop, too wide a spread, a volatility spike. |
+//|  It refuses only execution: the entry alert still fires, so the  |
 //|  EA keeps telling you what it saw while it is standing down.     |
 //|                                                                  |
 //|  Ride the trend (optional): no fixed target at all. The position |
-//|  is held until price reaches the nearest live Order Block facing  |
+//|  is held until price reaches the nearest live Order Block facing |
 //|  the other way, which becomes a moving take profit. While this is |
 //|  on, the reward:risk multiple is not used.                        |
 //+------------------------------------------------------------------+

@@ -1,6 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                 SMC_OB_Types.mqh |
-//|  Shared enums, settings and data records for the SMC OB engine.   |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
+//|  Shared enums, settings and data records for the SMC OB engine.  |
 //|                                                                  |
 //|  INDEXING CONVENTION (used by every engine in this project):     |
 //|  All price arrays passed to the engines are in *series* order:   |

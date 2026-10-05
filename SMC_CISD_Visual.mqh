@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              SMC_CISD_Visual.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  CISD chart objects (prefix "SMCCISD_"). Read-only consumer of   |
 //|  the CISD engine; independent from OB / ZOrder visualization.    |
 //|  Objects are placed by CISD-timeframe bar time, so they line up  |

@@ -1,6 +1,8 @@
 //+------------------------------------------------------------------+
 //|                                                   SMC_OB_FVG.mqh |
-//|  FVG Engine. Confluence only: it is invoked exclusively for an    |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
+//|  FVG Engine. Confluence only: it is invoked exclusively for an   |
 //|  OB candidate that already passed BOS + displacement, so an FVG  |
 //|  can never create an Order Block on its own.                     |
 //|                                                                  |

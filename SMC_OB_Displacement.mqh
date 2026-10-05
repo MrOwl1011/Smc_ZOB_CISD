@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                          SMC_OB_Displacement.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Displacement Engine + last-opposite-candle identification.      |
 //|                                                                  |
 //|  Given a BOS on closed bar i in direction D:                     |

@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              SMC_CISD_Engine.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  CISD - Change in State of Delivery. Independent detection       |
 //|  module: it shares no state with the Order Block / ZOrder        |
 //|  engines and runs on its own timeframe.                          |

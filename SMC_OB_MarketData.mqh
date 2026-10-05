@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                            SMC_OB_MarketData.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Candle and volatility helpers. Every function reads only r[i]   |
 //|  and OLDER bars (r[i+k]); none of them can look ahead.           |
 //+------------------------------------------------------------------+

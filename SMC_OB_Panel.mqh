@@ -1,10 +1,12 @@
 //+------------------------------------------------------------------+
 //|                                                 SMC_OB_Panel.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  On-chart control panel (collapsible, Easy / Advanced mode).     |
 //|                                                                  |
 //|  The panel only edits a state record and reports what the EA has |
 //|  to do (re-layout, redraw, or rescan). It never touches the      |
-//|  detector directly, so detection stays independent of the UI.   |
+//|  detector directly, so detection stays independent of the UI.    |
 //+------------------------------------------------------------------+
 #ifndef SMC_OB_PANEL_MQH
 #define SMC_OB_PANEL_MQH

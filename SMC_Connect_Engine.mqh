@@ -1,35 +1,37 @@
 //+------------------------------------------------------------------+
 //|                                           SMC_Connect_Engine.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  HTF PD Array (Standard OB / ZOrder) -> LTF CISD workflow.       |
 //|                                                                  |
 //|  Three separate records:                                         |
-//|   SConnSetup   one HTF Order Block: zone, validity, retest count  |
-//|   SConnSeq     one RETEST of that OB -> one CISD sequence, with   |
-//|                its own CISD engine, id and state                  |
-//|   SConnCISDHit one confirmed CISD of one sequence                 |
+//|   SConnSetup   one HTF Order Block: zone, validity, retest count |
+//|   SConnSeq     one RETEST of that OB -> one CISD sequence, with  |
+//|                its own CISD engine, id and state                 |
+//|   SConnCISDHit one confirmed CISD of one sequence                |
 //|                                                                  |
-//|  Retest mode (per OB):                                            |
-//|   SINGLE  only the first retest starts a CISD sequence            |
-//|   MULTI   every re-entry into the zone starts a new sequence      |
-//|  CISD mode (per sequence):                                        |
-//|   SINGLE  first valid CISD only                                   |
-//|   MULTI   every valid CISD of that sequence                       |
+//|  Retest mode (per OB):                                           |
+//|   SINGLE  only the first retest starts a CISD sequence           |
+//|   MULTI   every re-entry into the zone starts a new sequence     |
+//|  CISD mode (per sequence):                                       |
+//|   SINGLE  first valid CISD only                                  |
+//|   MULTI   every valid CISD of that sequence                      |
 //|                                                                  |
-//|  Order Block invalidation is absolute: as soon as the OB's death  |
-//|  is KNOWN, every live sequence of that OB stops - no new sweep,   |
+//|  Order Block invalidation is absolute: as soon as the OB's death |
+//|  is KNOWN, every live sequence of that OB stops - no new sweep,  |
 //|  no new confirmation, no retracement. CISDs already confirmed are |
-//|  preserved (sequence ends as COMPLETED).                          |
+//|  preserved (sequence ends as COMPLETED).                         |
 //|                                                                  |
-//|  The CISD candle series may START BEFORE the retest: the engine   |
-//|  runs in CISD_ACT_CONFIRM_AFTER mode, so only the confirmation    |
-//|  close must fall at/after the activation candle. A setup whose    |
+//|  The CISD candle series may START BEFORE the retest: the engine  |
+//|  runs in CISD_ACT_CONFIRM_AFTER mode, so only the confirmation   |
+//|  close must fall at/after the activation candle. A setup whose   |
 //|  close already changed delivery before activation is consumed, so |
-//|  an old CISD is never re-attached to a later retest.              |
+//|  an old CISD is never re-attached to a later retest.             |
 //|                                                                  |
-//|  Time consistency (no repaint): every decision compares fixed     |
+//|  Time consistency (no repaint): every decision compares fixed    |
 //|  timestamps - OB available at confirmTime + OB period, OB dead at |
-//|  invalidation/expiry + OB period, retest known at M1 close, CISD  |
-//|  known at CISD candle close - so the history scan and live        |
+//|  invalidation/expiry + OB period, retest known at M1 close, CISD |
+//|  known at CISD candle close - so the history scan and live       |
 //|  processing give identical results.                              |
 //+------------------------------------------------------------------+
 #ifndef SMC_CONNECT_ENGINE_MQH

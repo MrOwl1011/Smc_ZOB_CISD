@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
-//|                                               SMC_OB_Guards.mqh |
+//|                                               SMC_OB_Guards.mqh  |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Capital protection. Step 5 of RISK_FRAMEWORK.md.                |
 //|                                                                  |
 //|  Every guard here is a refusal, never a resize: it either lets   |

@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                            SMC_OrderBlock_EA.mq5 |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Smart Money Concepts Order Block detection Expert Advisor.      |
 //|                                                                  |
 //|  Version 1.1: detection, visualization, state management,        |

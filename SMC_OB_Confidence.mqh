@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
-//|                                           SMC_OB_Confidence.mqh |
+//|                                           SMC_OB_Confidence.mqh  |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Confidence score for a confirmed HTF OB + LTF CISD setup.       |
 //|                                                                  |
 //|  0 to 100, from information the detection engines already        |

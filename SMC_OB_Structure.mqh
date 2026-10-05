@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                             SMC_OB_Structure.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Market Structure Engine: swing confirmation and BOS detection.  |
 //|                                                                  |
 //|  Swing High at candle c (R = swingLength), confirmed when bar    |

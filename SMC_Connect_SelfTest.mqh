@@ -1,14 +1,16 @@
 //+------------------------------------------------------------------+
 //|                                         SMC_Connect_SelfTest.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Verification of the HTF OB -> LTF CISD workflow on real data.   |
 //|   - live (bar-by-bar, multi-timeframe) == batch rebuild          |
-//|   - truncated horizons: nothing decided earlier ever changes      |
-//|   - retest = M1 re-entry into a live OB zone, CISD start aligned  |
-//|   - OB invalidation stops every sequence of that OB               |
-//|   - CISD candle series may begin BEFORE the retest, but the       |
-//|     confirmation close never may                                  |
-//|   - Single / Multi RETEST x Single / Multi CISD (4 combinations)  |
-//|   - OB source filters, direction matching, concurrency            |
+//|   - truncated horizons: nothing decided earlier ever changes     |
+//|   - retest = M1 re-entry into a live OB zone, CISD start aligned |
+//|   - OB invalidation stops every sequence of that OB              |
+//|   - CISD candle series may begin BEFORE the retest, but the      |
+//|     confirmation close never may                                 |
+//|   - Single / Multi RETEST x Single / Multi CISD (4 combinations) |
+//|   - OB source filters, direction matching, concurrency           |
 //+------------------------------------------------------------------+
 #ifndef SMC_CONNECT_SELFTEST_MQH
 #define SMC_CONNECT_SELFTEST_MQH

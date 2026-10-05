@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                                SMC_OB_Engine.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Order Block Engine + Retest/Mitigation Engine + orchestrator.   |
 //|                                                                  |
 //|  Pipeline per CLOSED bar i (ProcessBar):                         |

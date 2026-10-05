@@ -1,5 +1,7 @@
 //+------------------------------------------------------------------+
 //|                                              SMC_OB_SelfTest.mqh |
+//|  SPDX-License-Identifier: MIT                                    |
+//|  https://github.com/MrOwl1011/Smc_ZOB_CISD                       |
 //|  Deterministic self tests for the detection engine.              |
 //|                                                                  |
 //|  Synthetic candles (hand-computed expectations):                 |
