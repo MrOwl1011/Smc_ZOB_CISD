@@ -7,7 +7,8 @@ Each package ships two files:
 * `<name>.cfg` - runtime profile for the on-chart panel. Type the package name in the
   panel's CONFIGURATION field and press Load.
 
-Trading is OFF in every package: switch it on from the panel when you are ready.
+**Trading is ON in every package.** The EA places real orders once a setup confirms, so load a
+package on a demo account first, or switch Trade execution off in the panel to watch it only draw.
 Opposite-block exit is OFF because it was not part of the tested rule set.
 
 | Package | Swing | Displacement | Trend gate | Instruments |

@@ -5,7 +5,8 @@ validation report: every cell that scored above 59%.
 
 Settings are the study's own profile in every file, so only the two timeframes differ:
 series Order Block, Open-Last Ext zones, swing 4, displacement 1.50 ATR, single retest,
-single CISD, mitigation stops the search, trend gate 1.5 ATR over 20 bars. Trading is off.
+single CISD, mitigation stops the search, trend gate 1.5 ATR over 20 bars. **Trading is on**, so
+these place real orders: use a demo account first.
 
 Attach each one to its own symbol. The accuracy quoted is that market alone.
 

@@ -44,12 +44,15 @@ profiles\*.cfg  ->  MQL5\Files\SMC_OrderBlock_EA\
 1. Drag the EA onto a chart.
 2. Properties dialog, press **Load**, pick `presets/SMC_1_BestOverall.set`.
 3. Watch it mark zones, retests and confirmations.
-4. Ready to trade? Flip **Trade execution** on in the panel.
+4. The presets have **Trade execution on**. Switch it off in the panel for a dry run first.
 
 Use the presets. They carry the timeframes and thresholds that work, so you are not
 guessing at forty inputs on day one. There is one per market in `presets/`.
 
-**Trading is off until you switch it on.** Until then it only draws.
+**Every preset ships with trade execution on**, so the EA places real orders as soon as a
+setup confirms. Switch **Trade execution** off in the panel to watch it draw without trading,
+and test on a demo account before a live one. Dropped on a chart without loading a preset, the
+EA starts with execution off.
 
 ## What it does
 
