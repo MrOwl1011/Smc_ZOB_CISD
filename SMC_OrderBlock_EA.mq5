@@ -134,6 +134,11 @@ input string                     InpConfidenceFile     = "SMC_Confidence.csv";  
 input string                     InpResultFile         = "SMC_Results.csv";      // Closed-trade results with their scores, in the common Files folder
 input bool                       InpBreakEven          = false;                 // Break even: move the stop to entry once in profit (panel default)
 input int                        InpBreakEvenPoints    = 4000;                   // Break even trigger: profit in points (panel default)
+input bool                       InpPartialTP          = false;                 // Partial take profit: bank part of the position at a set R (input only, no panel switch)
+input double                     InpPartialAtR         = 1.0;                   // Partial: profit, in R, that takes the first part
+input double                     InpPartialPct         = 50.0;                  // Partial: percent of the position closed there
+input double                     InpPartialRunnerRR    = 2.5;                   // Partial: target for the rest, in R (0 = use the take-profit setting)
+input bool                       InpPartialBE          = true;                  // Partial: move the rest's stop to entry after the first part
 input bool                       InpCapitalGuards      = false;                 // Capital protection: hard refusals before any new trade (input only, no panel switch)
 input double                     InpGuardDailyLoss     = 2.0;                   // Guard: stop for the day after this loss, % of day-start equity (0 = off)
 input double                     InpGuardWeeklyLoss    = 4.0;                   // Guard: stop for the week after this loss, % of week-start equity (0 = off)
@@ -578,6 +583,7 @@ int OnInit(void)
    if(MQLInfoInteger(MQL_TESTER))
       g_guard.ResetState();
    g_trade.AttachGuard(GetPointer(g_guard));
+   g_trade.SetPartial(InpPartialTP, InpPartialAtR, InpPartialPct, InpPartialRunnerRR, InpPartialBE);
    ApplyTradeSettings();               // a restored panel state overrides the inputs
 
    if(InpRunSelfTest)
@@ -656,6 +662,7 @@ void OnTick(void)
    g_guard.Update();                   // day / week rollover, equity peak, equity stop
    g_trade.FlattenIfAsked();           // carry out an equity-stop flatten
    g_trade.RecordClosedTrade();        // write the result of a trade that just closed
+   g_trade.ManagePartial();            // partial take profit, if armed
    g_trade.ManageOpenPosition();       // break-even stop, if armed
    g_trade.RideOpenPosition(g_detector);   // opposite-block target, if riding
    if(InpEnableCISD && !ConnActive())
@@ -926,8 +933,10 @@ string TradeStatusText(void)
   {
    if(!g_trade.IsEnabled())
       return "";
-   return StringFormat("     TRADING %.2f lots %s%s (%d sent%s)", g_trade.Lots(),
-                       g_trade.RideTrend() ? "ride" : StringFormat("1:%.1f", g_trade.TargetRR()),
+   double rr = (g_trade.Partial() && InpPartialRunnerRR > 0.0) ? InpPartialRunnerRR : g_trade.TargetRR();
+   return StringFormat("     TRADING %.2f lots %s%s%s (%d sent%s)", g_trade.Lots(),
+                       g_trade.RideTrend() ? "ride" : StringFormat("1:%.1f", rr),
+                       g_trade.Partial() ? StringFormat(" part %.0f%%@%.1fR", g_trade.PartialPct(), g_trade.PartialAtR()) : "",
                        g_trade.BreakEven() ? StringFormat(" BE %d", g_trade.BreakEvenPoints()) : "",
                        g_trade.Sent(),
                        g_trade.Closed() > 0 ? StringFormat(", %d closed", g_trade.Closed()) : "");

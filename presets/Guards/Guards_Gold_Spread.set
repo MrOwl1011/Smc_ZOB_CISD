@@ -194,3 +194,8 @@ InpRiskPercentMode=true
 
 InpRiskPercent=0.50
 
+InpPartialTP=false
+InpPartialAtR=1.0
+InpPartialPct=50.0
+InpPartialRunnerRR=2.5
+InpPartialBE=true

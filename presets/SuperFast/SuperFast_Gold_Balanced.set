@@ -86,3 +86,8 @@ InpGuardVolSpike=0.0
 
 InpGuardVolAvgBars=200
 
+InpPartialTP=false
+InpPartialAtR=1.0
+InpPartialPct=50.0
+InpPartialRunnerRR=2.5
+InpPartialBE=true

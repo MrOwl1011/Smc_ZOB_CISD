@@ -588,7 +588,7 @@ rather than against the original EA.
 | 4 | ~~Score multiplier on size~~ **cancelled** | Failed: score does not predict outcome |
 | 5 | Drawdown floor and daily/weekly stops | **Done, partial:** only the spread guard helps; three never fired |
 | 6 | Trend-strength RR | PF and average trade beat fixed 2R |
-| 7 | Partials | Win rate and drawdown improve; check spread cost |
+| 7 | Partials | **Built, off by default, not yet measured:** `InpPartialTP` and four settings; see below |
 
 **Step 2 is not optional.** Shipping a score that sizes trades before any evidence it predicts
 anything is how a strategy acquires complexity without edge. Log it, collect 200 trades, regress
@@ -691,6 +691,29 @@ disconnection, no gap through a stop, no bad tick, no broker outage. But at thes
 decoration. Making them real means tightening them a long way - a 1% daily stop, a 7% equity
 stop - and that is a trade between protection and participation that no backtest can settle. It
 is left to the person running the EA, deliberately.
+
+### Step 7: partial take profits, built and waiting to be measured
+
+`InpPartialTP` (off by default, input only) closes `InpPartialPct` of the position once it is
+`InpPartialAtR` in profit, moves the stop on the rest to entry when `InpPartialBE` is on, and
+gives the whole position `InpPartialRunnerRR` as its target from the start (0 keeps
+`InpTargetRR`). R is the stop distance measured from the actual fill. The first part is taken
+once per position, and only for a position this EA opened in the current run.
+
+A position must split into two legal lot sizes, so **at 0.01 lots on a 0.01-minimum symbol no
+partial is ever taken** and the position is left whole, with a log line saying so. The shipped
+`H1M5_Gold_Swing4` preset trades 0.01 lots, so measuring step 7 needs 0.02 lots or risk-percent
+sizing on both sides of the comparison.
+
+Every preset carries the five keys with partials off, so loading any of them reproduces its
+published figures.
+
+Measurement plan, against the shipped configuration rather than the original EA, across the same
+three one-year windows as step 5: baseline `H1M5_Gold_Swing4` at 0.02 lots, against the same with
+partials on at 50% / 1R / runner 2.5R, with and without the stop to entry. The success test is
+the one in the table: win rate and drawdown improve, and the extra exit's spread cost does not eat
+the difference. The caution in 3.7 applies: break even at 1R is close to the early break even
+that cut profit from +810 to +430.
 
 ### What this framework cannot fix
 
