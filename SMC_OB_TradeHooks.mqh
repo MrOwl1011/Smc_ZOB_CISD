@@ -39,6 +39,11 @@
 //|  is held until price reaches the nearest live Order Block facing |
 //|  the other way, which becomes a moving take profit. While this is |
 //|  on, the reward:risk multiple is not used.                        |
+//|                                                                  |
+//|  Partial take profit (optional): at a set profit in R part of the |
+//|  position is closed, the stop on the rest can move to entry, and |
+//|  the rest runs to its own target. Needs a position big enough to |
+//|  split into two legal lot sizes; one that is not is left whole.  |
 //+------------------------------------------------------------------+
 #ifndef SMC_OB_TRADEHOOKS_MQH
 #define SMC_OB_TRADEHOOKS_MQH
@@ -61,6 +66,11 @@ private:
    double            m_riskPercent;   // percent of equity risked per trade when m_riskPct is on
    bool              m_beEnabled;     // move the stop to entry once in profit
    int               m_bePoints;      // profit in points that arms it
+   bool              m_partial;       // bank part of the position at m_partialAtR
+   double            m_partialAtR;    // profit, in R, that takes the first part
+   double            m_partialPct;    // percent of the position closed there
+   double            m_runnerRR;      // target for the rest, in R (0 = m_rr)
+   bool              m_partialBE;     // move the rest's stop to entry after the first part
    double            m_lots;
    long              m_magic;
    ENUM_TIMEFRAMES   m_obTF;          // for the alert text only
@@ -71,11 +81,15 @@ private:
    int               m_beMoved;       // stops moved to break even
    int               m_rideExits;     // positions closed at an opposite block
    int               m_alerted;       // entry alerts raised
+   int               m_partials;      // first parts taken
+   int               m_partialUnsplit; // positions too small to split, left whole
    //--- the open trade, kept so its outcome can be recorded against its score
    long              m_openPosId;     // position identifier, 0 when flat
    long              m_openObId;
    double            m_openScore;
    double            m_openRiskMoney; // money risked at entry, the denominator of R
+   double            m_openRisk;      // stop distance in price at the fill, the unit of R
+   bool              m_partialDone;   // the first part of the open position is settled
    datetime          m_openTime;
    string            m_resultFile;    // where closed trades are written
    int               m_resultHandle;  // kept open: reopening per row is far too slow
@@ -184,10 +198,13 @@ private:
 
 public:
                      CSMCTradeEngine(void) : m_enabled(false), m_oppExit(false), m_rr(1.0), m_ride(false), m_alerts(true), m_guard(NULL), m_riskPct(false), m_riskPercent(0.5),
-                                             m_beEnabled(false), m_bePoints(100), m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
+                                             m_beEnabled(false), m_bePoints(100),
+                                             m_partial(false), m_partialAtR(1.0), m_partialPct(50.0), m_runnerRR(2.5), m_partialBE(true),
+                                             m_lots(0.01), m_obTF(PERIOD_CURRENT), m_magic(0), m_ready(false),
                                              m_warned(false), m_sent(0), m_closed(0), m_beMoved(0), m_rideExits(0), m_alerted(0),
+                                             m_partials(0), m_partialUnsplit(0),
                                              m_openPosId(0), m_openObId(0), m_openScore(0.0),
-                                             m_openRiskMoney(0.0), m_openTime(0), m_resultHandle(INVALID_HANDLE),
+                                             m_openRiskMoney(0.0), m_openRisk(0.0), m_partialDone(true), m_openTime(0), m_resultHandle(INVALID_HANDLE),
                                              m_skipped(0), m_last("") {}
 
    //--- called once from OnInit
@@ -215,6 +232,8 @@ public:
       m_beMoved = 0;
       m_rideExits = 0;
       m_alerted = 0;
+      m_partials = 0;
+      m_partialUnsplit = 0;
       m_skipped = 0;
       m_last = "";
      }
@@ -238,6 +257,28 @@ public:
       m_ride = on;
      }
    void              AttachGuard(CSMCCapitalGuard *g) { m_guard = g; }
+
+   //--- Partial take profit. Input only: there is no panel switch for it.
+   void              SetPartial(const bool on, const double atR, const double pct,
+                                const double runnerRR, const bool moveToEntry)
+     {
+      if(on != m_partial)
+         Print("[SMC-TRADE] partial take profit ", on ? "ON" : "OFF");
+      m_partial    = on;
+      m_partialAtR = (atR > 0.0 ? atR : 1.0);
+      m_partialPct = (pct > 0.0 && pct < 100.0 ? pct : 50.0);
+      m_runnerRR   = MathMax(0.0, runnerRR);
+      m_partialBE  = moveToEntry;
+      if(on)
+         PrintFormat("[SMC-TRADE] partial: %.0f%% at %.2fR, rest to %s%s", m_partialPct, m_partialAtR,
+                     m_runnerRR > 0.0 ? StringFormat("%.2fR", m_runnerRR) : "the take-profit setting",
+                     m_partialBE ? ", stop to entry after the first part" : "");
+     }
+   bool              Partial(void) const { return m_partial; }
+   double            PartialAtR(void) const { return m_partialAtR; }
+   double            PartialPct(void) const { return m_partialPct; }
+   int               Partials(void) const { return m_partials; }
+   int               PartialUnsplit(void) const { return m_partialUnsplit; }
 
    void              SetRiskPercent(const bool on, const double pct)
      {
@@ -289,8 +330,8 @@ public:
                           m_enabled ? "ON" : "OFF",
                           m_riskPct ? StringFormat("risk %.2f%%", m_riskPercent) : StringFormat("lots %.2f", m_lots),
                           m_ride ? "ride the trend" : StringFormat("1:%.2f", m_rr),
-                          m_alerts ? "ON" : "OFF",
                           m_beEnabled ? "ON" : "OFF", m_bePoints, m_oppExit ? "ON" : "OFF",
+                          m_alerts ? "ON" : "OFF",
                           m_sent, m_closed, m_beMoved, m_rideExits, m_skipped,
                           m_last == "" ? "" : " | " + m_last);
      }
@@ -330,20 +371,23 @@ public:
       if(ask <= 0.0 || bid <= 0.0)
          return false;
 
+      //--- with partials on, the whole position carries the runner's target and
+      //--- the first part is taken off by ManagePartial on the way there
+      double rr = (m_partial && m_runnerRR > 0.0) ? m_runnerRR : m_rr;
       double entry, sl, tp, risk;
       if(dir == SMC_DIR_BULL)
         {
          entry = ask;
          sl    = obBottom;                       // other side of the block
          risk  = entry - sl;
-         tp    = m_ride ? 0.0 : entry + risk * m_rr;   // riding: the opposite block is the target
+         tp    = m_ride ? 0.0 : entry + risk * rr;     // riding: the opposite block is the target
         }
       else
         {
          entry = bid;
          sl    = obTop;
          risk  = sl - entry;
-         tp    = m_ride ? 0.0 : entry - risk * m_rr;
+         tp    = m_ride ? 0.0 : entry - risk * rr;
         }
       sl = NormalizeDouble(sl, digits);
       tp = (tp > 0.0) ? NormalizeDouble(tp, digits) : 0.0;
@@ -411,8 +455,16 @@ public:
          m_sent++;
          //--- remember this trade so its result can be matched to its score later
          m_openPosId     = 0;
+         m_openRisk      = risk;
          if(PositionSelect(_Symbol) && PositionGetInteger(POSITION_MAGIC) == m_magic)
+           {
             m_openPosId  = PositionGetInteger(POSITION_IDENTIFIER);
+            //--- R is measured from the actual fill, not the quote the order was priced on
+            double fill  = PositionGetDouble(POSITION_PRICE_OPEN);
+            if(fill > 0.0 && MathAbs(fill - sl) > 0.0)
+               m_openRisk = MathAbs(fill - sl);
+           }
+         m_partialDone   = !m_partial;
          m_openObId      = obId;
          m_openScore     = score;
          m_openTime      = TimeCurrent();
@@ -485,11 +537,13 @@ public:
             FileFlush(h);
            }
         }
-      PrintFormat("[SMC-TRADE] closed OB #%I64d: %.2f (%.2f R), score %.1f",
-                  m_openObId, profit, realisedR, m_openScore);
+      PrintFormat("[SMC-TRADE] closed OB #%I64d: %.2f (%.2f R), score %.1f%s",
+                  m_openObId, profit, realisedR, m_openScore,
+                  m_partial ? (m_partialDone && m_openRisk > 0.0 ? "" : ", no partial taken") : "");
       if(m_guard != NULL)
          m_guard.OnTradeClosed(profit);
       m_openPosId = 0;
+      m_partialDone = true;
      }
 
    //--- The equity stop asked for a flatten. Closing is this layer's job, so the
@@ -509,6 +563,78 @@ public:
         }
       Print("[SMC-TRADE] equity stop could not close the position: retcode ", m_trade.ResultRetcode());
       return false;
+     }
+
+   //--- Partial take profit: once the open position is m_partialAtR in profit,
+   //--- m_partialPct of it is closed and, if asked, the stop on the rest moves to
+   //--- entry. Once per position. A position this EA did not open in this run is
+   //--- left alone, because its R is not known.
+   bool              ManagePartial(void)
+     {
+      if(!m_enabled || !m_partial || !m_ready || m_partialDone || m_openPosId == 0 || m_openRisk <= 0.0)
+         return false;
+      ulong    ticket = 0;
+      int      posDir = 0;
+      datetime opened = 0;
+      if(!FindPosition(ticket, posDir, opened))
+         return false;
+      if(!PositionSelectByTicket(ticket) || PositionGetInteger(POSITION_IDENTIFIER) != m_openPosId)
+         return false;
+
+      int    digits = (int)SymbolInfoInteger(_Symbol, SYMBOL_DIGITS);
+      double point  = SymbolInfoDouble(_Symbol, SYMBOL_POINT);
+      double entry  = NormalizeDouble(PositionGetDouble(POSITION_PRICE_OPEN), digits);
+      double sl     = PositionGetDouble(POSITION_SL);
+      double price  = PositionGetDouble(POSITION_PRICE_CURRENT);
+      double vol    = PositionGetDouble(POSITION_VOLUME);
+      double profit = (posDir == SMC_DIR_BULL) ? (price - entry) : (entry - price);
+      if(profit < m_partialAtR * m_openRisk)
+         return false;                            // not there yet
+
+      //--- the part to close, rounded down to the volume step; both pieces must be legal
+      double mn   = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+      double step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+      if(step <= 0.0)
+         step = 0.01;
+      double part = NormalizeDouble(MathFloor(vol * m_partialPct / 100.0 / step + 1e-9) * step, 2);
+      if(part < mn - 1e-9 || vol - part < mn - 1e-9)
+        {
+         m_partialDone = true;
+         m_partialUnsplit++;
+         m_last = StringFormat("partial skipped: %.2f lots cannot be split into two legal sizes", vol);
+         Print("[SMC-TRADE] ", m_last);
+         return false;
+        }
+      if(!m_trade.PositionClosePartial(ticket, part))
+        {
+         m_last = StringFormat("partial failed: retcode %d (%s)",
+                               m_trade.ResultRetcode(), m_trade.ResultRetcodeDescription());
+         Print("[SMC-TRADE] ", m_last);
+         return false;                            // try again on the next tick
+        }
+      m_partialDone = true;
+      m_partials++;
+      m_last = StringFormat("partial: closed %.2f of %.2f lots at %.2fR", part, vol, profit / m_openRisk);
+      Print("[SMC-TRADE] ", m_last);
+
+      if(!m_partialBE)
+         return true;
+      if(sl != 0.0 && ((posDir == SMC_DIR_BULL && sl >= entry) || (posDir == SMC_DIR_BEAR && sl <= entry)))
+         return true;                             // already at or beyond entry
+      double stops = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * point;
+      if(MathAbs(price - entry) <= stops)
+         return true;
+      //--- the rest may now have a new ticket on a hedging account: find it again
+      if(!FindPosition(ticket, posDir, opened) || !PositionSelectByTicket(ticket))
+         return true;
+      if(m_trade.PositionModify(ticket, entry, PositionGetDouble(POSITION_TP)))
+        {
+         m_beMoved++;
+         Print("[SMC-TRADE] stop on the rest moved to entry at ", DoubleToString(entry, digits));
+        }
+      else
+         Print("[SMC-TRADE] could not move the rest's stop to entry: retcode ", m_trade.ResultRetcode());
+      return true;
      }
 
    //--- Break-even: once the open position is m_bePoints in profit, the stop is
